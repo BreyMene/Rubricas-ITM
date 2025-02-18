@@ -1,4 +1,27 @@
 
+# Before Starting
+
+Make sure you have installed node.js and npm
+
+- Go to Web folder:
+
+        cd Web
+
+- Execute in terminal:
+
+        npm install
+
+        // if it throws you an error: "cannot be loaded becouse running scripts is disabled on this system" 
+        //execute this command in the same folder
+
+        set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+- Now run the web:
+
+        npm run dev
+
+
+
 # RubrITM
 
 This project is a web application designed for the ITM university to facilitate the creation, management, and sharing of evaluation rubrics across different courses. The system allows professors to create and customize rubrics, collaborate with other professors, and efficiently communicate final grades to students via their institutional Outlook email.
@@ -40,7 +63,7 @@ The application is built using Vue.js and Nuxt.js, providing a robust and scalab
 
 ## Color Palette
 
-**Light Version**
+**White Version**
 | Color Name       | Hex Code   | Example                     |
 |------------------|------------|-----------------------------|
 | Dark Blue     | `#2a3465`  | ![Dark Blue](https://img.shields.io/badge/Dark%20Blue-%232a3465?style=for-the-badge&color=2a3465) |
