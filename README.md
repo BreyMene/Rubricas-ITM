@@ -1,4 +1,3 @@
-
 # RubrITM
 
 This project is a web application designed for the ITM university to facilitate the creation, management, and sharing of evaluation rubrics across different courses. The system allows professors to create and customize rubrics, collaborate with other professors, and efficiently communicate final grades to students via their institutional Outlook email.
