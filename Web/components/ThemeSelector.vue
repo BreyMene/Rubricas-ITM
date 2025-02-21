@@ -1,51 +1,51 @@
 <script setup lang="ts">
-    import { ref, computed } from "vue";
+  import { ref, computed } from "vue";
 
-    const colorMode = useColorMode();
+  const colorMode = useColorMode();
 
-    // Variable para almacenar el tema seleccionado
-    const selectedTheme = ref<string>(colorMode.preference);
+  // Variable para almacenar el tema seleccionado
+  const selectedTheme = ref<string>(colorMode.preference);
 
-    // Opciones del dropdown con evento de selección
-    const themeOptions = computed(() => [
-    [
-        {
-        label: "Light",
-        icon: "fluent:brightness-high-16-regular",
-        value: "light",
-        click: () => changeTheme("light"),
-        },
-        {
-        label: "Dark",
-        icon: "fluent:weather-moon-28-filled",
-        value: "dark",
-        click: () => changeTheme("dark"),
-        },
-        {
-        label: "System",
-        icon: "fluent:desktop-28-regular",
-        value: "system",
-        click: () => changeTheme("system"),
-        },
-    ],
-    ]);
+  // Opciones del dropdown con evento de selección
+  const themeOptions = computed(() => [
+  [
+      {
+      label: "Light",
+      icon: "fluent:brightness-high-16-regular",
+      value: "light",
+      click: () => changeTheme("light"),
+      },
+      {
+      label: "Dark",
+      icon: "fluent:weather-moon-28-filled",
+      value: "dark",
+      click: () => changeTheme("dark"),
+      },
+      {
+      label: "System",
+      icon: "fluent:desktop-28-regular",
+      value: "system",
+      click: () => changeTheme("system"),
+      },
+  ],
+  ]);
 
-    // Computed para definir el icono del botón principal
-    const selectedIcon = computed(() => {
-      if (selectedTheme.value === "light") return "fluent:brightness-high-16-regular";
-      if (selectedTheme.value === "dark") return "fluent:weather-moon-28-filled";
-      
-      // If system theme, check the actual value instead of showing desktop icon
-        return colorMode.value === "dark" 
-            ? "fluent:weather-moon-28-filled" 
-            : "fluent:brightness-high-16-regular";
-    });
+  // Computed para definir el icono del botón principal
+  const selectedIcon = computed(() => {
+    if (selectedTheme.value === "light") return "fluent:brightness-high-16-regular";
+    if (selectedTheme.value === "dark") return "fluent:weather-moon-28-filled";
+    
+    // If system theme, check the actual value instead of showing desktop icon
+      return colorMode.value === "dark" 
+          ? "fluent:weather-moon-28-filled" 
+          : "fluent:brightness-high-16-regular";
+  });
 
-    // Función para cambiar el tema seleccionado
-    const changeTheme = (theme: string) => {
-      selectedTheme.value = theme;
-      colorMode.preference = theme;
-    };
+  // Función para cambiar el tema seleccionado
+  const changeTheme = (theme: string) => {
+    selectedTheme.value = theme;
+    colorMode.preference = theme; 
+  };
 </script>
 
 <template>
