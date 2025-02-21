@@ -61,15 +61,17 @@
   <nav class="flex justify-center py-3 mt-8 font-semibold">
     <div class="flex items-center w-2/5 max-w-5xl justify-between relative">
       <!-- Left Logo -->
-      <NuxtLink to="/">
-        <NuxtImg width="60px" src="/img/ITMLogoLight.png" format="webp" densities="x1" />
-      </NuxtLink>
-
+      <div>
+        <NuxtLink to="/">
+          <NuxtImg width="60px" src="/img/ITMLogoLight.png" format="webp" densities="x1" class="dark:brightness-0 dark:invert"/>
+        </NuxtLink>
+      </div>
+      
       <!-- Centered Menu -->
       <div class="relative">
         <!-- Indicador animado -->
         <div
-          class="absolute top-0 left-0 h-full bg-Dark-Blue rounded-lg"
+          class="absolute top-0 left-0 h-full bg-Dark-Blue rounded-lg dark:bg-Medium-Gray"
           :style="{
             width: activeWidth > 0 ? activeWidth + 'px' : '0',
             transform: `translateX(${activeX}px)`,
@@ -86,8 +88,8 @@
               class="px-3 py-2 rounded-lg relative z-10 flex items-center transition-colors duration-300"
               :class="{ 
                 'text-White-w': activeIndex === index, 
-                'text-black': activeIndex !== index,
-                'bg-Dark-Blue': activeIndex === index && !activeWidth
+                'text-black dark:text-Light-Gray': activeIndex !== index,
+                'bg-Dark-Blue dark:bg-Medium-Gray': activeIndex === index && !activeWidth
               }"
               @click="updateIndicator">
                 {{ routeNames[index] }}
