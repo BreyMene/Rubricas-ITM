@@ -10,16 +10,16 @@
   const readyForAnimation = ref<boolean>(false);
   const isLoading = ref<boolean>(true);
 
-  const routes: string[] = ['/', '/equipos', '/rubricas'];
-  const routeNames: string[] = ['Home', 'Equipos', 'Rubricas'];
+  const routes: string[] = ['/', '/rubricas'];
+  const routeNames: string[] = ['Inicio','Rubricas'];
 
-  // Determinar índice activo basado en la ruta actual
+  // Determine active index based on current path
   const activeIndex = computed<number>(() => {
     const index = routes.indexOf(route.path);
     return index !== -1 ? index : 0;
   });
 
-  // Actualizar dimensiones del indicador
+  // Update indicator dimensions
   const updateIndicator = (): void => {
     nextTick(() => {
       const el = menuRefs.value[activeIndex.value];
@@ -36,14 +36,13 @@
     });
   };
 
-  // Manejador de clic seguro
   const handleClick = (index: number): void => {
     if (!isLoading.value) {
       nextTick(updateIndicator);
     }
   };
 
-  // Ciclo de vida y eventos
+  // Life cycle and events
   onMounted(() => {
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
@@ -53,25 +52,25 @@
     window.removeEventListener('resize', updateIndicator);
   });
 
-  // Observar cambios en la ruta
+  // Observe changes in the route
   watch(() => route.path, updateIndicator);
 </script>
 
 <template>
-  <nav class="flex justify-center py-3 mt-8 font-semibold">
-    <div class="flex items-center w-2/5 max-w-5xl justify-between relative">
+  <nav class="flex justify-center py-3 mt-2 font-semibold">
+    <div class="flex items-center w-[90%] lg:w-1/2 max-w-5xl justify-between relative">
       <!-- Left Logo -->
       <div>
         <NuxtLink to="/">
-          <NuxtImg width="60px" src="/img/ITMLogoLight.png" format="webp" densities="x1" class="dark:brightness-0 dark:invert"/>
+          <NuxtImg width="60px" src="/img/ITMLogo.png" format="webp" densities="x1 x2" class="dark:brightness-0 dark:invert  pointer-events-none select-none" />
         </NuxtLink>
       </div>
       
       <!-- Centered Menu -->
       <div class="relative">
-        <!-- Indicador animado -->
+        <!-- Animated indicator -->
         <div
-          class="absolute top-0 left-0 h-full bg-Dark-Blue rounded-lg dark:bg-Medium-Gray"
+          class="absolute top-0 left-0 h-full bg-Dark-Blue rounded-lg dark:bg-Dark-Grey"
           :style="{
             width: activeWidth > 0 ? activeWidth + 'px' : '0',
             transform: `translateX(${activeX}px)`,
@@ -80,16 +79,16 @@
           }"
         ></div>
 
-        <!-- Menú -->
-        <ul class="flex gap-4 relative">
+        <!-- Menu -->
+        <ul class="flex gap-2 sm:gap-4 relative">
           <li v-for="(route, index) in routes" :key="index" ref="menuRefs">
             <NuxtLink
               :to="route"
-              class="px-3 py-2 rounded-lg relative z-10 flex items-center transition-colors duration-300"
+              class="p-1 sm:px-3 sm:py-2 rounded-lg relative z-10 flex items-center transition-colors duration-300"
               :class="{ 
                 'text-White-w': activeIndex === index, 
                 'text-black dark:text-Light-Gray': activeIndex !== index,
-                'bg-Dark-Blue dark:bg-Medium-Gray': activeIndex === index && !activeWidth
+                'bg-Dark-Blue dark:bg-Dark-Grey': activeIndex === index && !activeWidth
               }"
               @click="updateIndicator">
                 {{ routeNames[index] }}
@@ -99,11 +98,11 @@
       </div>
 
       <!-- Right Profile Icon -->
-      <div class="flex gap-5 items-center min-h-[48px]">
+      <div class="flex gap-3 sm:gap-5 items-center min-h-[48px]">
         <div class="w-[30px] h-[30px] flex items-center justify-center">
             <ThemeSelector />
         </div>
-        <UIcon name="fluent:person-circle-32-regular" class="text-3xl"/>
+        <Profile />
       </div>
       
     </div>
