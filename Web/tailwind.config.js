@@ -21,7 +21,8 @@ export default {
 
         //Backgrounds
         "Warm-Dark": "#0B0B0B",
-        "Pure-Black": "#000000"
+        "Pure-Black": "#000000",
+        "Warm-White": "#fafafa"
       }
     },
   },

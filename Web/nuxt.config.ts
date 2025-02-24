@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     dataValue: 'theme', // activate data-theme in <html> tag
     classSuffix: '', // Class name suffix for color mode
   },
+
   devServer: {
     host: '0.0.0.0'
   }
