@@ -58,16 +58,16 @@
 
 <template>
   <nav class="flex justify-center py-3 mt-2 font-semibold">
-    <div class="flex items-center w-[90%] lg:w-1/2 max-w-5xl justify-between relative">
+    <div class="container mx-auto px-10 sm:px-5 flex items-center justify-between relative">
       <!-- Left Logo -->
       <div>
         <NuxtLink to="/">
-          <NuxtImg width="60px" src="/img/ITMLogo.png" format="webp" densities="x1 x2" class="dark:brightness-0 dark:invert  pointer-events-none select-none" />
+          <NuxtImg sizes="50px sm:60px" src="/img/ITMLogo.png" format="webp" densities="x1 x2" class="dark:brightness-0 dark:invert  pointer-events-none select-none" />
         </NuxtLink>
       </div>
       
       <!-- Centered Menu -->
-      <div class="relative">
+      <div class="relative flex items-center">
         <!-- Animated indicator -->
         <div
           class="absolute top-0 left-0 h-full bg-Dark-Blue rounded-lg dark:bg-Dark-Grey"
@@ -84,7 +84,7 @@
           <li v-for="(route, index) in routes" :key="index" ref="menuRefs">
             <NuxtLink
               :to="route"
-              class="p-1 sm:px-3 sm:py-2 rounded-lg relative z-10 flex items-center transition-colors duration-300"
+              class="text-sm sm:text-base p-1 sm:px-3 sm:py-2 rounded-lg relative z-10 flex items-center transition-colors duration-300"
               :class="{ 
                 'text-White-w': activeIndex === index, 
                 'text-black dark:text-Light-Gray': activeIndex !== index,

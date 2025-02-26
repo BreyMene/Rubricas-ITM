@@ -74,7 +74,7 @@
             padding: 'p-2',
         }"
       >
-        <UIcon :name="selectedIcon" class="text-3xl cursor-pointer" />
+        <UIcon :name="selectedIcon" class="text-2xl sm:text-3xl cursor-pointer" />
         
         <template #item="{ item, active }">
           <div class="flex items-center justify-between w-full px-3 py-1.5" :class="{ 'bg-gray-200 dark:bg-[#383332]': active }">

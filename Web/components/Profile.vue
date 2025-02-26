@@ -43,7 +43,7 @@
             divide: 'dark:divide-Dark-Grey divide-opacity-50'
         }"
     >
-        <UIcon name="fluent:person-circle-32-regular" class="text-3xl"/>
+        <UIcon name="fluent:person-circle-32-regular" class="text-2xl sm:text-3xl"/>
 
         <!-- Text Above the email -->
         <template #account="{ item }">
