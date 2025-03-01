@@ -1,13 +1,17 @@
 <script setup lang="ts">
     // Ref for the search input
     const searchQuery = ref('');
+
+    defineProps<{ 
+        placeholderText?: string 
+    }>();
 </script>
 
 <template>
     <UInput
         v-model="searchQuery"
         icon="fluent:search-12-filled"
-        placeholder="Buscar curso..."
+        :placeholder="placeholderText || 'Buscar...' "
         size="lg"
         class="w-auto sm:w-96"
         :ui="{

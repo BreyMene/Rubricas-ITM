@@ -1,45 +1,92 @@
 <script setup lang="ts">
-      const people = ref<{ email: string }[]>([]);
-  people.value = [{
-      email: 'ejemplo@itm.edu.co'
-    },
-    {
-      email: 'ejemplo@itm.edu.co'
-    },
-    {
-      email: 'ejemplo@itm.edu.co'
-    },
-    {
-      email: 'ejemplo@itm.edu.co'
-    },
-    {
-      email: 'ejemplo@itm.edu.co'
-    },
-    {
-      email: 'ejemplo@itm.edu.co'
+
+    // Props
+    const props = defineProps<{
+        view: "docentes" | "estudiantes";
+        hideFinalNote?: boolean;
+    }>();
+
+    // Teachers data
+    const teachers = ref<{ email: string }[]>([]);
+
+    teachers.value = [{
+            email: 'ejemplo@correo.itm.edu.co'
+        },
+        {
+            email: 'ejemplo@correo.itm.edu.co'
+        },
+        {
+            email: 'ejemplo@correo.itm.edu.co'
+        },
+        {
+            email: 'ejemplo@correo.itm.edu.co'
+        },
+        {
+            email: 'ejemplo@correo.itm.edu.co'
+        },
+        {
+            email: 'ejemplo@correo.itm.edu.co'
+        }
+    ]
+
+    // Students data
+    const students = ref<{ name: string; email: string; finalNote: number }[]>([]);
+
+    students.value = [{
+            name: 'Pepito Perez',
+            email: 'pepitoperez1245@correo.itm.edu.co',
+            finalNote: 3.8
+        },{
+            name: 'Vanesa Van',
+            email: 'vanesavan8456@correo.itm.edu.co',
+            finalNote: 4.0
+        },{
+            name: 'Yo apellido',
+            email: 'yoapellido1236@correo.itm.edu.co',
+            finalNote: 4.1
+        }
+    ]
+
+    // Change columns depends of the view
+    const columns = computed(() => {
+        if (props.view === "docentes") {
+            return [{ key: "email", label: "Email" }, { key: "actions" }];
+        }
+        
+        const studentColumns = [
+            { key: "name", label: "Nombre" },
+            { key: "email", label: "Email" },
+            { key: "actions" }
+        ];
+        
+        if (!props.hideFinalNote) {
+            studentColumns.splice(2, 0, { key: "finalNote", label: "Nota Final" });
+        }
+        
+        return studentColumns;
+    });
+
+    // Get data depends of the view
+    const people = computed(() =>
+        props.view === "docentes" ? teachers.value : students.value
+    );
+
+    // Auxiliary Functions
+    interface TableRow {
+        email: string;
     }
-  ]
 
-  const columns = [
-    {key: 'email', label: 'Email'},
-    { key: "actions"}
-  ]
-
-  interface TableRow {
-    email: string;
-  }
-
-  const items = (row: TableRow) => [
-  [{ label: 'Editar', icon: 'i-heroicons-pencil-square'}],
-  [{ label: 'Eliminar', icon: 'i-heroicons-trash'}]
+    const items = (row: TableRow) => [
+        [{ label: 'Editar', icon: 'i-heroicons-pencil-square'}],
+        [{ label: 'Eliminar', icon: 'i-heroicons-trash'}]
     ];
 
-  const page = ref(1)
-  const pageCount = 5
+    const page = ref(1)
+    const pageCount = 5
 
-  const rows = computed(() => {
-    return people.value.slice((page.value - 1) * pageCount, page.value * pageCount);
-  })
+    const rows = computed(() => {
+        return people.value.slice((page.value - 1) * pageCount, page.value * pageCount);
+    })
 </script>
 
 <template>
@@ -76,7 +123,8 @@
                 <template #empty-state>
                     <div class="flex flex-col items-center justify-center py-6 gap-3">
                         <UIcon name="fluent:beach-24-regular" class="text-7xl"/>
-                        <span class="italic text-sm">No hay docentes!</span>
+                        <span v-if="view == 'docentes'" class="italic text-sm">No hay docentes!</span>
+                        <span v-else="view == 'estudiantes'" class="italic text-sm">No hay estudiantes!</span>
                     </div>
                 </template>
 
@@ -95,7 +143,7 @@
                 class: 'bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Light-Gray',
             },
             inactiveButton: {
-                class: 'dark:bg-Warm-Dark  hover:bg-Light-Gray hover:dark:bg-Medium-Dark ring-1 ring-Purple-P dark:ring-Muted-Brown',
+                class: 'dark:bg-Warm-Dark  hover:bg-MLight-White hover:dark:bg-Medium-Dark ring-1 ring-Purple-P dark:ring-Muted-Brown',
             }
             },
         }"
@@ -105,7 +153,7 @@
                     <UButton
                         icon="fluent:caret-left-16-filled"
                         :ui="{ rounded: 'rounded-full' }"
-                        class="me-2 bg-White-w dark:bg-Warm-Dark hover:bg-Light-Gray hover:dark:bg-Medium-Dark ring-1 ring-Purple-P dark:ring-Muted-Brown text-black dark:text-white disabled:opacity-100 disabled:bg-White-w disabled:dark:bg-Warm-Dark"
+                        class="me-2 bg-White-w dark:bg-Warm-Dark hover:bg-MLight-White hover:dark:bg-Medium-Dark ring-1 ring-Purple-P dark:ring-Muted-Brown text-black dark:text-white disabled:opacity-100 disabled:bg-White-w disabled:dark:bg-Warm-Dark"
                         :disabled="!canGoPrev"
                         @click="onClick"
                     />
@@ -117,7 +165,7 @@
                     <UButton
                         icon="fluent:caret-right-16-filled"
                         :ui="{ rounded: 'rounded-full'}"
-                        class="ms-2 bg-White-w dark:bg-Warm-Dark hover:bg-Light-Gray hover:dark:bg-Medium-Dark ring-1 ring-Purple-P dark:ring-Muted-Brown text-black dark:text-white disabled:opacity-100 disabled:bg-White-w disabled:dark:bg-Warm-Dark"
+                        class="ms-2 bg-White-w dark:bg-Warm-Dark hover:bg-MLight-White hover:dark:bg-Medium-Dark ring-1 ring-Purple-P dark:ring-Muted-Brown text-black dark:text-white disabled:opacity-100 disabled:bg-White-w disabled:dark:bg-Warm-Dark"
                         :disabled="!canGoNext"
                         @click="onClick"
                     />

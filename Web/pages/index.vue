@@ -5,6 +5,22 @@
         "Acabas de modificar la rubrica del curso 'nombre'",
         "Tu rubrica 'nombre' a sido actualizada"
     ];*/
+
+    // Sample courses data (you can replace this with your actual data)
+    const courses = [
+      { id: 1, name: 'Nombre del Curso 1' },
+      { id: 2, name: 'Nombre del Curso 2' },
+      { id: 3, name: 'Nombre del Curso 3' },
+      { id: 4, name: 'Nombre del Curso 4' },
+      { id: 5, name: 'Nombre del Curso 5' },
+      { id: 6, name: 'Nombre del Curso 6' },
+    ];
+    
+    // Function to handle course navigation
+    const navigateToCourse = (courseId: number) => {
+      // Navigate to the dynamic Curso/[id] page
+      navigateTo(`/Curso/${courseId}`);
+    };
 </script>
 
 <template>
@@ -22,11 +38,16 @@
             <!-- Course Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <!-- Course Cards -->
-              <div v-for="i in 6" :key="i" 
-                class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3">
+              <UButton 
+                v-for="course in courses" 
+                :key="course.id"
+                @click="navigateToCourse(course.id)"
+                variant="ghost"
+                class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+              >
                 <UIcon name="fluent:book-32-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown" />
-                <h3 class="text-lg font-medium text-center">Nombre del Curso {{ i }}</h3>
-              </div>
+                <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ course.name }}</h3>
+              </UButton>
             </div>
           </div>
         </div>
