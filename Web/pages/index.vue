@@ -1,11 +1,5 @@
 <script setup lang="ts">
     
-    /*const notifications = [
-        "Acabas de entrar al curso 'nombre'",
-        "Acabas de modificar la rubrica del curso 'nombre'",
-        "Tu rubrica 'nombre' a sido actualizada"
-    ];*/
-
     // Sample courses data (you can replace this with your actual data)
     const courses = [
       { id: 1, name: 'Nombre del Curso 1' },
@@ -51,19 +45,6 @@
             </div>
           </div>
         </div>
-  
-        <!-- Notifications Sidebar 
-        <div class="w-full md:w-80 shrink-0 mt-16 mx-auto md:mx-0">
-          <div class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg">
-            <h2 class="text-xl font-semibold mb-4">Notificaciones</h2>
-            <div class="space-y-3">
-              <div v-for="(notification, index) in notifications" :key="index" 
-                   class="text-sm text-gray-600 dark:text-gray-300 p-2 border-b border-Light-Gray dark:border-Dark-Grey last:border-0">
-                {{ notification }}
-              </div>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
   </template>

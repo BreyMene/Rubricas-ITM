@@ -51,7 +51,7 @@
                 <p>
                     Conectado como
                 </p>
-                <p class="truncate font-medium text-gray-900 dark:text-white">
+                <p class="truncate font-medium">
                     {{ item.label }}
                 </p>
             </div>

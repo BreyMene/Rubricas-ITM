@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Icon } from '#components';
-
     // Get the route object
     const route = useRoute();
 
@@ -19,11 +17,19 @@ import { Icon } from '#components';
             to: `/Curso/${courseId.value}`
         }
     ]
+
+    const groups = ref([
+        { id: 1, name: 'Grupo A', manager: 'Juan Apellido' },
+        { id: 2, name: 'Grupo B', manager: 'Nose' },
+        { id: 3, name: 'Grupo C', manager: 'Nombre' },
+        { id: 4, name: 'Grupo D', manager: 'Pepito'}
+    ]);
+
 </script>
 
 <template>
     <div class="container mx-auto p-6">
-        <!-- Return Button and Curso id -->
+        <!-- Navigation -->
         <UBreadcrumb :links="items"
         :ui="{
             ol: 'gap-x-3', li: 'gap-x-3',
@@ -35,13 +41,54 @@ import { Icon } from '#components';
             </template>
         </UBreadcrumb>
         
-        <div class="mt-6 sm:mt-10 flex sm:flex-row gap-4 sm:items-center relative">
+        <div class="flex flex-col lg:flex-row gap-16 mt-8">
+            <!-- Group Section -->
+            <div class="flex-1">
+                <!-- Searchbar and Buttons -->
+                <div class="mb-6">
+                    <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
+                        <UtilitiesSearchBar placeholderText="Buscar Grupo..."/>
+                        <div class="flex items-center gap-4">
+                            <UIcon name="fluent:people-community-12-filled" class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown"/>
+                            <CreateGroup class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+                        </div>
+                    </div>
+                </div>
 
-            <UtilitiesSearchBar placeholderText="Buscar Grupo..."/>
+                <!-- Groups -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <UButton 
+                    v-for="group in groups" 
+                    :key="group.id"
+                    variant="ghost"
+                    class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                    >
+                    <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.name }}</h3>
+                    <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
+                    </UButton>
+                </div>
+            </div>
 
-            <UIcon name="fluent:people-community-12-filled" class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown"/>
+            <!-- Rubric Preview -->
+            <div class="w-full lg:w-[500px] h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1">
+                <div class="w-full h-full rounded-lg overflow-hidden relative">
+                    <NuxtImg 
+                        src="RubricaTest.PNG" 
+                        class="w-full h-full object-cover" 
+                        style="filter: blur(1.5px);"
+                    />
+                </div>
 
-            <CreateGroup class="sm:relative fixed bottom-6 right-6 z-1 sm:z-auto sm:bottom-0 sm:right-0"/>
+                <div class="absolute flex items-center justify-center top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div class="bg-Pure-Black/50 p-2 rounded-md">
+                        <span class="text-white text-xl sm:text-2xl font-bold">Rubrica Guia</span>
+                    </div>
+                </div>
+
+                <UButton size="lg" class="absolute bottom-4 sm:right-4 rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w">
+                    Modificar
+                </UButton>
+            </div>
         </div>
     </div>
 </template>
