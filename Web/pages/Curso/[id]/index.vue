@@ -19,10 +19,10 @@
     ]
 
     const groups = ref([
-        { id: 1, name: 'Grupo A', manager: 'Juan Apellido' },
-        { id: 2, name: 'Grupo B', manager: 'Nose' },
-        { id: 3, name: 'Grupo C', manager: 'Nombre' },
-        { id: 4, name: 'Grupo D', manager: 'Pepito'}
+        { id: 'A', name: 'Grupo A', manager: 'Juan Apellido' },
+        { id: 'B', name: 'Grupo B', manager: 'Nose' },
+        { id: 'C', name: 'Grupo C', manager: 'Nombre' },
+        { id: 'D', name: 'Grupo D', manager: 'Pepito'}
     ]);
 
 </script>
@@ -62,6 +62,7 @@
                     :key="group.id"
                     variant="ghost"
                     class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                    @click="$router.push(`/Curso/${courseId}/Grupo/${group.id}`)"
                     >
                     <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.name }}</h3>
                     <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>

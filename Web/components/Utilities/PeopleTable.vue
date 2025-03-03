@@ -41,7 +41,7 @@
             email: 'vanesavan8456@correo.itm.edu.co',
             finalNote: 4.0
         },{
-            name: 'Yo apellido',
+            name: 'Yo apellido segundoapellido',
             email: 'yoapellido1236@correo.itm.edu.co',
             finalNote: 4.1
         }
@@ -98,11 +98,20 @@
                 padding: 'px-4 py-3',
             },
             td: {
-                base: 'text-base',
+                base: 'text-left text-base px-4',
                 padding: 'p-2',
             }
             }"
             > 
+            <template #finalNote-header>
+                <div class="text-center w-full">Nota Final</div>
+            </template>
+            <template #finalNote-data="{ row }">
+                <div class="text-center">
+                    {{ row.finalNote }}
+                </div>
+            </template>
+
                 <template #actions-data="{ row }">
                     <UDropdown :items="items(row)" :ui="{
                         width: 'w-40',
