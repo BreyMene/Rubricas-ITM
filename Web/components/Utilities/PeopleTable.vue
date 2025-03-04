@@ -13,19 +13,19 @@
             email: 'ejemplo@correo.itm.edu.co'
         },
         {
-            email: 'ejemplo@correo.itm.edu.co'
+            email: 'ejemplo1@correo.itm.edu.co'
         },
         {
-            email: 'ejemplo@correo.itm.edu.co'
+            email: 'ejemplo2@correo.itm.edu.co'
         },
         {
-            email: 'ejemplo@correo.itm.edu.co'
+            email: 'ejemplo3@correo.itm.edu.co'
         },
         {
-            email: 'ejemplo@correo.itm.edu.co'
+            email: 'ejemplo4@correo.itm.edu.co'
         },
         {
-            email: 'ejemplo@correo.itm.edu.co'
+            email: 'ejemplo5@correo.itm.edu.co'
         }
     ]
 
@@ -76,9 +76,18 @@
         email: string;
     }
 
+    // Función para eliminar un usuario
+    const deleteUser = (email: string) => {
+        if (props.view === "docentes") {
+            teachers.value = teachers.value.filter((t) => t.email !== email);
+        } else {
+            students.value = students.value.filter((s) => s.email !== email);
+        }
+    };
+
     const items = (row: TableRow) => [
         [{ label: 'Editar', icon: 'i-heroicons-pencil-square'}],
-        [{ label: 'Eliminar', icon: 'i-heroicons-trash'}]
+        [{ label: 'Eliminar', icon: 'i-heroicons-trash', click: () => deleteUser(row.email)}]
     ];
 
     const page = ref(1)
