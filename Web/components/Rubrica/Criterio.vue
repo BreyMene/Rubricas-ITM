@@ -1,0 +1,57 @@
+<script setup lang="ts">
+    import { defineProps, defineEmits } from 'vue';
+    import type { RubricaRow } from '~/utils/types';
+
+    const props = defineProps<{ 
+        row: RubricaRow, 
+        rowIndex: number 
+    }>();
+
+    const emit = defineEmits(['deleteRow']);
+
+    const deleteRow = () => emit('deleteRow', props.rowIndex);
+</script>
+
+<template>
+    <div class="flex">
+      <UInput 
+        v-model="row.criterio" 
+        placeholder="Criterio"
+        class="flex-none w-[37%] p-3"
+      />
+      <UInput 
+        type="number" 
+        v-model="row.peso" 
+        step="0.1"
+        placeholder="Peso"
+        class="flex-none w-[12.4%] p-3 text-center"
+      />
+      <UInput 
+        type="number" 
+        v-model="row.calificacion" 
+        placeholder="Calificación"
+        class="flex-none w-[12.4%] p-3 text-center"
+      />
+      <UInput 
+        type="number" 
+        v-model="row.acumulado" 
+        placeholder="Acumulado"
+        class="flex-none w-[12.4%] p-3 text-center"
+      />
+      <div class="flex flex-grow p-3 items-center">
+        <UInput 
+          v-model="row.observaciones" 
+          placeholder="Observaciones"
+          class="flex-grow mr-2"
+        />
+        <UButton 
+          icon="i-heroicons-trash" 
+          variant="ghost" 
+          color="red"
+          size="xs"
+          @click="deleteRow"
+        />
+      </div>
+    </div>
+</template>
+  

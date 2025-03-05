@@ -1,14 +1,14 @@
 <script setup lang="ts">
     
     // Sample courses data (you can replace this with your actual data)
-    const courses = [
-      { id: 1, name: 'Nombre del Curso 1' },
-      { id: 2, name: 'Nombre del Curso 2' },
-      { id: 3, name: 'Nombre del Curso 3' },
-      { id: 4, name: 'Nombre del Curso 4' },
-      { id: 5, name: 'Nombre del Curso 5' },
-      { id: 6, name: 'Nombre del Curso 6' },
-    ];
+    const courses = ref<Curso[]>([
+      { id: 1, nombre: 'Nombre del Curso 1', grupos: [] },
+      { id: 2, nombre: 'Nombre del Curso 2', grupos: []  },
+      { id: 3, nombre: 'Nombre del Curso 3', grupos: []  },
+      { id: 4, nombre: 'Nombre del Curso 4', grupos: []  },
+      { id: 5, nombre: 'Nombre del Curso 5', grupos: []  },
+      { id: 6, nombre: 'Nombre del Curso 6', grupos: []  },
+    ]);
     
     // Function to handle course navigation
     const navigateToCourse = (courseId: number) => {
@@ -40,7 +40,7 @@
                 class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
               >
                 <UIcon name="fluent:book-32-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown" />
-                <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ course.name }}</h3>
+                <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ course.nombre }}</h3>
               </UButton>
             </div>
           </div>
