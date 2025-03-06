@@ -1,5 +1,4 @@
 <script setup lang="ts">
-    import { defineProps, defineEmits } from 'vue';
     import type { Tema } from '~/utils/types';
 
     const props = defineProps<{ 
@@ -16,27 +15,26 @@
 
 <template>
     <div class="flex">
-        <div class="w-[20%] p-3 flex items-center bg-gray-50">
-            <span v-if="!tema.isEditing" class="mr-2">{{ tema.nombre }}</span>
-            <UTextarea v-else
+        <div class="w-[20%] p-3 flex items-center bg-MLight-White/50 rounded-lg dark:bg-Warm-Dark/30">
+            <UTextarea
                 v-model="tema.nombre"
                 :rows="1"
                 placeholder="Nombre del Tema"
-                @keyup.enter="tema.isEditing = false"
                 autoresize
                 class="mr-2 flex-grow h-fit"
+                color="gray"
+                :ui="{
+                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                    color: {
+                        gray: {
+                            outline: 'shadow-md bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                        }
+                    }
+                }"
             />
             <div class="flex space-x-2">
                 <UButton 
-                v-if="!tema.isEditing" 
-                icon="i-heroicons-pencil-square" 
-                variant="ghost" 
-                color="gray"
-                size="xs"
-                @click="tema.isEditing = true"
-                />
-                <UButton 
-                icon="i-heroicons-trash" 
+                icon="fluent:delete-12-regular" 
                 variant="ghost" 
                 color="red"
                 size="xs"
@@ -59,10 +57,10 @@
         <div class="w-[20%] p-3"></div> <!-- Espacio vacío para alinear con 'Tema' -->
         <div class="w-[80%] p-3">
             <UButton 
-                icon="i-heroicons-plus" 
+                icon="fluent:add-16-filled" 
                 variant="ghost" 
-                color="primary"
                 @click="addRow()"
+                class="hover:bg-Light-Gray hover:text-White-w hover:dark:bg-Medium-Gray text-Pure-Black/55 dark:text-White-w"
             >
                 Agregar Criterio
             </UButton>

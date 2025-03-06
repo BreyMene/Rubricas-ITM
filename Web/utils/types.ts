@@ -6,7 +6,6 @@ export interface Rubrica {
 
 export interface Tema {
     nombre: string
-    isEditing: boolean
     rows: RubricaRow[]
 }
 

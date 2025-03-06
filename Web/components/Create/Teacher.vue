@@ -1,6 +1,5 @@
 <script setup lang="ts">
   const isOpen = ref(false)
-
 </script>
 
 <template>
@@ -23,7 +22,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Crear Curso
+              Agregar Docente
             </h3>
             <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="isOpen = false" />
           </div>
@@ -33,45 +32,22 @@
         <div>
           <!-- Form Content -->
           <div class="flex flex-col md:flex-row gap-9">  
-            <div class="md:w-2/5 space-y-7">
-
-              <!-- Top Image Circle -->
-              <div class=" mx-auto w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-Light-Gray dark:bg-Dark-Grey flex items-center justify-center">
-                <UIcon name="fluent:image-32-regular" class="text-4xl text-gray-400 dark:text-Light-Gray"/>
-              </div>
-
-              <!-- Left Side - Two Inputs -->
-              <UFormGroup label="Nombre del curso" required>
-                <UInput size="sm" placeholder="Ingrese el nombre" class="w-full"
-                  :ui="{
-                    icon: {
-                          trailing: { pointer: '' }
-                    },
-                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                    color: {
-                          gray: {
-                              outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                          }
-                    }
-                  }"
-                  color="gray"
-                />
-              </UFormGroup>
-              <UFormGroup label="Agregar Docente">
-                <UInput size="sm" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
-                :ui="{
-                    icon: {
-                          trailing: { pointer: '' }
-                    },
-                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                    color: {
-                          gray: {
-                              outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                          }
-                    }
-                  }"
-                  color="gray"
-                  />
+            <div class="md:w-2/5 space-y-7 my-auto">
+                <UFormGroup label="Agregar Docente">
+                    <UInput size="sm" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
+                    :ui="{
+                        icon: {
+                            trailing: { pointer: '' }
+                        },
+                        ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                        color: {
+                            gray: {
+                                outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                            }
+                        }
+                    }"
+                    color="gray"
+                    />
               </UFormGroup>
             </div>
 
@@ -86,7 +62,7 @@
               Cancelar
             </UButton>
             <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="isOpen = false">
-              Crear
+              Terminar
             </UButton>
           </div>
 

@@ -86,8 +86,8 @@
     };
 
     const items = (row: TableRow) => [
-        [{ label: 'Editar', icon: 'i-heroicons-pencil-square'}],
-        [{ label: 'Eliminar', icon: 'i-heroicons-trash', click: () => deleteUser(row.email)}]
+        [{ label: 'Editar', icon: 'fluent:compose-12-filled'}],
+        [{ label: 'Eliminar', icon: 'fluent:delete-12-regular', click: () => deleteUser(row.email)}]
     ];
 
     const page = ref(1)

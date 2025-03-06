@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <UButton size="xl" @click="isOpen = true" class="rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray">
+    <UButton size="xl" @click="isOpen = true" class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray">
             <UIcon name="fluent:add-16-filled" class="text-xl dark:text-White-w"/>
     </UButton>
 
@@ -104,7 +104,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true"/>
+              <UtilitiesPeopleTable view="docentes" :hideFinalNote="true"/>
             </div>
           </div>
 

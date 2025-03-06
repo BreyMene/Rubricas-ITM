@@ -4,11 +4,11 @@
 
 <template>
   <div>
-    <UButton size="xl" @click="isOpen = true" class="rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray">
+    <UButton size="xl" @click="isOpen = true" class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray">
             <UIcon name="fluent:add-16-filled" class="text-xl dark:text-White-w"/>
     </UButton>
 
-    <UModal v-model="isOpen" prevent-close :ui="{  width: 'w-full sm:max-w-3xl', height: 'max-h-[700px]',
+    <UModal v-model="isOpen" prevent-close :ui="{  width: 'w-full sm:max-w-5xl', height: 'max-h-[700px]',
         container: 'flex items-center justify-center',
         overlay: {background: 'dark:bg-Light-Gray/15',}}">
 

@@ -25,6 +25,18 @@
         { id: 'D', nombre: 'Grupo D', manager: 'Pepito', estudiantes: []}
     ]);
 
+    // Controls the Views 
+    const showGroups = ref(true);
+    
+    // Altern between views
+    const toggleView = () => {
+        showGroups.value = !showGroups.value;
+    };
+
+    // Icon State
+    const currentIcon = computed(() => 
+        showGroups.value ? 'fluent:people-community-12-filled' : 'fluent:book-32-filled'
+    );
 </script>
 
 <template>
@@ -49,25 +61,58 @@
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
                         <UtilitiesSearchBar placeholderText="Buscar Grupo..."/>
                         <div class="flex items-center gap-4">
-                            <UIcon name="fluent:people-community-12-filled" class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown"/>
-                            <CreateGroup class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+                            <!-- Transition para el icono -->
+                            <transition 
+                                name="scale" 
+                                mode="out-in"
+                            >
+                                <UIcon 
+                                    :key="currentIcon"
+                                    :name="currentIcon" 
+                                    class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown cursor-pointer"
+                                    @click="toggleView"
+                                />
+                            </transition>
+                            
+                            <!-- Transition para los botones de creación -->
+                            <transition 
+                                name="scale" 
+                                mode="out-in"
+                                >
+                                <div :key="showGroups ? 'group-btn' : 'teacher-btn'" class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0">
+                                    <CreateGroup v-if="showGroups"/>
+                                    <CreateTeacher v-else/>
+                                </div>
+                            </transition>
                         </div>
                     </div>
                 </div>
 
+                <!-- Altern Between Groups or Teachers -->
                 <!-- Groups -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <UButton 
-                    v-for="group in groups" 
-                    :key="group.id"
-                    variant="ghost"
-                    class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-                    @click="$router.push(`/Curso/${courseId}/Grupo/${group.id}`)"
-                    >
-                    <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.nombre }}</h3>
-                    <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
-                    </UButton>
-                </div>
+                <transition 
+                    name="slide" 
+                    mode="out-in"
+                >
+                    <!-- Grupos -->
+                    <div v-if="showGroups" :key="'groups'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <UButton 
+                        v-for="group in groups" 
+                        :key="group.id"
+                        variant="ghost"
+                        class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                        @click="$router.push(`/Curso/${courseId}/Grupo/${group.id}`)"
+                        >
+                        <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.nombre }}</h3>
+                        <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
+                        </UButton>
+                    </div>
+
+                    <!-- Teachers Table -->
+                    <div v-else :key="'teachers'">
+                        <UtilitiesPeopleTable view="docentes"/>
+                    </div>
+                </transition>
             </div>
 
             <!-- Rubric Preview -->
@@ -94,3 +139,38 @@
     </div>
 </template>
 
+<style scoped>
+    /* Transición de escala para iconos y botones */
+    .scale-enter-active,
+    .scale-leave-active {
+    transition: transform 0.3s ease;
+    }
+
+    .scale-enter-from,
+    .scale-leave-to {
+    transform: scale(0.5);
+    opacity: 0;
+    }
+
+    .scale-enter-to,
+    .scale-leave-from {
+    transform: scale(1);
+    opacity: 1;
+    }
+
+    /* Transición de deslizamiento para el contenido principal */
+    .slide-enter-active,
+    .slide-leave-active {
+    transition: all 0.3s ease-out;
+    }
+
+    .slide-enter-from {
+    transform: translateX(-20px);
+    opacity: 0;
+    }
+
+    .slide-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
+    }
+</style>

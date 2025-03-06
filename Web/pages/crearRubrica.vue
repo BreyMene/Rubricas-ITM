@@ -8,7 +8,6 @@
   function addTema() {
     temas.value.push({
       nombre: '',
-      isEditing: true,
       rows: []
     })
   }
@@ -37,8 +36,8 @@
 <template>
   <div class="container mx-auto p-0 md:p-4">
     <div class="overflow-x-auto lg:overflow-x-clip">
-      <div class="min-w-[1200px] lg:min-w-0 bg-white shadow-lg rounded-lg overflow-visible">
-        <div class="sticky top-0 flex bg-gray-100 font-bold text-gray-700 p-3 border-b z-10 text-xs lg:text-sm xl:text-base">
+      <div class="min-w-[1200px] lg:min-w-0 bg-White-w dark:bg-Dark-Grey shadow-lg rounded-xl overflow-visible">
+        <div class="sticky top-0 flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 z-10 text-xs lg:text-sm xl:text-base rounded-lg">
           <div class="flex-none w-[20%] px-3">Tema</div>
           <div class="flex-none w-[30%] px-3">Criterio</div>
           <div class="flex-none w-[10%] px-3">Peso</div>
@@ -47,7 +46,7 @@
           <div class="flex-none w-[20%] px-3">Observaciones</div>
         </div>
   
-        <div v-if="temas.length === 0" class="text-center p-4 text-gray-500">
+        <div v-if="temas.length === 0" class="text-center p-4 text-Light-Gray dark:text-MLight-White/50">
           No hay temas. 
         </div>
   
@@ -65,10 +64,9 @@
 
     <div class="flex justify-end p-4">
       <UButton 
-        icon="i-heroicons-plus" 
-        color="primary"
+        icon="fluent:add-16-filled" 
         size="lg"
-        class="shadow-lg"
+        class="rounded-xl shadow-lg bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w"
         @click="addTema"
       >
         Agregar Tema
