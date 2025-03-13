@@ -37,6 +37,11 @@
     const currentIcon = computed(() => 
         showGroups.value ? 'fluent:people-community-12-filled' : 'fluent:book-32-filled'
     );
+
+    // Placeholder text for the search bar
+    const placeholderText = computed(() => 
+        showGroups.value ? 'Buscar Grupo...' : 'Buscar Docente...'
+    );
 </script>
 
 <template>
@@ -59,7 +64,16 @@
                 <!-- Searchbar and Buttons -->
                 <div class="mb-6">
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
-                        <UtilitiesSearchBar placeholderText="Buscar Grupo..."/>
+                        <transition 
+                            name="scale" 
+                            mode="out-in"
+                        >
+                            <UtilitiesSearchBar 
+                                :key="placeholderText" 
+                                :placeholderText="placeholderText" 
+                            />
+                        </transition>
+
                         <div class="flex items-center gap-4">
                             <!-- Transition para el icono -->
                             <transition 
@@ -140,7 +154,7 @@
 </template>
 
 <style scoped>
-    /* Transición de escala para iconos y botones */
+    /* Transition for Icons and Buttons */
     .scale-enter-active,
     .scale-leave-active {
     transition: transform 0.3s ease;
@@ -158,7 +172,7 @@
     opacity: 1;
     }
 
-    /* Transición de deslizamiento para el contenido principal */
+    /* Slide Main Content */
     .slide-enter-active,
     .slide-leave-active {
     transition: all 0.3s ease-out;

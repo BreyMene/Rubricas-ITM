@@ -1,6 +1,6 @@
 <script setup lang="ts">
   const isOpen = ref(false)
-
+  const empty = ref('');
 </script>
 
 <template>
@@ -59,6 +59,7 @@
               </UFormGroup>
               <UFormGroup label="Agregar Docente">
                 <UInput size="sm" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
+                v-model="empty"
                 :ui="{
                     icon: {
                           trailing: { pointer: '' }
@@ -71,7 +72,18 @@
                     }
                   }"
                   color="gray"
-                  />
+                  >
+                  <template #trailing>
+                    <UButton
+                      v-show="empty !== ''"
+                      color="gray"
+                      variant="link"
+                      icon="fluent:add-16-filled"
+                      :padded="false"
+                      @click="empty = ''"
+                    />
+                </template>
+                </UInput>
               </UFormGroup>
             </div>
 

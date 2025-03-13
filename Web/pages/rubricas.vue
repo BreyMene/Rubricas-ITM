@@ -1,11 +1,11 @@
 <script setup lang="ts">
     const rubricas = ref([
-    { id: 1, imagen: 'RubricaTest.PNG' },
-    { id: 2, imagen: 'RubricaTest.PNG' },
-    { id: 3, imagen: 'RubricaTest.PNG' },
-    { id: 4, imagen: 'RubricaTest.PNG' },
-    { id: 5, imagen: 'RubricaTest.PNG' },
-    { id: 6, imagen: 'RubricaTest.PNG' },
+      { id: 1, imagen: 'RubricaTest.PNG' },
+      { id: 2, imagen: 'RubricaTest.PNG' },
+      { id: 3, imagen: 'RubricaTest.PNG' },
+      { id: 4, imagen: 'RubricaTest.PNG' },
+      { id: 5, imagen: 'RubricaTest.PNG' },
+      { id: 6, imagen: 'RubricaTest.PNG' },
     ]);
 
     // Modal state
@@ -31,7 +31,7 @@
             </div>
 
           <!-- Rubrics Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 select-none">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none">
             <UButton variant="ghost"
               v-for="rubrica in rubricas" 
               :key="rubrica.id"
@@ -45,6 +45,7 @@
                   style="filter: blur(1.5px);"
                 />
               </div>
+              <h3 class="text-White-w dark:text-White-w">{{ rubrica.id }}</h3>
             </UButton>
           </div>
         </div>

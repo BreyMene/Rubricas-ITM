@@ -48,15 +48,13 @@
                 <!-- Searchbar and Buttons -->
                 <div class="mb-6">
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
-                        <UtilitiesSearchBar placeholderText="Buscar Grupo..."/>
+                        <UtilitiesSearchBar placeholderText="Buscar Estudiante..."/>
                         <CreateStudent class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
                     </div>
                 </div>
 
                 <!-- Content -->
-                <div class="lg:w-[920px]">
-                    <UtilitiesPeopleTable view="estudiantes"/>
-                </div>
+                <UtilitiesPeopleTable view="estudiantes"/>
             </div>
 
             <!-- Rubric -->
