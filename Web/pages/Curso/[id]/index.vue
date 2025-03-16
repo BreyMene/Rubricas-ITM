@@ -31,6 +31,9 @@
     // Altern between views
     const toggleView = () => {
         showGroups.value = !showGroups.value;
+
+        // Reset search bar
+        searchTerm.value = '';
     };
 
     // Icon State
@@ -42,6 +45,22 @@
     const placeholderText = computed(() => 
         showGroups.value ? 'Buscar Grupo...' : 'Buscar Docente...'
     );
+
+    // SEARCH BAR  ---------------
+    const searchTerm = ref('');
+
+    // Filtered groups based on search
+    const filteredGroups = computed(() => {
+        if (!searchTerm.value) return groups.value;
+        return groups.value.filter(group => 
+            group.nombre.toLowerCase().includes(searchTerm.value) ||
+            group.manager.toLowerCase().includes(searchTerm.value)
+        );
+    });
+
+    const handleSearch = (value: string) => {
+        searchTerm.value = value;
+    };
 </script>
 
 <template>
@@ -71,6 +90,7 @@
                             <UtilitiesSearchBar 
                                 :key="placeholderText" 
                                 :placeholderText="placeholderText" 
+                                @search="handleSearch"
                             />
                         </transition>
 
@@ -109,22 +129,28 @@
                     mode="out-in"
                 >
                     <!-- Grupos -->
-                    <div v-if="showGroups" :key="'groups'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <UButton 
-                        v-for="group in groups" 
-                        :key="group.id"
-                        variant="ghost"
-                        class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-                        @click="$router.push(`/Curso/${courseId}/Grupo/${group.id}`)"
+                    <div v-if="showGroups" :key="'groups'" class="relative">
+                        <TransitionGroup 
+                            name="list" 
+                            tag="div" 
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                         >
-                        <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.nombre }}</h3>
-                        <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
-                        </UButton>
+                            <UButton 
+                            v-for="group in filteredGroups" 
+                            :key="group.id"
+                            variant="ghost"
+                            class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                            @click="$router.push(`/Curso/${courseId}/Grupo/${group.id}`)"
+                            >
+                                <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.nombre }}</h3>
+                                <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
+                            </UButton>
+                        </TransitionGroup>
                     </div>
 
                     <!-- Teachers Table -->
                     <div v-else :key="'teachers'">
-                        <UtilitiesPeopleTable view="docentes"/>
+                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm"/>
                     </div>
                 </transition>
             </div>
@@ -186,5 +212,35 @@
     .slide-leave-to {
     transform: translateX(20px);
     opacity: 0;
+    }
+
+    /* ------ Group Animations when the searchbar is used */
+    .list-move, 
+    .list-enter-active,
+    .list-leave-active {
+        transition: all 0.3s ease;
+    }
+
+    .list-enter-from,
+    .list-leave-to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .list-leave-active {
+        position: absolute;
+        width: calc(33.33% - 16px);
+    }
+
+    @media (max-width: 768px) {
+        .list-leave-active {
+            width: calc(50% - 16px);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .list-leave-active {
+            width: calc(100% - 16px);
+        }
     }
 </style>

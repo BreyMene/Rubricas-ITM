@@ -26,6 +26,13 @@
         }
     ]
 
+    // SEARCH BAR ----------
+    const searchTerm = ref('');
+
+    const handleSearch = (value: string) => {
+        searchTerm.value = value;
+    };
+
 </script>
 
 <template>
@@ -48,13 +55,13 @@
                 <!-- Searchbar and Buttons -->
                 <div class="mb-6">
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
-                        <UtilitiesSearchBar placeholderText="Buscar Estudiante..."/>
+                        <UtilitiesSearchBar placeholderText="Buscar Estudiante..." @search="handleSearch"/>
                         <CreateStudent class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
                     </div>
                 </div>
 
                 <!-- Content -->
-                <UtilitiesPeopleTable view="estudiantes"/>
+                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm"/>
             </div>
 
             <!-- Rubric -->

@@ -4,12 +4,12 @@
     const props = defineProps<{
         view: "docentes" | "estudiantes";
         hideFinalNote?: boolean;
+        searchTerm?: string;
     }>();
 
     // Teachers data
-    const teachers = ref<{ email: string }[]>([]);
-
-    teachers.value = [{
+    const teachers = ref<Docente[]>([
+        {
             email: 'ejemplo@correo.itm.edu.co'
         },
         {
@@ -27,25 +27,23 @@
         {
             email: 'ejemplo5@correo.itm.edu.co'
         }
-    ]
-
+    ]);
     // Students data
-    const students = ref<{ name: string; email: string; finalNote: number }[]>([]);
-
-    students.value = [{
-            name: 'Pepito Perez',
+    const students = ref<Estudiante[]>([
+        {
+            nombre: 'Pepito Perez',
             email: 'pepitoperez1245@correo.itm.edu.co',
-            finalNote: 3.8
+            promedio: 3.8
         },{
-            name: 'Vanesa Van',
+            nombre: 'Vanesa Van',
             email: 'vanesavan8456@correo.itm.edu.co',
-            finalNote: 4.0
+            promedio: 4.0
         },{
-            name: 'Yo apellido segundoapellido',
+            nombre: 'Yo apellido segundoapellido',
             email: 'yoapellido1236@correo.itm.edu.co',
-            finalNote: 4.1
+            promedio: 4.1
         }
-    ]
+    ]);
 
     // Change columns depends of the view
     const columns = computed(() => {
@@ -54,13 +52,13 @@
         }
         
         const studentColumns = [
-            { key: "name", label: "Nombre" },
+            { key: "nombre", label: "Nombre" },
             { key: "email", label: "Email" },
             { key: "actions" }
         ];
         
         if (!props.hideFinalNote) {
-            studentColumns.splice(2, 0, { key: "finalNote", label: "Nota Final" });
+            studentColumns.splice(2, 0, { key: "promedio", label: "Nota Final" });
         }
         
         return studentColumns;
@@ -90,12 +88,33 @@
         [{ label: 'Eliminar', icon: 'fluent:delete-12-regular', click: () => deleteUser(row.email)}]
     ];
 
+    // Filtered people with proper type checking
+    const filteredPeople = computed(() => {
+        if (!props.searchTerm) return people.value;
+        
+        const searchLower = props.searchTerm.toLowerCase();
+        return people.value.filter(person => {
+            if (props.view === "docentes") {
+                return person.email.toLowerCase().includes(searchLower);
+            } else {
+                // Type guard to ensure we're working with a Student
+                const studentPerson = person as Estudiante;
+                return (
+                    studentPerson.nombre.toLowerCase().includes(searchLower) ||
+                    studentPerson.email.toLowerCase().includes(searchLower)
+                );
+            }
+        });
+    });
+
     const page = ref(1)
     const pageCount = 5
 
     const rows = computed(() => {
-        return people.value.slice((page.value - 1) * pageCount, page.value * pageCount);
-    })
+        return filteredPeople.value.slice((page.value - 1) * pageCount, page.value * pageCount);
+    });
+
+const totalItems = computed(() => filteredPeople.value.length);
 </script>
 
 <template>
@@ -110,8 +129,8 @@
                 base: 'text-left text-base px-4',
                 padding: 'p-2',
             }
-            }"
-            > 
+        }"
+        > 
             <template #finalNote-header>
                 <div class="text-center w-full">Nota Final</div>
             </template>
@@ -121,37 +140,37 @@
                 </div>
             </template>
 
-                <template #actions-data="{ row }">
-                    <UDropdown :items="items(row)" :ui="{
-                        width: 'w-40',
+            <template #actions-data="{ row }">
+                <UDropdown :items="items(row)" :ui="{
+                    width: 'w-40',
+                    rounded: 'rounded-lg',
+                    ring: 'ring-0',
+                    background: 'bg-White-w dark:bg-Pure-Black',
+                    item: {
                         rounded: 'rounded-lg',
-                        ring: 'ring-0',
-                        background: 'bg-White-w dark:bg-Pure-Black',
-                        item: {
-                            rounded: 'rounded-lg',
-                            active: 'dark:bg-Warm-Dark',
-                            disabled: 'cursor-text select-text'
-                        },
-                        divide: 'dark:divide-Light-Gray/20 divide-opacity-50'
-                    }">
-                        <UButton color="gray" variant="ghost" icon="fluent:more-horizontal-16-filled"/>
-                    </UDropdown>
-                </template>
+                        active: 'dark:bg-Warm-Dark',
+                        disabled: 'cursor-text select-text'
+                    },
+                    divide: 'dark:divide-Light-Gray/20 divide-opacity-50'
+                }">
+                    <UButton color="gray" variant="ghost" icon="fluent:more-horizontal-16-filled"/>
+                </UDropdown>
+            </template>
 
-                <template #empty-state>
-                    <div class="flex flex-col items-center justify-center py-6 gap-3">
-                        <UIcon name="fluent:beach-24-regular" class="text-7xl"/>
-                        <span v-if="view == 'docentes'" class="italic text-sm">No hay docentes!</span>
-                        <span v-else="view == 'estudiantes'" class="italic text-sm">No hay estudiantes!</span>
-                    </div>
-                </template>
+            <template #empty-state>
+                <div class="flex flex-col items-center justify-center py-6 gap-3">
+                    <UIcon name="fluent:beach-24-regular" class="text-7xl"/>
+                    <span v-if="view == 'docentes'" class="italic text-sm">No hay docentes!</span>
+                    <span v-else class="italic text-sm">No hay estudiantes!</span>
+                </div>
+            </template>
 
-            </UTable>
+        </UTable>
     </div>
 
     <!-- Pagination -->
     <div class="flex justify-center px-3 py-3.5 border-t border-Purple-P dark:border-Muted-Brown">
-        <UPagination v-model="page" :page-count="pageCount" :total="people.length" 
+        <UPagination v-model="page" :page-count="pageCount" :total="totalItems" 
         :ui="{
             wrapper: 'flex items-center gap-1',
             rounded: '!rounded-full min-w-[32px] justify-center',

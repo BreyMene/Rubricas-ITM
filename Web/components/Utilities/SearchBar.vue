@@ -5,6 +5,13 @@
     defineProps<{ 
         placeholderText?: string 
     }>();
+
+    const emit = defineEmits(['search']);
+
+    // Watch for changes in searchQuery and emit the value
+    watch(searchQuery, (newValue) => {
+        emit('search', newValue.toLowerCase());
+    });
 </script>
 
 <template>
