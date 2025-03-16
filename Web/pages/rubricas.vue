@@ -24,7 +24,7 @@
     // Filtered rubricas based on search
     const filteredRubricas = computed(() => {
         if (!searchTerm.value) return rubricas.value;
-        return rubricas.value.filter(rubrica => 
+        return rubricas.value.filter(rubrica =>
             rubrica.id.toString().toLowerCase().includes(searchTerm.value)
         );
     });
@@ -48,25 +48,25 @@
 
           <!-- Rubrics Grid -->
           <div class="relative">
-            <TransitionGroup 
-                name="list" 
-                tag="div" 
+            <TransitionGroup
+                name="list"
+                tag="div"
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
             >
               <UButton variant="ghost"
-                v-for="rubrica in filteredRubricas" 
+                v-for="rubrica in filteredRubricas"
                 :key="rubrica.id"
                 @click="selectRubrica(rubrica.id)"
                 class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
               >
                 <div class="w-full h-full rounded-lg overflow-hidden relative">
-                  <NuxtImg 
-                    :src="rubrica.imagen" 
-                    class="w-full h-full object-cover" 
+                  <NuxtImg
+                    :src="rubrica.imagen"
+                    class="w-full h-full object-cover"
                     style="filter: blur(1.5px);"
                   />
                 </div>
-                <h3 class="text-White-w dark:text-White-w">{{ rubrica.id }}</h3>
+                <h3 class="text-Pure-Black dark:text-White-w">{{ rubrica.id }}</h3>
               </UButton>
             </TransitionGroup>
           </div>
@@ -110,9 +110,9 @@
                   </p>
               </div>
             </div>
-            
+
             <div class="mt-4 flex justify-end">
-                <UButton 
+                <UButton
                     variant="link" color="black"
                     @click="isOpen = false">
                     Cerrar
@@ -128,7 +128,7 @@
 
 <style scoped>
   /* Group Animations when the searchbar is used */
-  .list-move, 
+  .list-move,
   .list-enter-active,
   .list-leave-active {
       transition: all 0.3s ease;

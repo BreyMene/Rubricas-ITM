@@ -6,20 +6,21 @@ export interface Rubrica {
 
 export interface Tema {
     nombre: string
-    rows: RubricaRow[]
+    rows: Criterio[]
 }
 
-export interface RubricaRow {
+export interface Criterio {
     criterio: string
     peso: number
     calificacion: number
     acumulado: number
     observaciones: string
 }
-  
+
 export interface Curso {
     id: number,
     nombre: string,
+    docentes: Docente[],
     grupos: Grupo[]
 }
 

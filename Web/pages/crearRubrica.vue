@@ -1,32 +1,26 @@
 <script setup lang="ts">
   import { ref } from 'vue'
-  import Tema from '~/components/Rubrica/Tema.vue'
-  import type {RubricaRow, Tema as TemaType} from '~/utils/types'
-  
+  import type {Criterio, Tema} from '~/utils/types'
+
   const temas = ref<TemaType[]>([])
-  
+
   function addTema() {
+    const rb: Criterio = {}
     temas.value.push({
       nombre: '',
-      rows: []
+      rows: [rb]
     })
   }
-  
+
   function addRow(temaIndex: number) {
-    const rb: RubricaRow = {
-      criterio: "",
-      peso: 0,
-      calificacion: 0,
-      acumulado: 0,
-      observaciones: ""
-    }
+    const rb: Criterio = {}
     temas.value[temaIndex].rows.push(rb)
   }
-  
+
   function deleteTema(temaIndex: number) {
     temas.value.splice(temaIndex, 1)
   }
-  
+
   function deleteRow(temaIndex: number, rowIndex: number) {
     temas.value[temaIndex].rows.splice(rowIndex, 1)
   }
@@ -45,13 +39,13 @@
           <div class="flex-none w-[10%] px-3">Acumulado</div>
           <div class="flex-none w-[20%] px-3">Observaciones</div>
         </div>
-  
+
         <div v-if="temas.length === 0" class="text-center p-4 text-Light-Gray dark:text-MLight-White/50">
-          No hay temas. 
+          No hay temas.
         </div>
-  
-        <Tema 
-          v-for="(tema, index) in temas" 
+
+        <RubricaTema
+          v-for="(tema, index) in temas"
           :key="index"
           :tema="tema"
           :temaIndex="index"
@@ -63,8 +57,8 @@
     </div>
 
     <div class="flex justify-end p-4">
-      <UButton 
-        icon="fluent:add-16-filled" 
+      <UButton
+        icon="fluent:add-16-filled"
         size="lg"
         class="rounded-xl shadow-lg bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w"
         @click="addTema"

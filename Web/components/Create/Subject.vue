@@ -1,6 +1,20 @@
 <script setup lang="ts">
   const isOpen = ref(false)
   const empty = ref('');
+  const emit = defineEmits(['addCourse']);
+
+  const courseName = ref('');
+  const addCourse = () => {
+    if (courseName.value === "") return;
+
+    const c: Curso = {
+      nombre: courseName.value,
+      grupos: []
+    };
+    emit('addCourse', c);
+    courseName.value = '';
+    isOpen.value = false;
+  };
 </script>
 
 <template>
@@ -28,11 +42,11 @@
             <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="isOpen = false" />
           </div>
         </template>
-        
+
         <!-- Modal Content -->
         <div>
           <!-- Form Content -->
-          <div class="flex flex-col md:flex-row gap-9">  
+          <div class="flex flex-col md:flex-row gap-9">
             <div class="md:w-2/5 space-y-7">
 
               <!-- Top Image Circle -->
@@ -42,7 +56,7 @@
 
               <!-- Left Side - Two Inputs -->
               <UFormGroup label="Nombre del curso" required>
-                <UInput size="sm" placeholder="Ingrese el nombre" class="w-full"
+                <UInput v-model="courseName" size="sm" placeholder="Ingrese el nombre" class="w-full"
                   :ui="{
                     icon: {
                           trailing: { pointer: '' }
@@ -97,7 +111,7 @@
             <UButton variant="link" color="black" @click="isOpen = false">
               Cancelar
             </UButton>
-            <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="isOpen = false">
+            <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="addCourse">
               Crear
             </UButton>
           </div>

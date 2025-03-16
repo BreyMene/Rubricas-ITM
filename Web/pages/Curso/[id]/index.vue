@@ -18,16 +18,15 @@
         }
     ]
 
-    const groups = ref<Grupo[]>([
-        { id: 'A', nombre: 'Grupo A', manager: 'Juan Apellido', estudiantes: [] },
-        { id: 'B', nombre: 'Grupo B', manager: 'Nose', estudiantes: [] },
-        { id: 'C', nombre: 'Grupo C', manager: 'Nombre', estudiantes: [] },
-        { id: 'D', nombre: 'Grupo D', manager: 'Pepito', estudiantes: []}
-    ]);
+    const groups = ref<Grupo[]>([]);
 
-    // Controls the Views 
+    function addGroup(g: Grupo) {
+        groups.value.push(g);
+    }
+
+    // Controls the Views
     const showGroups = ref(true);
-    
+
     // Altern between views
     const toggleView = () => {
         showGroups.value = !showGroups.value;
@@ -37,12 +36,12 @@
     };
 
     // Icon State
-    const currentIcon = computed(() => 
+    const currentIcon = computed(() =>
         showGroups.value ? 'fluent:people-community-12-filled' : 'fluent:book-32-filled'
     );
 
     // Placeholder text for the search bar
-    const placeholderText = computed(() => 
+    const placeholderText = computed(() =>
         showGroups.value ? 'Buscar Grupo...' : 'Buscar Docente...'
     );
 
@@ -51,8 +50,10 @@
 
     // Filtered groups based on search
     const filteredGroups = computed(() => {
+        console.log(groups);
+
         if (!searchTerm.value) return groups.value;
-        return groups.value.filter(group => 
+        return groups.value.filter(group =>
             group.nombre.toLowerCase().includes(searchTerm.value) ||
             group.manager.toLowerCase().includes(searchTerm.value)
         );
@@ -76,45 +77,45 @@
                 <UIcon name="fluent:chevron-right-12-filled" class="text-gray-500 dark:text-gray-400 w-4 h-4" />
             </template>
         </UBreadcrumb>
-        
+
         <div class="flex flex-col lg:flex-row gap-16 mt-8">
             <!-- Group Section -->
             <div class="flex-1">
                 <!-- Searchbar and Buttons -->
                 <div class="mb-6">
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
-                        <transition 
-                            name="scale" 
+                        <transition
+                            name="scale"
                             mode="out-in"
                         >
-                            <UtilitiesSearchBar 
-                                :key="placeholderText" 
-                                :placeholderText="placeholderText" 
+                            <UtilitiesSearchBar
+                                :key="placeholderText"
+                                :placeholderText="placeholderText"
                                 @search="handleSearch"
                             />
                         </transition>
 
                         <div class="flex items-center gap-4">
                             <!-- Transition para el icono -->
-                            <transition 
-                                name="scale" 
+                            <transition
+                                name="scale"
                                 mode="out-in"
                             >
-                                <UIcon 
+                                <UIcon
                                     :key="currentIcon"
-                                    :name="currentIcon" 
+                                    :name="currentIcon"
                                     class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown cursor-pointer"
                                     @click="toggleView"
                                 />
                             </transition>
-                            
+
                             <!-- Transition para los botones de creación -->
-                            <transition 
-                                name="scale" 
+                            <transition
+                                name="scale"
                                 mode="out-in"
                                 >
                                 <div :key="showGroups ? 'group-btn' : 'teacher-btn'" class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0">
-                                    <CreateGroup v-if="showGroups"/>
+                                    <CreateGroup @addGroup="addGroup" v-if="showGroups"/>
                                     <CreateTeacher v-else/>
                                 </div>
                             </transition>
@@ -124,19 +125,19 @@
 
                 <!-- Altern Between Groups or Teachers -->
                 <!-- Groups -->
-                <transition 
-                    name="slide" 
+                <transition
+                    name="slide"
                     mode="out-in"
                 >
                     <!-- Grupos -->
                     <div v-if="showGroups" :key="'groups'" class="relative">
-                        <TransitionGroup 
-                            name="list" 
-                            tag="div" 
+                        <TransitionGroup
+                            name="list"
+                            tag="div"
                             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                         >
-                            <UButton 
-                            v-for="group in filteredGroups" 
+                            <UButton
+                            v-for="group in filteredGroups"
                             :key="group.id"
                             variant="ghost"
                             class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
@@ -158,9 +159,9 @@
             <!-- Rubric Preview -->
             <div class="w-full lg:w-[500px] h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1">
                 <div class="w-full h-full rounded-lg overflow-hidden relative">
-                    <NuxtImg 
-                        src="RubricaTest.PNG" 
-                        class="w-full h-full object-cover" 
+                    <NuxtImg
+                        src="RubricaTest.PNG"
+                        class="w-full h-full object-cover"
                         style="filter: blur(1.5px);"
                     />
                 </div>
@@ -215,7 +216,7 @@
     }
 
     /* ------ Group Animations when the searchbar is used */
-    .list-move, 
+    .list-move,
     .list-enter-active,
     .list-leave-active {
         transition: all 0.3s ease;
