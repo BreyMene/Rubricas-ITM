@@ -7,8 +7,11 @@
   const addCourse = () => {
     if (courseName.value === "") return;
 
+    // Luego corregir el id, si se pone vacio da error
     const c: Curso = {
+      id: "a", 
       nombre: courseName.value,
+      docentes: [],
       grupos: []
     };
     emit('addCourse', c);

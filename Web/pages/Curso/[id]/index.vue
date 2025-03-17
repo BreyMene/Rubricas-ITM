@@ -131,7 +131,21 @@
                 >
                     <!-- Grupos -->
                     <div v-if="showGroups" :key="'groups'" class="relative">
-                        <TransitionGroup
+                        <!-- No Groups warning -->
+                        <div v-if="!groups.length" class="flex items-center justify-center md:mt-24 lg:mt-36 mt-10"> 
+                            <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                                <!-- Corner decorations -->
+                                <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                                <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                                <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                                <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                                
+                                <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUN GRUPO</p>
+                            </div>
+                        </div>
+
+                        <TransitionGroup v-else
                             name="list"
                             tag="div"
                             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"

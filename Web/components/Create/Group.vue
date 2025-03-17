@@ -7,6 +7,7 @@
     if (groupName.value === "") return;
 
     const g: Grupo = {
+      id: "",
       nombre: groupName.value,
       manager: "",
       estudiantes: []

@@ -2,10 +2,16 @@
   import { ref } from 'vue'
   import type {Criterio, Tema} from '~/utils/types'
 
-  const temas = ref<TemaType[]>([])
+  const temas = ref<Tema[]>([])
 
   function addTema() {
-    const rb: Criterio = {}
+    const rb: Criterio = {
+      criterio: "",
+      peso: 0,
+      calificacion: 0,
+      acumulado: 0,
+      observaciones: "",
+    }
     temas.value.push({
       nombre: '',
       rows: [rb]
@@ -13,7 +19,13 @@
   }
 
   function addRow(temaIndex: number) {
-    const rb: Criterio = {}
+    const rb: Criterio = {
+      criterio: "",
+      peso: 0,
+      calificacion: 0,
+      acumulado: 0,
+      observaciones: "",
+    }
     temas.value[temaIndex].rows.push(rb)
   }
 

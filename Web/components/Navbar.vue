@@ -15,6 +15,11 @@
 
   // Determine active index based on current path
   const activeIndex = computed<number>(() => {
+    // Check if the current path includes 'rubrica' in any form
+    if (route.path.toLowerCase().includes('rubrica')) {
+      return routes.indexOf('/rubricas');
+    }
+    
     const index = routes.indexOf(route.path);
     return index !== -1 ? index : 0;
   });
