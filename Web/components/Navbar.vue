@@ -62,7 +62,7 @@
 </script>
 
 <template>
-  <nav class="flex justify-center py-3 mt-2 font-semibold">
+  <nav class="flex justify-center py-3 mt-2 font-semibold mb-8">
     <div class="container mx-auto px-10 sm:px-5 flex items-center justify-between relative">
       <!-- Left Logo -->
       <div>
