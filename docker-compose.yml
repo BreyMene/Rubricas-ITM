@@ -1,12 +1,10 @@
 services:
-  #backend:
-  #  build: ./backend
-  #  ports:
-  #    - "3000:3000"
-  #  environment:
-  #    - NODE_ENV=production
-  #  depends_on:
-  #    - db
+  backend:
+    build: ./Backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
   app:
     build: ./Web
     ports:
