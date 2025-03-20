@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./Backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  app:
+    build: ./Web
+    ports:
+      - "3000:3000"
+
+  db:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: pass1234
+      MONGO_INITDB_DATABASE: RubrITM
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+volumes:
+  mongodata:

@@ -20,7 +20,7 @@
 
 <template>
     <UDropdown
-        :items="items"  class="select-none" 
+        :items="items"  class="select-none"
         :ui="{
             width: 'w-40',
             transition: {
@@ -56,7 +56,7 @@
                 </p>
             </div>
         </template>
-        
+
         <!-- Change position of the icons -->
         <template #item="{ item }">
             <span class="truncate">{{ item.label }}</span>
