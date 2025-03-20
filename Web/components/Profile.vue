@@ -20,16 +20,16 @@
 
 <template>
     <UDropdown
-        :items="items" :popper="{ placement: 'bottom-start'}" class="select-none" 
+        :items="items"  class="select-none" 
         :ui="{
             width: 'w-40',
             transition: {
-              enterActiveClass: 'transition-all duration-200 ease-out', //time it takes to come out
-              enterFromClass: 'transform scale-0 opacity-90 origin-top-right 2xl:origin-top-left', //scale from 90 to 100, creating the magnification effect
-              enterToClass: 'transform scale-100 opacity-100 origin-top-right 2xl:origin-top-left',
+                enterActiveClass: 'transition-all duration-200 ease-out', //time it takes to come out
+              enterFromClass: 'transform scale-0 opacity-90 origin-top-right', //scale from 90 to 100, creating the magnification effect
+              enterToClass: 'transform scale-100 opacity-100 origin-top-right',
               leaveActiveClass: 'transition-all duration-200 ease-in',
-              leaveFromClass: 'transform scale-100 opacity-100 origin-top-right 2xl:origin-top-left',
-              leaveToClass: 'transform scale-92 opacity-0 origin-top-right 2xl:origin-top-left',
+              leaveFromClass: 'transform scale-100 opacity-100 origin-top-right',
+              leaveToClass: 'transform scale-92 opacity-0 origin-top-right',
             },
             rounded: 'rounded-2xl',
             ring: 'ring-0',

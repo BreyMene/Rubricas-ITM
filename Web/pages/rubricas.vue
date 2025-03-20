@@ -1,12 +1,5 @@
 <script setup lang="ts">
-    const rubricas = ref([
-      { id: 1, imagen: 'RubricaTest.PNG' },
-      { id: 2, imagen: 'RubricaTest.PNG' },
-      { id: 3, imagen: 'RubricaTest.PNG' },
-      { id: 4, imagen: 'RubricaTest.PNG' },
-      { id: 5, imagen: 'RubricaTest.PNG' },
-      { id: 6, imagen: 'RubricaTest.PNG' },
-    ]);
+    const rubricas = ref<Rubrica[]>([]);
 
     // Modal state
     const isOpen = ref(false)
@@ -25,7 +18,7 @@
     const filteredRubricas = computed(() => {
         if (!searchTerm.value) return rubricas.value;
         return rubricas.value.filter(rubrica =>
-            rubrica.id.toString().toLowerCase().includes(searchTerm.value)
+            rubrica.nombre.toString().toLowerCase().includes(searchTerm.value)
         );
     });
 
@@ -53,7 +46,20 @@
                 tag="div"
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
             >
-              <UButton variant="ghost"
+              <div v-if="!rubricas.length" class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2"> 
+                  <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                      <!-- Corner decorations -->
+                      <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                      <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                      <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                      <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                      
+                      <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                      <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
+                  </div>
+              </div>
+
+              <UButton v-else variant="ghost"
                 v-for="rubrica in filteredRubricas"
                 :key="rubrica.id"
                 @click="selectRubrica(rubrica.id)"
@@ -61,12 +67,12 @@
               >
                 <div class="w-full h-full rounded-lg overflow-hidden relative">
                   <NuxtImg
-                    :src="rubrica.imagen"
+                    src="RubricaTest.PNG"
                     class="w-full h-full object-cover"
                     style="filter: blur(1.5px);"
                   />
                 </div>
-                <h3 class="text-Pure-Black dark:text-White-w">{{ rubrica.id }}</h3>
+                <h3 class="text-Pure-Black dark:text-White-w">{{ rubrica.nombre }}</h3>
               </UButton>
             </TransitionGroup>
           </div>

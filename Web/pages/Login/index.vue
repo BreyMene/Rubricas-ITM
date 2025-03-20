@@ -81,7 +81,7 @@
             <div v-show="isLogin" 
                 class="form-container transition-opacity duration-500 ease-in-out w-3/5 ml-[40%] px-14 py-8"
                 :class="{'opacity-0': isAnimating, 'opacity-100': !isAnimating || !isLogin}">
-                <h2 class="text-2xl font-semibold text-Pure-Black dark:text-White-w mb-8">LOG IN</h2>
+                <h2 class="text-2xl font-semibold text-Pure-Black dark:text-White-w mb-8">INICIAR SESION</h2>
                 <div class="mb-6">
                     <UForm :state="state" class="flex flex-col gap-3" @submit="handleLogin">
                         <UFormGroup label="Email" name="email">
@@ -145,7 +145,7 @@
             <div v-show="!isLogin" 
                 class="form-container transition-opacity duration-500 ease-in-out w-3/5 px-14 py-6 absolute top-0 right-0"
                 :class="{'opacity-0': isAnimating, 'opacity-100': !isAnimating || isLogin}">
-                <h2 class="text-2xl font-semibold text-Pure-Black dark:text-White-w mb-6">SIGN IN</h2>
+                <h2 class="text-2xl text-end font-semibold text-Pure-Black dark:text-White-w mb-6">REGISTRATE</h2>
                 <div class="mb-6">
                     <UForm :state="state2" class="flex flex-col gap-3" @submit="handleLogin">
                         <UFormGroup label="Email" name="email">
@@ -200,7 +200,7 @@
                         </UFormGroup>
 
                         <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                            Registrarse
+                            Crear Cuenta
                         </UButton>
                     </UForm>
                 </div>

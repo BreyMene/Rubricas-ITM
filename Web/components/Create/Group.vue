@@ -6,8 +6,9 @@
   const addGroup = () => {
     if (groupName.value === "") return;
 
+    // Luego corregir el id, si se pone vacio da error
     const g: Grupo = {
-      id: "",
+      id: "a",
       nombre: groupName.value,
       manager: "",
       estudiantes: []
