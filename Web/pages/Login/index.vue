@@ -7,46 +7,8 @@
     const isAnimating = ref(false);
     const isForgotPassword = ref(false);
     const isReturningFromForgot = ref(false);
-
-    const state = reactive({
-        email: '',
-        password: ''
-    });
-
-    const state2 = reactive({
-        email: '',
-        password: '',
-        secPasword: ''
-    });
-
-    const forgotPasswordState = reactive({
-        email: ''
-    });
-
-    const handleLogin = async () => {
-        try {
-            if (isLogin.value) {
-                console.log('Login data:', state);
-            } else {
-                console.log('Sign-in data:', state2);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    const resetFormFields = () => {
-        // Resetear los campos del formulario Login
-        state.email = '';
-        state.password = '';
-        
-        // Resetear los campos del formulario Sign In
-        state2.email = '';
-        state2.password = '';
-        state2.secPasword = '';
-
-        forgotPasswordState.email = '';
-    }
+    const isOTPForm = ref(false);
+    const otpEmail = ref('');
 
     const toggleForm = async () => {
         if (isAnimating.value) return;
@@ -54,9 +16,9 @@
         isLogin.value = !isLogin.value;
         isForgotPassword.value = false;
         isReturningFromForgot.value = false;
+        isOTPForm.value = false;
 
         setTimeout(() => {
-            resetFormFields();
             isAnimating.value = false;
         }, 750);
     }
@@ -67,9 +29,9 @@
         isForgotPassword.value = true;
         isLogin.value = false;
         isReturningFromForgot.value = false;
+        isOTPForm.value = false;
         
         setTimeout(() => {
-            resetFormFields();
             isAnimating.value = false;
         }, 750);
     }
@@ -78,17 +40,33 @@
         if (isAnimating.value) return;
         isAnimating.value = true;
         isReturningFromForgot.value = true;
+        isOTPForm.value = false;
 
         setTimeout(() => {
             isForgotPassword.value = false;
             isLogin.value = true;
             
             setTimeout(() => {
-                resetFormFields();
                 isAnimating.value = false;
                 isReturningFromForgot.value = false;
             }, 550);
         }, 350);
+    }
+
+    const showOTPForm = (email: string) => {
+        if (isAnimating.value) return;
+        otpEmail.value = email;
+        setTimeout(() => {
+            isOTPForm.value = true;
+        }, 100);
+    }
+
+    const backToForgotPassword = () => {
+        if (isAnimating.value) return;
+        setTimeout(() => {
+            isOTPForm.value = false;
+            console.log(isOTPForm)
+        }, 100);
     }
 </script>
 
@@ -151,179 +129,32 @@
 
                 <!-- Login Form Desktop -->
                 <transition name="fade" mode="out-in">
-                    <div v-if="isLogin && !isForgotPassword" 
-                        class="form-container w-3/5 ml-[40%] px-14 py-8">
-                        <h2 class="text-2xl font-semibold text-Pure-Black dark:text-White-w mb-8">INICIAR SESION</h2>
-                        <div class="mb-6">
-                            <UForm :state="state" class="flex flex-col gap-3" @submit="handleLogin">
-                                <UFormGroup label="Email" name="email">
-                                    <UInput size="sm" v-model="state.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-
-                                <UFormGroup label="Contraseña" name="password">
-                                    <UInput size="sm" v-model="state.password" type="password" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-
-                                <div class="flex justify-end">
-                                    <UButton variant="link" class="w-fit text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
-                                        @click="showForgotPassword">
-                                        ¿Olvidaste tu contraseña?
-                                    </UButton>
-                                </div>
-
-                                <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Iniciar Sesión
-                                </UButton>
-                            </UForm>
-                        </div>
-                        <div class="mt-5 flex items-center justify-center">
-                            <p class="text-sm">No tienes Cuenta?</p>
-                            <UButton 
-                                variant="link" 
-                                @click="toggleForm"
-                                class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
-                            >
-                                Registrate Aqui
-                            </UButton>
-                        </div>
-                    </div>
+                    <RegisterLogIn
+                        v-if="isLogin && !isForgotPassword"
+                        @show-forgot-password="showForgotPassword"
+                        @toggle-form="toggleForm"
+                    />
 
                     <!-- Sign In Form Desktop -->
-                    <div v-else-if="!isLogin && !isForgotPassword"  
-                        class="form-container w-3/5 px-14 py-6 absolute top-0 right-0">
-                        <h2 class="text-2xl text-end font-semibold text-Pure-Black dark:text-White-w mb-6">REGISTRATE</h2>
-                        <div class="mb-6">
-                            <UForm :state="state2" class="flex flex-col gap-3" @submit="handleLogin">
-                                <UFormGroup label="Email" name="email">
-                                    <UInput size="sm" v-model="state2.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-
-                                <UFormGroup label="Contraseña" name="password">
-                                    <UInput size="sm" v-model="state2.password" type="password" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-
-                                <UFormGroup label="Verifica Contraseña" name="password">
-                                    <UInput size="sm" v-model="state2.secPasword" type="password" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-
-                                <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Crear Cuenta
-                                </UButton>
-                            </UForm>
-                        </div>
-                        <div class="mt-5 flex items-center justify-center">
-                            <p class="text-sm">Ya tienes cuenta?</p>
-                            <UButton 
-                                variant="link" 
-                                @click="toggleForm"
-                                class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
-                            >
-                                Inicia Sesión Aqui
-                            </UButton>
-                        </div>
-                    </div>
+                    <RegisterSignIn 
+                        v-else-if="!isLogin && !isForgotPassword"
+                        @toggle-form="toggleForm"
+                    />
 
                     <!-- Olvido Contraseña Desktop -->
-                    <div v-else-if="isForgotPassword"
-                        class="form-container w-full px-60 py-8 mt-[12.5%] absolute left-0 right-0" :class="{'faster-transition-out': isReturningFromForgot}">
-                        <h2 class="text-2xl font-semibold text-Pure-Black dark:text-White-w mb-8">RECUPERAR CONTRASEÑA</h2>
-                        <div class="mb-6">
-                            <UForm :state="forgotPasswordState" class="flex flex-col gap-3">
-                                <UFormGroup label="Email" name="email">
-                                    <UInput size="sm" v-model="forgotPasswordState.email" placeholder="ejemplo@correo.itm.edu.co"
-                                        class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
+                    <RegisterForgotPassword 
+                        v-else-if="isForgotPassword && !isOTPForm"
+                        :is-returning-from-forgot="isReturningFromForgot"
+                        @back-to-login="backToLogin"
+                        @show-o-t-p-form="showOTPForm"
+                    />
 
-                                <UButton class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Enviar Instrucciones
-                                </UButton>
-                            </UForm>
-                        </div>
-                        <div class="mt-5 flex items-center justify-center">
-                            <UButton variant="link" @click="backToLogin"
-                                class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w">
-                                Volver a Iniciar Sesión
-                            </UButton>
-                        </div>
-                    </div>
+                    <!-- OPT para olvidar contraseña -->
+                    <RegisterOTP 
+                        v-else-if="isForgotPassword && isOTPForm"
+                        :email="otpEmail"
+                        @back-to-forgot-password="backToForgotPassword"
+                    />
                 </transition>
             </div>
 
@@ -342,180 +173,36 @@
 
                 <transition name="fade" mode="out-in">
                     <!-- Login Form Mobile -->
-                    <div v-if="isLogin && !isForgotPassword" 
-                        class="px-6 py-8 min-h-[450px]">
-                        <h2 class="text-xl font-semibold text-Pure-Black dark:text-White-w mb-6 text-center">INICIAR SESION</h2>
-                        <div class="mb-6">
-                            <UForm :state="state" class="flex flex-col gap-3" @submit="handleLogin">
-                                <UFormGroup label="Email" name="email">
-                                    <UInput size="sm" v-model="state.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-    
-                                <UFormGroup label="Contraseña" name="password">
-                                    <UInput size="sm" v-model="state.password" type="password" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-    
-                                <div class="flex justify-end">
-                                    <UButton variant="link" class="w-fit text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
-                                        @click="showForgotPassword">
-                                        ¿Olvidaste tu contraseña?
-                                    </UButton>
-                                </div>
-    
-                                <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Iniciar Sesión
-                                </UButton>
-                            </UForm>
-                        </div>
-                        <div class="mt-5 flex items-center justify-center flex-wrap">
-                            <p class="text-sm">No tienes Cuenta?</p>
-                            <UButton 
-                                variant="link" 
-                                @click="toggleForm"
-                                class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
-                            >
-                                Registrate Aqui
-                            </UButton>
-                        </div>
-                    </div>
+                    <RegisterLogIn
+                        v-if="isLogin && !isForgotPassword"
+                        :is-mobile="true"
+                        @show-forgot-password="showForgotPassword"
+                        @toggle-form="toggleForm"
+                    />
     
                     <!-- Sign In Form Mobile -->
-                    <div v-else-if="!isLogin && !isForgotPassword"
-                        class="px-6 py-6 min-h-[450px]">
-                        <h2 class="text-xl font-semibold text-Pure-Black dark:text-White-w mb-6 text-center">REGISTRATE</h2>
-                        <div class="mb-6">
-                            <UForm :state="state2" class="flex flex-col gap-3" @submit="handleLogin">
-                                <UFormGroup label="Email" name="email">
-                                    <UInput size="sm" v-model="state2.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-    
-                                <UFormGroup label="Contraseña" name="password">
-                                    <UInput size="sm" v-model="state2.password" type="password" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-    
-                                <UFormGroup label="Verifica Contraseña" name="password">
-                                    <UInput size="sm" v-model="state2.secPasword" type="password" class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-    
-                                <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Crear Cuenta
-                                </UButton>
-                            </UForm>
-                        </div>
-                        <div class="mt-5 flex items-center justify-center flex-wrap">
-                            <p class="text-sm">Ya tienes cuenta?</p>
-                            <UButton 
-                                variant="link" 
-                                @click="toggleForm"
-                                class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
-                            >
-                                Inicia Sesión Aqui
-                            </UButton>
-                        </div>
-                    </div>
+                    <RegisterSignIn 
+                        v-else-if="!isLogin && !isForgotPassword"
+                        :is-mobile="true"
+                        @toggle-form="toggleForm"
+                    />
     
                     <!-- Olvido Contraseña Mobile -->
-                    <div v-else-if="isForgotPassword"
-                        class="px-6 py-8 min-h-[450px] flex flex-col justify-center"
-                        :class="{'faster-transition-out': isReturningFromForgot}">
-                        <h2 class="text-xl font-semibold text-Pure-Black dark:text-White-w mb-6 text-center">RECUPERAR CONTRASEÑA</h2>
-                        <div class="mb-6">
-                            <UForm :state="forgotPasswordState" class="flex flex-col gap-3">
-                                <UFormGroup label="Email" name="email">
-                                    <UInput size="sm" v-model="forgotPasswordState.email" placeholder="ejemplo@correo.itm.edu.co"
-                                        class="w-full"
-                                        :ui="{
-                                            icon: {
-                                                trailing: { pointer: '' }
-                                            },
-                                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                            color: {
-                                                gray: {
-                                                    outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                                }
-                                            }
-                                        }"
-                                        color="gray"
-                                    />
-                                </UFormGroup>
-    
-                                <UButton class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Enviar Instrucciones
-                                </UButton>
-                            </UForm>
-                        </div>
-                        <div class="mt-5 flex items-center justify-center">
-                            <UButton variant="link" @click="backToLogin"
-                                class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w">
-                                Volver a Iniciar Sesión
-                            </UButton>
-                        </div>
-                    </div>
+                    <RegisterForgotPassword 
+                        v-else-if="isForgotPassword && !isOTPForm"
+                        :is-mobile="true"
+                        :is-returning-from-forgot="isReturningFromForgot"
+                        @back-to-login="backToLogin"
+                        @show-o-t-p-form="showOTPForm"
+                    />
+
+                    <!-- OPT para olvidar contraseña -->
+                    <RegisterOTP 
+                        v-else-if="isForgotPassword && isOTPForm"
+                        :is-mobile="true"
+                        :email="otpEmail"
+                        @back-to-forgot-password="backToForgotPassword"
+                    />
                 </transition>
 
             </div>
@@ -579,11 +266,6 @@
         
         .animate-to-left {
             animation: toLeft 1s ease-in-out forwards;
-        }
-        
-        .form-container {
-            position: relative;
-            will-change: opacity;
         }
 
         /* Animaciones de LogIn a ForgotPassword */
