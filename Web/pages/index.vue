@@ -50,7 +50,7 @@
                 variant="ghost"
                 class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
               >
-                <UIcon name="fluent:book-32-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown" />
+                <UIcon name="fluent:book-16-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown" />
                 <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ course.nombre }}</h3>
               </UButton>
             </div>

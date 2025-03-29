@@ -7,7 +7,7 @@ const props = defineProps({
     email: String 
 });
 
-const emit = defineEmits(['backToForgotPassword']);
+const emit = defineEmits(['backToForgotPassword', 'showResetPassword']);
 
 const otpState = reactive({
     digit1: '',
@@ -20,8 +20,19 @@ const otpState = reactive({
 
 // Función para verificar el código OTP
 const verifyOTP = () => {
-    const code = `${otpState.digit1}${otpState.digit2}${otpState.digit3}${otpState.digit4}${otpState.digit5}${otpState.digit6}`;
-    console.log('Verificando código OTP:', code);
+    try{
+        if(otpState.digit1 && otpState.digit2 && otpState.digit3 && otpState.digit4 && otpState.digit5 && otpState.digit6)
+        {
+            const code = `${otpState.digit1}${otpState.digit2}${otpState.digit3}${otpState.digit4}${otpState.digit5}${otpState.digit6}`;
+            emit('showResetPassword');
+            console.log('Verificando código OTP:', code);
+        }
+        else{
+            console.log('No hay codigo');
+        }
+    }catch(error){
+        console.error('Error:', error);
+    }
 }
 
 // Función para manejar el cambio de input y pasar al siguiente

@@ -19,6 +19,7 @@ export interface Criterio {
 
 export interface Curso {
     id: string,
+    icon: string,
     nombre: string,
     docentes: Docente[],
     grupos: Grupo[]

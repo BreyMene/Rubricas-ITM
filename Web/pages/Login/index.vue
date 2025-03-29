@@ -9,6 +9,10 @@
     const isReturningFromForgot = ref(false);
     const isOTPForm = ref(false);
     const otpEmail = ref('');
+    const isResetPass = ref(false);
+
+    // Para hacer el backToLogin mas rapido en ResetPassword
+    const isLeavingFromReset = ref(false);
 
     const toggleForm = async () => {
         if (isAnimating.value) return;
@@ -17,6 +21,7 @@
         isForgotPassword.value = false;
         isReturningFromForgot.value = false;
         isOTPForm.value = false;
+        isResetPass.value = false;
 
         setTimeout(() => {
             isAnimating.value = false;
@@ -36,19 +41,25 @@
         }, 750);
     }
 
-    const backToLogin = () => {
+    const backToLogin = (fromReset = false) => {
         if (isAnimating.value) return;
         isAnimating.value = true;
         isReturningFromForgot.value = true;
         isOTPForm.value = false;
+        
+        if (fromReset) {
+            isLeavingFromReset.value = true;
+        }
 
         setTimeout(() => {
             isForgotPassword.value = false;
             isLogin.value = true;
+            isResetPass.value = false;
             
             setTimeout(() => {
                 isAnimating.value = false;
                 isReturningFromForgot.value = false;
+                isLeavingFromReset.value = false;
             }, 550);
         }, 350);
     }
@@ -58,6 +69,15 @@
         otpEmail.value = email;
         setTimeout(() => {
             isOTPForm.value = true;
+        }, 100);
+    }
+
+    const showResetPassword = () => {
+        if (isAnimating.value) return;
+
+        setTimeout(() => {
+            isOTPForm.value = false;
+            isResetPass.value = true;
         }, 100);
     }
 
@@ -128,7 +148,7 @@
                 </div>
 
                 <!-- Login Form Desktop -->
-                <transition name="fade" mode="out-in">
+                <transition name="fade" mode="out-in" :class="{ 'faster-transition-out': isLeavingFromReset }">
                     <RegisterLogIn
                         v-if="isLogin && !isForgotPassword"
                         @show-forgot-password="showForgotPassword"
@@ -143,7 +163,7 @@
 
                     <!-- Olvido Contraseña Desktop -->
                     <RegisterForgotPassword 
-                        v-else-if="isForgotPassword && !isOTPForm"
+                        v-else-if="isForgotPassword && !isOTPForm && !isResetPass"
                         :is-returning-from-forgot="isReturningFromForgot"
                         @back-to-login="backToLogin"
                         @show-o-t-p-form="showOTPForm"
@@ -151,9 +171,15 @@
 
                     <!-- OPT para olvidar contraseña -->
                     <RegisterOTP 
-                        v-else-if="isForgotPassword && isOTPForm"
+                        v-else-if="isForgotPassword && isOTPForm && !isResetPass"
                         :email="otpEmail"
                         @back-to-forgot-password="backToForgotPassword"
+                        @show-reset-password = 'showResetPassword'
+                    />
+
+                    <RegisterResetPassword 
+                        v-else-if="isForgotPassword && !isOTPForm && isResetPass"
+                        @back-to-login="backToLogin"
                     />
                 </transition>
             </div>
@@ -189,7 +215,7 @@
     
                     <!-- Olvido Contraseña Mobile -->
                     <RegisterForgotPassword 
-                        v-else-if="isForgotPassword && !isOTPForm"
+                        v-else-if="isForgotPassword && !isOTPForm && !isResetPass"
                         :is-mobile="true"
                         :is-returning-from-forgot="isReturningFromForgot"
                         @back-to-login="backToLogin"
@@ -198,10 +224,17 @@
 
                     <!-- OPT para olvidar contraseña -->
                     <RegisterOTP 
-                        v-else-if="isForgotPassword && isOTPForm"
+                        v-else-if="isForgotPassword && isOTPForm && !isResetPass"
                         :is-mobile="true"
                         :email="otpEmail"
                         @back-to-forgot-password="backToForgotPassword"
+                        @show-reset-password = 'showResetPassword'
+                    />
+
+                    <RegisterResetPassword 
+                        v-else-if="isForgotPassword && !isOTPForm && isResetPass"
+                        :is-mobile="true"
+                        @back-to-login="backToLogin"
                     />
                 </transition>
 
