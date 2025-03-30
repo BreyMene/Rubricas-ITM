@@ -8,8 +8,29 @@
   const courseName = ref('');
 
   const selectedIcon = ref('fluent:image-32-regular');
-  const isIconSelectorOpen = ref(false);
   const hasSelectedCustomIcon = ref(false); // Track if user has selected a custom icon
+
+  // Button ref for popover placement
+  const iconButtonRef = ref(null);
+
+  // Popover state
+  const isPopoverOpen = ref(false);
+
+  // TO CHECK IF THE POPOVER IS ON MOBILE
+    const isMobile = ref(false)
+    const checkScreenSize = () => {
+      isMobile.value = window.innerWidth < 768
+    }
+
+    // Watch for screen resizes
+    onMounted(() => {
+      checkScreenSize() // Check on initial load
+      window.addEventListener('resize', checkScreenSize)
+    })
+
+    onBeforeUnmount(() => {
+      window.removeEventListener('resize', checkScreenSize)
+    })
 
   const addCourse = () => {
     if (courseName.value === "") return;
@@ -30,7 +51,7 @@
   const selectIcon = (icon: string) => {
     selectedIcon.value = icon;
     hasSelectedCustomIcon.value = true;
-    isIconSelectorOpen.value = false;
+    isPopoverOpen.value = false;
   };
 </script>
 
@@ -66,20 +87,44 @@
           <div class="flex flex-col md:flex-row gap-9">
             <div class="md:w-2/5 space-y-7">
 
-              <!-- Icon Selection Button -->
-              <UButton
-                class="mx-auto w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-dashed border-Light-Gray dark:border-Light-Gray/30 hover:bg-Medium-Blue/20 dark:hover:bg-Light-Gray/25 flex items-center justify-center hover:border-Purple-P dark:hover:border-Muted-Brown"
-                variant="ghost"
-                @click="isIconSelectorOpen = true"
-              >
-                <UIcon 
-                  :name="selectedIcon" 
-                  class="text-5xl" 
-                  :class="[hasSelectedCustomIcon ? 'text-Purple-P dark:text-Muted-Brown' : 'text-gray-400 dark:text-Light-Gray']"
-                />
-                <span class="sr-only">Select course icon</span>
-              </UButton>
-
+              <!-- Icon Selection Button with UPopover -->
+              <div class="flex justify-center">
+                <UPopover v-model="isPopoverOpen" overlay :popper="{ placement: isMobile ? 'bottom' : 'auto-end' }" >
+                  <UButton
+                    ref="iconButtonRef"
+                    class="mx-auto w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-dashed border-Light-Gray dark:border-Light-Gray/30 hover:bg-Medium-Blue/20 dark:hover:bg-Light-Gray/25 flex items-center justify-center hover:border-Purple-P dark:hover:border-Muted-Brown"
+                    variant="ghost"
+                  >
+                    <UIcon 
+                      :name="selectedIcon" 
+                      class="text-5xl" 
+                      :class="[hasSelectedCustomIcon ? 'text-Purple-P dark:text-Muted-Brown' : 'text-gray-400 dark:text-Light-Gray']"
+                    />
+                    <span class="sr-only">Select course icon</span>
+                  </UButton>
+                  
+                  <template #panel="{ close }">
+                    <div class="p-4 bg-white dark:bg-Medium-Dark rounded-lg shadow-lg">
+                      <div class="flex justify-between mb-4">
+                        <h3 class="text-base font-semibold dark:text-white">Seleccionar icono</h3>
+                        <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-m-1 p-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="close" />
+                      </div>
+                      
+                      <div class="max-h-[300px] overflow-y-auto grid grid-cols-4 sm:grid-cols-6 gap-4">
+                        <UButton
+                          v-for="icon in iconOptions"
+                          :key="icon"
+                          variant="ghost"
+                          class="p-4 h-14 w-14 rounded-lg flex items-center justify-center hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+                          @click="selectIcon(icon)"
+                        >
+                          <UIcon :name="icon" class="text-2xl text-gray-700 dark:text-Light-Gray" />
+                        </UButton>
+                      </div>
+                    </div>
+                  </template>
+                </UPopover>
+              </div>
 
               <!-- Left Side - Two Inputs -->
               <UFormGroup label="Nombre del curso" required>
@@ -147,41 +192,5 @@
 
       </UCard>
     </UModal>
-
-    <!-- Icon Selector Modal -->
-    <UModal v-model="isIconSelectorOpen" :ui="{
-        width: 'w-full sm:max-w-lg',
-        height: 'max-h-[500px]', 
-        container: 'flex items-center justify-center',
-        overlay: {background: 'dark:bg-Light-Gray/15'}
-      }">
-      <UCard :ui="{
-          background: 'dark:bg-Medium-Dark',
-          header: { base: 'border-b border-Purple-P dark:border-Dark-Grey'},
-          base: 'w-full',
-        }">
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Seleccionar icono
-            </h3>
-            <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="isIconSelectorOpen = false" />
-          </div>
-        </template>
-        
-        <div class="max-h-[400px] overflow-y-auto grid grid-cols-4 sm:grid-cols-6 gap-4 p-2">
-          <UButton
-            v-for="icon in iconOptions"
-            :key="icon"
-            variant="ghost"
-            class="p-4 h-16 w-16 rounded-lg flex items-center justify-center hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
-            @click="selectIcon(icon)"
-          >
-            <UIcon :name="icon" class="text-2xl text-gray-700 dark:text-Light-Gray" />
-          </UButton>
-        </div>
-      </UCard>
-    </UModal>
   </div>
 </template>
-
