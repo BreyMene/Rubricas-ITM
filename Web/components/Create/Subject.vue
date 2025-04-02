@@ -7,7 +7,10 @@
 
   const courseName = ref('');
 
-  const selectedIcon = ref('fluent:image-32-regular');
+  // For display purposes only
+  const displayIcon = ref('fluent:image-32-regular');
+  // This will be the actual icon used when creating a course
+  const selectedIcon = ref('fluent:book-16-regular');
   const hasSelectedCustomIcon = ref(false); // Track if user has selected a custom icon
 
   // Button ref for popover placement
@@ -35,10 +38,13 @@
   const addCourse = () => {
     if (courseName.value === "") return;
 
+    // Use the selected icon or the default if user didn't select one
+    const iconToUse = hasSelectedCustomIcon.value ? selectedIcon.value : 'fluent:book-16-regular';
+
     // Luego corregir el id, si se pone vacio da error
     const c: Curso = {
       id: "a", 
-      icon: selectedIcon.value,
+      icon: iconToUse,
       nombre: courseName.value,
       docentes: [], 
       grupos: []
@@ -49,10 +55,22 @@
   };
 
   const selectIcon = (icon: string) => {
+    displayIcon.value = icon;
     selectedIcon.value = icon;
     hasSelectedCustomIcon.value = true;
     isPopoverOpen.value = false;
   };
+
+  // Add a watch to reset the icon when the modal is closed
+  watch(isOpen, (newValue) => {
+    if (!newValue) {
+      // Add a delay before resetting the icon
+      setTimeout(() => {
+        displayIcon.value = 'fluent:image-32-regular'; // Reset display to placeholder
+        hasSelectedCustomIcon.value = false; // Reset custom icon flag
+      }, 300);
+    }
+  });
 </script>
 
 <template>
@@ -96,7 +114,7 @@
                     variant="ghost"
                   >
                     <UIcon 
-                      :name="selectedIcon" 
+                      :name="displayIcon" 
                       class="text-5xl" 
                       :class="[hasSelectedCustomIcon ? 'text-Purple-P dark:text-Muted-Brown' : 'text-gray-400 dark:text-Light-Gray']"
                     />
