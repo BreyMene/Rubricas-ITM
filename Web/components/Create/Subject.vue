@@ -107,7 +107,7 @@
 
               <!-- Icon Selection Button with UPopover -->
               <div class="flex justify-center">
-                <UPopover v-model="isPopoverOpen" overlay :popper="{ placement: isMobile ? 'bottom' : 'auto-end' }" >
+                <UPopover v-model="isPopoverOpen" overlay :popper="{ placement: isMobile ? 'bottom' : 'auto-end' }" :ui="{ring: 'ring-0', overlay: {background: 'dark:bg-Light-Gray/15',}}" >
                   <UButton
                     ref="iconButtonRef"
                     class="mx-auto w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-dashed border-Light-Gray dark:border-Light-Gray/30 hover:bg-Medium-Blue/20 dark:hover:bg-Light-Gray/25 flex items-center justify-center hover:border-Purple-P dark:hover:border-Muted-Brown"
