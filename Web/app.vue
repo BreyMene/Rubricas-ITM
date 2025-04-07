@@ -1,7 +1,7 @@
 <template>
   <div class="font-Zain list-none">
     <NuxtLayout >
-      <div class="mx-auto w-[90%]">
+      <div class="mx-auto w-[90%] sm:w-full">
         <NuxtPage />
       </div>
     </NuxtLayout>
