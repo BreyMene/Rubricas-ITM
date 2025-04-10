@@ -173,6 +173,7 @@
                     <RegisterOTP 
                         v-else-if="isForgotPassword && isOTPForm && !isResetPass"
                         :email="otpEmail"
+                        :otpLength="6"
                         @back-to-forgot-password="backToForgotPassword"
                         @show-reset-password = 'showResetPassword'
                     />
@@ -227,6 +228,7 @@
                         v-else-if="isForgotPassword && isOTPForm && !isResetPass"
                         :is-mobile="true"
                         :email="otpEmail"
+                        :otpLength="6"
                         @back-to-forgot-password="backToForgotPassword"
                         @show-reset-password = 'showResetPassword'
                     />
