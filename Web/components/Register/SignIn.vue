@@ -18,6 +18,21 @@
         try {
             console.log('Sign-in data:', state);
             // Add your sign in logic here
+            if (state.email == ""){
+                return
+            }
+            if (state.password == "" || state.secPasword == ""){
+                return
+            }
+            if (state.password != state.secPasword) {
+                return
+            }
+
+            const docente: Docente = {
+                email: state.email
+            }
+            useDocenteStore().setDocente(docente)
+            await navigateTo("/")
         } catch (error) {
             console.error('Error:', error);
         }
@@ -75,7 +90,7 @@
                             }
                         }"
                         color="gray"
-                    >   
+                    >
                         <template #trailing>
                             <UButton
                                 color="gray"
@@ -131,8 +146,8 @@
             isMobile ? 'flex-wrap' : ''
         ]">
             <p class="text-sm">Ya tienes cuenta?</p>
-            <UButton 
-                variant="link" 
+            <UButton
+                variant="link"
                 @click="toggleForm"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >

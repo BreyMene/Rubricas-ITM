@@ -1,8 +1,9 @@
 <script setup lang="ts">
+    const useDocente = useDocenteStore();
     const items = [
         [
             {
-                label: 'example@gmail.com',
+                label: useDocente.getEmail,
                 slot: 'account',
                 disabled: true
             }],
@@ -12,7 +13,11 @@
             }],
             [{
                 label: 'Cerrar Sesion',
-                icon: 'ph:sign-out-bold'
+                icon: 'ph:sign-out-bold',
+                click: async() => {
+                    useDocente.logout()
+                    await navigateTo("/login")
+                }
             }
         ]
     ]
@@ -22,7 +27,7 @@
     <UDropdown
         :items="items"  class="select-none"
         :ui="{
-            width: 'w-40',
+            width: 'w-fit',
             transition: {
                 enterActiveClass: 'transition-all duration-200 ease-out', //time it takes to come out
               enterFromClass: 'transform scale-0 opacity-90 origin-top-right', //scale from 90 to 100, creating the magnification effect

@@ -3,8 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
 
   devtools: { enabled: true },
-  
-  modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/ui'],
+
+  modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/ui', '@pinia/nuxt'],
 
   colorMode: {
     preference: 'system', // default theme

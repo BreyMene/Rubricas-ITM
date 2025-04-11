@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    import { useDocenteStore } from '~/utils/store';
+
     const props = defineProps({
         isMobile: {
             type: Boolean,
@@ -17,6 +19,15 @@
         try {
             console.log('Login data:', state);
             // Add your login logic here
+            if (state.email == "" || state.password == ""){
+                return
+            }
+
+            const docente: Docente = {
+                email: state.email
+            }
+            useDocenteStore().setDocente(docente)
+            await navigateTo("/")
         } catch (error) {
             console.error('Error:', error);
         }
@@ -109,8 +120,8 @@
             isMobile ? 'flex-wrap' : ''
         ]">
             <p class="text-sm">No tienes Cuenta?</p>
-            <UButton 
-                variant="link" 
+            <UButton
+                variant="link"
                 @click="toggleForm"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >
