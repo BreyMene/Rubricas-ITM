@@ -95,26 +95,29 @@
     }
 
     // Handle paste functionality
-    const handlePaste = (event: ClipboardEvent) => {
+    const handlePaste = (event: ClipboardEvent, index: number) => {
         event.preventDefault();
         const pastedText = event.clipboardData?.getData('text').trim();
         
-        // Only process if pasted text length matches OTP length
-        if (pastedText?.length === props.length) {
-            // Fill all digits with pasted characters
-            for (let i = 0; i < props.length; i++) {
-                otpDigits.value[i] = pastedText[i] || '';
-            }
-            
-            // Focus the last input after pasting
-            const target = event.target as HTMLElement;
-            const isMobile = target.id.includes('mobile-');
-            const lastInputId = isMobile ? `mobile-digit${props.length}` : `desktop-digit${props.length}`;
-            const lastInput = document.getElementById(lastInputId);
-            
-            if (lastInput) {
-                lastInput.focus();
-            }
+        if (!pastedText) return;
+        
+        // Extract only digits from pasted text
+        const digits = pastedText.replace(/\D/g, '');
+        
+        // Update inputs starting from the current index
+        for (let i = 0; i < digits.length && (index + i) < props.length; i++) {
+            otpDigits.value[index + i] = digits[i];
+        }
+        
+        // Focus the appropriate input after pasting
+        const focusIndex = Math.min(index + digits.length, props.length - 1);
+        const target = event.target as HTMLElement;
+        const isMobile = target.id.includes('mobile-');
+        const nextInputId = isMobile ? `mobile-digit${focusIndex + 1}` : `desktop-digit${focusIndex + 1}`;
+        const nextInput = document.getElementById(nextInputId);
+        
+        if (nextInput) {
+            nextInput.focus();
         }
     }
 
@@ -139,7 +142,6 @@
                 autoComplete="off"
                 :id="props.isMobile ? `mobile-digit${index + 1}` : `desktop-digit${index + 1}`"
                 :size="props.isMobile ? 'md' : 'lg'" 
-                type="tel" 
                 maxlength="1"
                 inputmode="numeric"
                 :class="[
@@ -164,7 +166,7 @@
                 @input="handleOtpInput($event, index)"
                 @keypress="handleKeyPress($event)"
                 @keydown="handleKeyDown($event, index)"
-                @paste="index === 0 ? handlePaste($event) : null"
+                @paste="handlePaste($event, index)"
             />
         </template>
     </div>

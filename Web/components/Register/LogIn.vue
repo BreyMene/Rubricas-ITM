@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import { useDocenteStore } from '~/utils/store';
+    import type { FormError, FormSubmitEvent } from '#ui/types';    
 
     const props = defineProps({
         isMobile: {
@@ -15,17 +16,55 @@
         password: ''
     });
 
-    const handleLogin = async () => {
+    // To display as a hint, instead of dsiplaying the base error
+    const emailError = ref('');
+    const passwordError = ref('');
+
+    const validate = (state: any): FormError[] => {
+        const errors = [];
+        
+        emailError.value = '';
+        passwordError.value = '';
+
+        // Email validation
+        if (!state.email) {
+            errors.push({ path: 'email', message: ' ' });
+        } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(state.email)) {
+            const message = 'Email inválido';
+            if(!props.isMobile){
+                errors.push({ path: 'email', message: ' ' });
+                emailError.value = message;
+            }else{
+                errors.push({ path: 'email', message });
+                emailError.value = '';
+            }
+        } else if (!state.email.endsWith('@correo.itm.edu.co')) {
+            const message = 'Debe usar un correo institucional';
+            if(!props.isMobile){
+                errors.push({ path: 'email', message: ' ' });
+                emailError.value = message;
+            }else{
+                errors.push({ path: 'email', message });
+                emailError.value = '';
+            }
+        }
+        
+        // Password validation
+        if (!state.password) {
+            errors.push({ path: 'password', message: ' ' });
+        }
+        
+        return errors;
+    };
+
+    const handleLogin = async (event: FormSubmitEvent<any>) => {
         try {
             console.log('Login data:', state);
-            // Add your login logic here
-            if (state.email == "" || state.password == ""){
-                return
-            }
 
             const docente: Docente = {
                 email: state.email
             }
+
             useDocenteStore().setDocente(docente)
             await navigateTo("/")
         } catch (error) {
@@ -55,8 +94,11 @@
             INICIAR SESION
         </h2>
         <div class="mb-6">
-            <UForm :state="state" class="flex flex-col gap-3" @submit="handleLogin">
-                <UFormGroup label="Email" name="email">
+            <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleLogin">
+                <UFormGroup label="Email" name="email" :hint="emailError"
+                    :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
+                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden' 
+                    }" >
                     <UInput size="sm" v-model="state.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
                         :ui="{
                             icon: {
@@ -73,7 +115,10 @@
                     />
                 </UFormGroup>
 
-                <UFormGroup label="Contraseña" name="password">
+                <UFormGroup label="Contraseña" name="password" :hint="passwordError"
+                    :ui="{  hint: 'text-red-500 dark:text-red-500',
+                        error: isMobile ? '' : 'hidden' 
+                    }">
                     <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
                         :ui="{
                             icon: {
