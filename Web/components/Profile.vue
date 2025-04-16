@@ -3,7 +3,7 @@
     const items = [
         [
             {
-                label: useDocente.getEmail,
+                label: useDocente.getCorreo,
                 slot: 'account',
                 disabled: true
             }],

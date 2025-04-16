@@ -13,8 +13,8 @@ export const useDocenteStore = defineStore('docente', {
   },
 
   getters: {
-    getEmail: (state): string => {
-        return state.docente?.email ?? ""
+    getCorreo: (state): string => {
+        return state.docente?.correo ?? ""
     }
   }
 })

@@ -34,10 +34,10 @@ export interface Grupo {
 
 export interface Estudiante {
     nombre: string,
-    email: string,
+    correo: string,
     promedio: number
 }
 
 export interface Docente {
-    email: string
+    correo: string
 }

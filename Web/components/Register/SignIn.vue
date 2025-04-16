@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import type { FormError, FormSubmitEvent } from '#ui/types';    
+    import type { FormError, FormSubmitEvent } from '#ui/types';
 
     const props = defineProps({
         isMobile: {
@@ -23,7 +23,7 @@
 
     const validate = (state: any): FormError[] => {
         const errors = [];
-        
+
         emailError.value = '';
         passwordError.value = '';
         secPasswordError.value = '';
@@ -50,7 +50,7 @@
                 emailError.value = '';
             }
         }
-        
+
         // Password validation
         if (!state.password) {
             errors.push({ path: 'password', message: ' ' });
@@ -64,7 +64,7 @@
                 passwordError.value = '';
             }
         }
-        
+
         // Second password validation
         if (!state.secPasword) {
             errors.push({ path: 'secPasword', message: ' ' });
@@ -78,7 +78,7 @@
                 secPasswordError.value = '';
             }
         }
-        
+
         return errors;
     };
 
@@ -86,9 +86,14 @@
         try {
             console.log('Sign-in data:', state);
 
-            const docente: Docente = {
-                email: state.email
-            }
+            const docente: Docente = await $fetch("http://localhost:8000/register", {
+                method: 'POST',
+                body: {
+                    correo: state.email,
+                    contraseña: state.password,
+                }
+            })
+
             useDocenteStore().setDocente(docente)
             await navigateTo("/")
         } catch (error) {
@@ -119,7 +124,7 @@
             <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleSignIn">
                 <UFormGroup label="Email" name="email" :hint="emailError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
-                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden' 
+                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
                     <UInput size="sm" v-model="state.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
                         :ui="{
@@ -139,7 +144,7 @@
 
                 <UFormGroup label="Contraseña" name="password" :hint="passwordError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
-                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden' 
+                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
                     <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
                         :ui="{
@@ -172,7 +177,7 @@
 
                 <UFormGroup label="Verifica Contraseña" name="secPasword" :hint="secPasswordError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
-                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden' 
+                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
                     <UInput size="sm" v-model="state.secPasword" :type="show2 ? 'text' : 'password'" class="w-full"
                         :ui="{
