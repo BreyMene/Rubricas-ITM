@@ -16,4 +16,3 @@ export default defineNuxtConfig({
     host: '0.0.0.0'
   },
 })
-  
