@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { useDocenteStore } from '~/utils/store';
-    import type { FormError, FormSubmitEvent } from '#ui/types';
+    import type { FormSubmitEvent } from '#ui/types';
 
     const props = defineProps({
         isMobile: {
@@ -20,42 +20,9 @@
     const emailError = ref('');
     const passwordError = ref('');
 
-    const validate = (state: any): FormError[] => {
-        const errors = [];
-
-        emailError.value = '';
-        passwordError.value = '';
-
-        // Email validation
-        if (!state.email) {
-            errors.push({ path: 'email', message: ' ' });
-        } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(state.email)) {
-            const message = 'Email inválido';
-            if(!props.isMobile){
-                errors.push({ path: 'email', message: ' ' });
-                emailError.value = message;
-            }else{
-                errors.push({ path: 'email', message });
-                emailError.value = '';
-            }
-        } else if (!state.email.endsWith('@correo.itm.edu.co')) {
-            const message = 'Debe usar un correo institucional';
-            if(!props.isMobile){
-                errors.push({ path: 'email', message: ' ' });
-                emailError.value = message;
-            }else{
-                errors.push({ path: 'email', message });
-                emailError.value = '';
-            }
-        }
-
-        // Password validation
-        if (!state.password) {
-            errors.push({ path: 'password', message: ' ' });
-        }
-
-        return errors;
-    };
+    const validate = createFormValidator(emailError, passwordError, undefined, {
+        isMobile: props.isMobile
+    });
 
     const handleLogin = async (event: FormSubmitEvent<any>) => {
         try {

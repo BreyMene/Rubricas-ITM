@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import type { FormError, FormSubmitEvent } from '#ui/types';
+    import type { FormSubmitEvent } from '#ui/types';
 
     const props = defineProps({
         isMobile: {
@@ -21,66 +21,10 @@
     const passwordError = ref('');
     const secPasswordError = ref('');
 
-    const validate = (state: any): FormError[] => {
-        const errors = [];
-
-        emailError.value = '';
-        passwordError.value = '';
-        secPasswordError.value = '';
-
-        // Email validation
-        if (!state.email) {
-            errors.push({ path: 'email', message: ' ' });
-        } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(state.email)) {
-            const message = 'Email inválido';
-            if(!props.isMobile){
-                errors.push({ path: 'email', message: ' ' });
-                emailError.value = message;
-            }else{
-                errors.push({ path: 'email', message });
-                emailError.value = '';
-            }
-        } else if (!state.email.endsWith('@correo.itm.edu.co')) {
-            const message = 'Debe usar un correo institucional';
-            if(!props.isMobile){
-                errors.push({ path: 'email', message: ' ' });
-                emailError.value = message;
-            }else{
-                errors.push({ path: 'email', message });
-                emailError.value = '';
-            }
-        }
-
-        // Password validation
-        if (!state.password) {
-            errors.push({ path: 'password', message: ' ' });
-        } else if (state.password.length < 6) {
-            const message = 'Minimo 6 caracteres';
-            if(!props.isMobile){
-                errors.push({ path: 'password', message: ' ' });
-                passwordError.value = message;
-            }else{
-                errors.push({ path: 'password', message });
-                passwordError.value = '';
-            }
-        }
-
-        // Second password validation
-        if (!state.secPasword) {
-            errors.push({ path: 'secPasword', message: ' ' });
-        } else if (state.password !== state.secPasword) {
-            const message = 'Las contraseñas no coinciden';
-            if(!props.isMobile){
-                errors.push({ path: 'secPasword', message: ' ' });
-                secPasswordError.value = message;
-            }else{
-                errors.push({ path: 'secPasword', message });
-                secPasswordError.value = '';
-            }
-        }
-
-        return errors;
-    };
+    const validate = createFormValidator(emailError, passwordError, secPasswordError, {
+        isMobile: props.isMobile,
+        minPasswordLength: 6
+    });
 
     const handleSignIn = async (event: FormSubmitEvent<any>) => {
         try {
