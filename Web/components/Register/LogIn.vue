@@ -19,12 +19,15 @@
     // To display as a hint, instead of dsiplaying the base error
     const emailError = ref('');
     const passwordError = ref('');
+    const formError = ref('');
 
     const validate = createFormValidator(emailError, passwordError, undefined, {
         isMobile: props.isMobile
     });
 
     const handleLogin = async (event: FormSubmitEvent<any>) => {
+        formError.value = '';
+
         try {
             console.log('Login data:', state);
 
@@ -39,7 +42,8 @@
             useDocenteStore().setDocente(docente)
             await navigateTo("/")
         } catch (error) {
-            console.error('Error:', error);
+            formError.value = 'Credenciales incorrectas';
+            emailError.value = props.isMobile ? '': formError.value;
         }
     }
 
@@ -66,7 +70,7 @@
         </h2>
         <div class="mb-6">
             <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleLogin">
-                <UFormGroup label="Email" name="email" :hint="emailError"
+                <UFormGroup label="Email" name="email" :hint="emailError" :error="formError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }" >
@@ -86,9 +90,9 @@
                     />
                 </UFormGroup>
 
-                <UFormGroup label="Contraseña" name="password" :hint="passwordError"
+                <UFormGroup label="Contraseña" name="password" :hint="passwordError" :error="formError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500',
-                        error: isMobile ? '' : 'hidden'
+                        error: 'hidden'
                     }">
                     <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
                         :ui="{
