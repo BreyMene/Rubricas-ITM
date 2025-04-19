@@ -8,7 +8,7 @@
 
     // Luego corregir el id, si se pone vacio da error
     const g: Grupo = {
-      id: "a",
+      _id: "a",
       nombre: groupName.value,
       manager: "",
       estudiantes: []
@@ -121,7 +121,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes" :hideFinalNote="true"/>
+              <UtilitiesPeopleTable view="docentes" :hideFinalNote="true" :data="[]"/>
             </div>
           </div>
 

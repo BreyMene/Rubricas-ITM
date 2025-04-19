@@ -152,10 +152,10 @@
                         >
                             <UButton
                             v-for="group in filteredGroups"
-                            :key="group.id"
+                            :key="group._id"
                             variant="ghost"
                             class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-                            @click="$router.push(`/Curso/${courseId}/Grupo/${group.id}`)"
+                            @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
                             >
                                 <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.nombre }}</h3>
                                 <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
@@ -165,7 +165,7 @@
 
                     <!-- Teachers Table -->
                     <div v-else :key="'teachers'">
-                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm"/>
+                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm" :data="[]"/>
                     </div>
                 </transition>
             </div>

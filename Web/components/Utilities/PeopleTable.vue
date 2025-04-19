@@ -1,49 +1,20 @@
 <script setup lang="ts">
-
-    // Props
     const props = defineProps<{
         view: "docentes" | "estudiantes";
         hideFinalNote?: boolean;
         searchTerm?: string;
+        data: DocenteEnCurso[] | Estudiante[]
     }>();
-
-    // Teachers data
-    const teachers = ref<Docente[]>([
-        {
-            _id: '',
-            correo: 'ejemplo@correo.itm.edu.co'
-        },
-        {
-            _id: '',
-            correo: 'ejemplo1@correo.itm.edu.co'
-        }
-    ]);
-    // Students data
-    const students = ref<Estudiante[]>([
-        {
-            nombre: 'Pepito Perez',
-            correo: 'pepitoperez1245@correo.itm.edu.co',
-            promedio: 3.8
-        },{
-            nombre: 'Vanesa Van',
-            correo: 'vanesavan8456@correo.itm.edu.co',
-            promedio: 4.0
-        },{
-            nombre: 'Yo apellido segundoapellido',
-            correo: 'yoapellido1236@correo.itm.edu.co',
-            promedio: 4.1
-        }
-    ]);
 
     // Change columns depends of the view
     const columns = computed(() => {
         if (props.view === "docentes") {
-            return [{ key: "email", label: "Email" }, { key: "actions" }];
+            return [{ key: "correo", label: "Correo" }, { key: "actions" }];
         }
         
         const studentColumns = [
             { key: "nombre", label: "Nombre" },
-            { key: "email", label: "Email" },
+            { key: "correo", label: "Correo" },
             { key: "actions" }
         ];
         
@@ -54,38 +25,39 @@
         return studentColumns;
     });
 
-    // Get data depends of the view
-    const people = computed(() =>
-        props.view === "docentes" ? teachers.value : students.value
-    );
-
     // Auxiliary Functions
     interface TableRow {
-        email: string;
+        correo: string;
     }
 
     // Función para eliminar un usuario
-    const deleteUser = (email: string) => {
-        if (props.view === "docentes") {
-            teachers.value = teachers.value.filter((t) => t.correo !== email);
-        } else {
-            students.value = students.value.filter((s) => s.correo !== email);
-        }
+    const emits = defineEmits(['delete-user']);
+
+    const deleteUser = (correo: string) => {
+        emits('delete-user', correo);
     };
 
     const items = (row: TableRow) => [
-        [{ label: 'Editar', icon: 'fluent:compose-12-filled'}],
-        [{ label: 'Eliminar', icon: 'fluent:delete-12-regular', click: () => deleteUser(row.email)}]
+        [
+            { label: 'Editar', icon: 'fluent:compose-12-filled'}
+        ],
+        [
+            {
+                label: 'Eliminar',
+                icon: 'fluent:delete-12-regular',
+                click: () => deleteUser(row.correo)
+            }
+        ]
     ];
 
     // Filtered people with proper type checking
     const filteredPeople = computed(() => {
-        if (!props.searchTerm) return people.value;
+        if (!props.searchTerm) return props.data;
         
         const searchLower = props.searchTerm.toLowerCase();
-        return people.value.filter(person => {
+        return props.data.filter(person => {
             if (props.view === "docentes") {
-                return person.correo.toLowerCase().includes(searchLower);
+                return (person as DocenteEnCurso).correo.toLowerCase().includes(searchLower);
             } else {
                 // Type guard to ensure we're working with a Student
                 const studentPerson = person as Estudiante;
@@ -104,7 +76,7 @@
         return filteredPeople.value.slice((page.value - 1) * pageCount, page.value * pageCount);
     });
 
-const totalItems = computed(() => filteredPeople.value.length);
+    const totalItems = computed(() => filteredPeople.value.length);
 </script>
 
 <template>
@@ -176,7 +148,7 @@ const totalItems = computed(() => filteredPeople.value.length);
         }"
         >
             <template #prev="{ onClick, canGoPrev }">
-                <UTooltip text="Pagina Anterior">
+                <UTooltip>
                     <UButton
                         icon="fluent:caret-left-16-filled"
                         :ui="{ rounded: 'rounded-full' }"
@@ -188,7 +160,7 @@ const totalItems = computed(() => filteredPeople.value.length);
             </template>
 
             <template #next="{ onClick, canGoNext }">
-                <UTooltip text="Siguiente Pagina">
+                <UTooltip>
                     <UButton
                         icon="fluent:caret-right-16-filled"
                         :ui="{ rounded: 'rounded-full'}"

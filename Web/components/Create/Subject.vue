@@ -1,123 +1,182 @@
 <script setup lang="ts">
-import type { iconOptions } from "~/utils/iconList";
-import { useDocenteStore } from "~/utils/store";
+  import type { iconOptions } from "~/utils/iconList";
+  import { useDocenteStore } from "~/utils/store";
 
-const isOpen = ref(false);
-const empty = ref("");
-const emit = defineEmits(["addCourse"]);
+  const isOpen = ref(false);
+  const emit = defineEmits(["addCourse"]);
 
-const courseName = ref("");
-const courseNameError = ref("");
+  const docenteInput = ref("");
+  const docenteList = ref<DocenteEnCurso[]>([])
+  const docenteInputError = ref("");
+  const isDocenteInputValid = ref(true);
 
-// For display purposes only
-const displayIcon = ref("fluent:image-32-regular");
-// This will be the actual icon used when creating a course
-const selectedIcon = ref("fluent:book-16-regular");
-const hasSelectedCustomIcon = ref(false); // Track if user has selected a custom icon
+  const courseName = ref("");
+  const courseNameError = ref("");
 
-// Button ref for popover placement
-const iconButtonRef = ref(null);
+  // For display purposes only
+  const displayIcon = ref("fluent:image-32-regular");
+  // This will be the actual icon used when creating a course
+  const selectedIcon = ref("fluent:book-16-regular");
+  const hasSelectedCustomIcon = ref(false); // Track if user has selected a custom icon
 
-// Popover state
-const isPopoverOpen = ref(false);
+  // Button ref for popover placement
+  const iconButtonRef = ref(null);
 
-// TO CHECK IF THE POPOVER IS ON MOBILE
-const isMobile = ref(false);
-const checkScreenSize = () => {
-  isMobile.value = window.innerWidth < 768;
-};
+  // Popover state
+  const isPopoverOpen = ref(false);
 
-// Watch for screen resizes
-onMounted(() => {
-  checkScreenSize(); // Check on initial load
-  window.addEventListener("resize", checkScreenSize);
-});
+  // TO CHECK IF THE POPOVER IS ON MOBILE
+  const isMobile = ref(false);
+  const checkScreenSize = () => {
+    isMobile.value = window.innerWidth < 768;
+  };
 
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", checkScreenSize);
-});
+  // Watch for screen resizes
+  onMounted(() => {
+    checkScreenSize(); // Check on initial load
+    window.addEventListener("resize", checkScreenSize);
+  });
 
-const validateCourseName = () => {
-  // Reset error
-  courseNameError.value = "";
-  
-  // Check if course name is empty
-  if (courseName.value.trim() === "") {
-    courseNameError.value = "El nombre del curso es obligatorio";
-    return false;
-  }
-  
-  return true;
-};
+  onBeforeUnmount(() => {
+    window.removeEventListener("resize", checkScreenSize);
+  });
 
-const addCourse = async () => {
-  if (!validateCourseName()) {
-    return;
-  }
+  const validateCourseName = () => {
+    // Reset error
+    courseNameError.value = "";
+    
+    // Check if course name is empty
+    if (courseName.value.trim() === "") {
+      courseNameError.value = "Se requiere un nombre";
+      return false;
+    }
+    
+    return true;
+  };
 
-  try {
-
-    // Use the selected icon or the default if user didn't select one
-    const iconToUse = hasSelectedCustomIcon.value
-      ? selectedIcon.value
-      : "fluent:book-16-regular";
-  
-    // Luego corregir el id, si se pone vacio da error
-    const c: Curso = {
-      _id: "",
-      icono: iconToUse,
-      nombre: courseName.value,
-      docentes: [],
-      grupos: [],
-    };
-  
-    c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
-  
-    const curso = await $fetch<Curso>("http://localhost:8000/course", {
-      method: "POST",
-      body: {
-        icono: c.icono,
-        nombre: c.nombre,
-        docentes: c.docentes,
-      },
-    });
-  
-    if (!curso) {
-      courseNameError.value = "Error al crear el curso";
+  const addCourse = async () => {
+    if (!validateCourseName()) {
       return;
     }
-  
-    emit("addCourse", curso);
-    courseName.value = "";
-    isOpen.value = false;
-  }catch(error: any){
-    if (error.response?.status === 409) {
-      courseNameError.value = "Ya existe un curso con este nombre";
-    }else {
-      courseNameError.value = "Ha ocurrido un error al crear el curso";
-    }
-  }
-};
 
-const selectIcon = (icon: string) => {
-  displayIcon.value = icon;
-  selectedIcon.value = icon;
-  hasSelectedCustomIcon.value = true;
-  isPopoverOpen.value = false;
-};
+    try {
 
-// Add a watch to reset the icon when the modal is closed
-watch(isOpen, (newValue) => {
-  if (!newValue) {
-    // Add a delay before resetting the icon
-    setTimeout(() => {
-      displayIcon.value = "fluent:image-32-regular"; // Reset display to placeholder
-      hasSelectedCustomIcon.value = false; // Reset custom icon flag
+      // Use the selected icon or the default if user didn't select one
+      const iconToUse = hasSelectedCustomIcon.value
+        ? selectedIcon.value
+        : "fluent:book-16-regular";
+    
+      // Luego corregir el id, si se pone vacio da error
+      const c: Curso = {
+        _id: "",
+        icono: iconToUse,
+        nombre: courseName.value,
+        docentes: docenteList.value,
+        grupos: [],
+      };
+    
+      c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
+    
+      const curso = await $fetch<Curso>("http://localhost:8000/course", {
+        method: "POST",
+        body: {
+          icono: c.icono,
+          nombre: c.nombre,
+          docentes: c.docentes,
+        },
+      });
+    
+      if (!curso) {
+        courseNameError.value = "Error al crear el curso";
+        return;
+      }
+    
+      emit("addCourse", curso);
       courseName.value = "";
-      courseNameError.value = "";
-    }, 300);
+      isOpen.value = false;
+    }catch(error: any){
+      if (error.response?.status === 409) {
+        courseNameError.value = "Ya existe un curso con este nombre";
+      }else {
+        courseNameError.value = "Ha ocurrido un error al crear el curso";
+      }
+    }
+  };
+
+  const validateDocenteInput = () => {
+    // Reset error
+    docenteInputError.value = "";
+    isDocenteInputValid.value = true;
+    
+    if (docenteInput.value.trim() === "") {
+      return false;
+    }
+    
+    // Check if it's a valid email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(docenteInput.value)) {
+      docenteInputError.value = "Email inválido";
+      isDocenteInputValid.value = false;
+      return false;
+    }
+    
+    // Check if it ends with the institutional domain
+    if (!docenteInput.value.endsWith("@correo.itm.edu.co")) {
+      docenteInputError.value = "Debe usar un correo institucional";
+      isDocenteInputValid.value = false;
+      return false;
+    }
+    
+    return true;
+  };
+
+  const addDocente = () => {
+    if (!validateDocenteInput()) {
+      return;
+    }
+
+    if (docenteList.value.some(docente => docente.correo === docenteInput.value)) {
+      docenteInputError.value = "Correo ya ingresado";
+      isDocenteInputValid.value = false;
+      return;
+    }
+
+    const d: DocenteEnCurso = {
+      _id: "",
+      correo: docenteInput.value,
+      moderador: false
+    };
+    docenteList.value.push(d);
+    docenteInput.value = "";
+    docenteInputError.value = "";
+    isDocenteInputValid.value = true;
   }
-});
+
+  const selectIcon = (icon: string) => {
+    displayIcon.value = icon;
+    selectedIcon.value = icon;
+    hasSelectedCustomIcon.value = true;
+    isPopoverOpen.value = false;
+  };
+
+  const handleUserDeletion = (correo: string) => {
+    docenteList.value = docenteList.value.filter(docente => docente.correo !== correo);
+  };
+
+  // Add a watch to reset the icon when the modal is closed
+  watch(isOpen, (newValue) => {
+    if (!newValue) {
+      // Add a delay before resetting the icon
+      setTimeout(() => {
+        displayIcon.value = "fluent:image-32-regular"; // Reset display to placeholder
+        hasSelectedCustomIcon.value = false; // Reset custom icon flag
+        courseName.value = "";
+        courseNameError.value = "";
+        docenteInput.value = "";
+        docenteList.value = []
+      }, 300);
+    }
+  });
 </script>
 
 <template>
@@ -238,8 +297,7 @@ watch(isOpen, (newValue) => {
               <!-- Left Side - Two Inputs -->
               <UFormGroup label="Nombre del curso" required :error="!!courseNameError" :hint="courseNameError"
                 :ui="{ 
-                  hint: 'text-red-500 dark:text-red-500 text-sm mt-1', 
-                  error: 'text-red-500 dark:text-red-500 text-sm' 
+                  hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
                   v-model="courseName"
@@ -262,12 +320,17 @@ watch(isOpen, (newValue) => {
                   @blur="validateCourseName"
                 />
               </UFormGroup>
-              <UFormGroup label="Agregar Docente">
+              <UFormGroup label="Agregar Docente" :error="!isDocenteInputValid" :hint="docenteInputError"
+                :ui="{ 
+                  hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
+                }">
                 <UInput
                   size="sm"
                   placeholder="ejemplo@correo.itm.edu.co"
                   class="w-full"
-                  v-model="empty"
+                  v-model="docenteInput"
+                  @keyup.enter="addDocente"
+                  @blur="validateDocenteInput"
                   :ui="{
                     icon: {
                       trailing: { pointer: '' },
@@ -284,12 +347,12 @@ watch(isOpen, (newValue) => {
                 >
                   <template #trailing>
                     <UButton
-                      v-show="empty !== ''"
+                      v-show="docenteInput !== ''"
                       color="gray"
                       variant="link"
                       icon="fluent:add-16-filled"
                       :padded="false"
-                      @click="empty = ''"
+                      @click="addDocente"
                     />
                   </template>
                 </UInput>
@@ -298,7 +361,7 @@ watch(isOpen, (newValue) => {
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes" />
+              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" />
             </div>
           </div>
 

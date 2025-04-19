@@ -53,7 +53,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes"/>
+              <UtilitiesPeopleTable view="docentes" :data="[]"/>
             </div>
           </div>
 
