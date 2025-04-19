@@ -1,6 +1,6 @@
 
 # Before Starting
-
+To run only the Web
 Make sure you have installed node.js and npm
 
 - Go to Web folder:
@@ -20,6 +20,17 @@ Make sure you have installed node.js and npm
 
         npm run dev
 
+
+To run the **entire application** (both frontend and backend), make sure you have **Docker** installed on your system.
+
+- Once Docker is installed, open your terminal and navigate to the root folder of the project.
+- Run the following command to start the full app:
+
+        docker-compose up -d
+
+- To stop the application, use:
+
+        docker-compose down
 
 
 # RubrITM
