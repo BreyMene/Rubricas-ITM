@@ -7,6 +7,7 @@ const empty = ref("");
 const emit = defineEmits(["addCourse"]);
 
 const courseName = ref("");
+const courseNameError = ref("");
 
 // For display purposes only
 const displayIcon = ref("fluent:image-32-regular");
@@ -36,41 +37,66 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", checkScreenSize);
 });
 
+const validateCourseName = () => {
+  // Reset error
+  courseNameError.value = "";
+  
+  // Check if course name is empty
+  if (courseName.value.trim() === "") {
+    courseNameError.value = "El nombre del curso es obligatorio";
+    return false;
+  }
+  
+  return true;
+};
+
 const addCourse = async () => {
-  if (courseName.value === "") return;
-
-  // Use the selected icon or the default if user didn't select one
-  const iconToUse = hasSelectedCustomIcon.value
-    ? selectedIcon.value
-    : "fluent:book-16-regular";
-
-  // Luego corregir el id, si se pone vacio da error
-  const c: Curso = {
-    _id: "",
-    icono: iconToUse,
-    nombre: courseName.value,
-    docentes: [],
-    grupos: [],
-  };
-
-  c.docentes.push({ ...useDocenteStore().docente, moderador: true });
-
-  const curso = await $fetch<Curso>("http://localhost:8000/course", {
-    method: "POST",
-    body: {
-      icono: c.icono,
-      nombre: c.nombre,
-      docentes: c.docentes,
-    },
-  });
-
-  if (!curso) {
+  if (!validateCourseName()) {
     return;
   }
 
-  emit("addCourse", curso);
-  courseName.value = "";
-  isOpen.value = false;
+  try {
+
+    // Use the selected icon or the default if user didn't select one
+    const iconToUse = hasSelectedCustomIcon.value
+      ? selectedIcon.value
+      : "fluent:book-16-regular";
+  
+    // Luego corregir el id, si se pone vacio da error
+    const c: Curso = {
+      _id: "",
+      icono: iconToUse,
+      nombre: courseName.value,
+      docentes: [],
+      grupos: [],
+    };
+  
+    c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
+  
+    const curso = await $fetch<Curso>("http://localhost:8000/course", {
+      method: "POST",
+      body: {
+        icono: c.icono,
+        nombre: c.nombre,
+        docentes: c.docentes,
+      },
+    });
+  
+    if (!curso) {
+      courseNameError.value = "Error al crear el curso";
+      return;
+    }
+  
+    emit("addCourse", curso);
+    courseName.value = "";
+    isOpen.value = false;
+  }catch(error: any){
+    if (error.response?.status === 409) {
+      courseNameError.value = "Ya existe un curso con este nombre";
+    }else {
+      courseNameError.value = "Ha ocurrido un error al crear el curso";
+    }
+  }
 };
 
 const selectIcon = (icon: string) => {
@@ -87,6 +113,8 @@ watch(isOpen, (newValue) => {
     setTimeout(() => {
       displayIcon.value = "fluent:image-32-regular"; // Reset display to placeholder
       hasSelectedCustomIcon.value = false; // Reset custom icon flag
+      courseName.value = "";
+      courseNameError.value = "";
     }, 300);
   }
 });
@@ -208,7 +236,11 @@ watch(isOpen, (newValue) => {
               </div>
 
               <!-- Left Side - Two Inputs -->
-              <UFormGroup label="Nombre del curso" required>
+              <UFormGroup label="Nombre del curso" required :error="!!courseNameError" :hint="courseNameError"
+                :ui="{ 
+                  hint: 'text-red-500 dark:text-red-500 text-sm mt-1', 
+                  error: 'text-red-500 dark:text-red-500 text-sm' 
+                }">
                 <UInput
                   v-model="courseName"
                   size="sm"
@@ -227,6 +259,7 @@ watch(isOpen, (newValue) => {
                     },
                   }"
                   color="gray"
+                  @blur="validateCourseName"
                 />
               </UFormGroup>
               <UFormGroup label="Agregar Docente">

@@ -10,37 +10,27 @@
     // Teachers data
     const teachers = ref<Docente[]>([
         {
-            email: 'ejemplo@correo.itm.edu.co'
+            _id: '',
+            correo: 'ejemplo@correo.itm.edu.co'
         },
         {
-            email: 'ejemplo1@correo.itm.edu.co'
-        },
-        {
-            email: 'ejemplo2@correo.itm.edu.co'
-        },
-        {
-            email: 'ejemplo3@correo.itm.edu.co'
-        },
-        {
-            email: 'ejemplo4@correo.itm.edu.co'
-        },
-        {
-            email: 'ejemplo5@correo.itm.edu.co'
+            _id: '',
+            correo: 'ejemplo1@correo.itm.edu.co'
         }
     ]);
     // Students data
     const students = ref<Estudiante[]>([
         {
             nombre: 'Pepito Perez',
-            email: 'pepitoperez1245@correo.itm.edu.co',
+            correo: 'pepitoperez1245@correo.itm.edu.co',
             promedio: 3.8
         },{
             nombre: 'Vanesa Van',
-            email: 'vanesavan8456@correo.itm.edu.co',
+            correo: 'vanesavan8456@correo.itm.edu.co',
             promedio: 4.0
         },{
             nombre: 'Yo apellido segundoapellido',
-            email: 'yoapellido1236@correo.itm.edu.co',
+            correo: 'yoapellido1236@correo.itm.edu.co',
             promedio: 4.1
         }
     ]);
@@ -77,9 +67,9 @@
     // Función para eliminar un usuario
     const deleteUser = (email: string) => {
         if (props.view === "docentes") {
-            teachers.value = teachers.value.filter((t) => t.email !== email);
+            teachers.value = teachers.value.filter((t) => t.correo !== email);
         } else {
-            students.value = students.value.filter((s) => s.email !== email);
+            students.value = students.value.filter((s) => s.correo !== email);
         }
     };
 
@@ -95,13 +85,13 @@
         const searchLower = props.searchTerm.toLowerCase();
         return people.value.filter(person => {
             if (props.view === "docentes") {
-                return person.email.toLowerCase().includes(searchLower);
+                return person.correo.toLowerCase().includes(searchLower);
             } else {
                 // Type guard to ensure we're working with a Student
                 const studentPerson = person as Estudiante;
                 return (
                     studentPerson.nombre.toLowerCase().includes(searchLower) ||
-                    studentPerson.email.toLowerCase().includes(searchLower)
+                    studentPerson.correo.toLowerCase().includes(searchLower)
                 );
             }
         });

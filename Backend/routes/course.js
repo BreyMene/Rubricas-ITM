@@ -7,7 +7,7 @@ router.post("/", async (req, res) => {
     const { icono, nombre, docentes } = req.body;
     let curso = await Curso.findOne({ nombre });
     if (curso) {
-      return res.status(401).json({ error: "course already created" });
+      return res.status(409).json({ error: "course already created" });
     }
 
     const docentesF = [];
