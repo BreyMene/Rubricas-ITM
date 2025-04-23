@@ -61,7 +61,7 @@
                 </div>
 
                 <!-- Content -->
-                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm"/>
+                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="[]"/>
             </div>
 
             <!-- Rubric -->
