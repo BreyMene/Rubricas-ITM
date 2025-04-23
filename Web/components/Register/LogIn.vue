@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
 import type { FormSubmitEvent } from "#ui/types";
 
@@ -31,7 +32,7 @@ const handleLogin = async (event: FormSubmitEvent<any>) => {
   try {
     console.log("Login data:", state);
 
-    const docente = await $fetch<Docente>("http://localhost:8000/login", {
+    const docente = await $fetch<Docente>(`${config.public.apiUrl}/login`, {
       method: "POST",
       body: {
         correo: state.email,

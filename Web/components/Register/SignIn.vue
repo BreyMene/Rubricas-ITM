@@ -1,4 +1,5 @@
 <script setup lang="ts">
+    const config = useRuntimeConfig();
     import type { FormSubmitEvent } from '#ui/types';
 
     const props = defineProps({
@@ -30,7 +31,7 @@
         try {
             console.log('Sign-in data:', state);
 
-            const docente: Docente = await $fetch("http://localhost:8000/register", {
+            const docente: Docente = await $fetch(`${config.public.apiUrl}/register`, {
                 method: 'POST',
                 body: {
                     correo: state.email,

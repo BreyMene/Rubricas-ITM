@@ -8,7 +8,8 @@ const groupsRoute = require("./routes/groups");
 
 const app = express();
 const port = 8000;
-const mongoURI = "mongodb://mongo:pass1234@db:27017/RubrITM?authSource=admin";
+//const mongoURI = "mongodb://mongo:pass1234@db:27017/RubrITM?authSource=admin";
+const mongoURI = "mongodb://mongo:pass1234@localhost:27017/RubrITM?authSource=admin";
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +23,6 @@ app.use("/", authRoute);
 app.use("/courses", coursesRoute);
 app.use("/groups", groupsRoute);
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`listening in port ${port}`);
 });

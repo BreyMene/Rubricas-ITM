@@ -1,4 +1,5 @@
 <script setup lang="ts">
+    const config = useRuntimeConfig();
     // Get the route object
     const route = useRoute();
 
@@ -22,7 +23,7 @@
     const fetchGroups = async () => {
         try {
             const data = await $fetch<Grupo[]>(
-            `http://localhost:8000/courses/groups/${courseId}`,
+            `${config.public.apiUrl}/courses/groups/${courseId}`,
             );
             groups.value = data;
         } catch (error) {

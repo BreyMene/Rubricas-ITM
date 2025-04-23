@@ -15,4 +15,10 @@ export default defineNuxtConfig({
   devServer: {
     host: '0.0.0.0'
   },
+
+  runtimeConfig: {
+    public: {
+      apiUrl: process.env.API_URL,
+    },
+  },
 })

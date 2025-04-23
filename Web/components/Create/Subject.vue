@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  const config = useRuntimeConfig();
   import type { iconOptions } from "~/utils/iconList";
   import { useDocenteStore } from "~/utils/store";
 
@@ -77,7 +78,7 @@
 
       c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
 
-      const curso = await $fetch<Curso>("http://localhost:8000/courses", {
+      const curso = await $fetch<Curso>(`${config.public.apiUrl}/courses`, {
         method: "POST",
         body: {
           icono: c.icono,

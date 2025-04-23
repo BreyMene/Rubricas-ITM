@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
 
 // Sample courses data (you can replace this with your actual data)
@@ -8,7 +9,7 @@ const docenteID = useDocenteStore().getID;
 const fetchCourses = async () => {
   try {
     const data = await $fetch<Curso[]>(
-      `http://localhost:8000/courses/${docenteID}`,
+      `${config.public.apiUrl}/courses/${docenteID}`,
     );
     courses.value = data;
   } catch (error) {

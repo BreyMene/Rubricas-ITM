@@ -29,8 +29,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: pass1234
       MONGO_INITDB_DATABASE: RubrITM
-    expose:
-      - "27017"
+    ports:
+      - "27017:27017"
     volumes:
       - mongodata:/data/db
 

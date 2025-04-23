@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  const config = useRuntimeConfig();
   const isOpen = ref(false);
   const emit = defineEmits(['addGroup']);
 
@@ -18,7 +19,7 @@
     isOpen.value = false;
   };
 
-  // const grupo = await $fetch<Curso>("http://localhost:8000/courses", {
+  // const grupo = await $fetch<Curso>(`${config.public.apiUrl}/courses`, {
   //       method: "POST",
   //       body: {
   //         nombre: groupName,
