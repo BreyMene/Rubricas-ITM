@@ -3,7 +3,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 
 const authRoute = require("./routes/auth");
-const courseRoute = require("./routes/course");
+const coursesRoute = require("./routes/course");
+const groupsRoute = require("./routes/groups");
 
 const app = express();
 const port = 8000;
@@ -18,7 +19,8 @@ mongoose
   .catch((err) => console.error("failed to connect", err));
 
 app.use("/", authRoute);
-app.use("/course", courseRoute);
+app.use("/courses", coursesRoute);
+app.use("/groups", groupsRoute);
 
 app.listen(port, () => {
   console.log(`listening in port ${port}`);

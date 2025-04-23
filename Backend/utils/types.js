@@ -52,10 +52,18 @@ const grupo = mongoose.Schema({
     type: String,
     required: true,
   },
-  proyecto: {
-    type: String,
-    required: true,
-  },
+  estudiantes: [
+    {
+      nombre: {
+        type: String,
+        required: true,
+      },
+      correo: {
+        type: String,
+        required: true,
+      }
+    }
+  ],
   docente: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Docente",

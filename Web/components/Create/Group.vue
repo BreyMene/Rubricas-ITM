@@ -17,6 +17,15 @@
     groupName.value = '';
     isOpen.value = false;
   };
+
+  // const grupo = await $fetch<Curso>("http://localhost:8000/courses", {
+  //       method: "POST",
+  //       body: {
+  //         nombre: groupName,
+  //         estudiantes: [],
+  //         docentes: ,
+  //       },
+  //     });
 </script>
 
 <template>

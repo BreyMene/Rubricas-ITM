@@ -44,13 +44,13 @@
   const validateCourseName = () => {
     // Reset error
     courseNameError.value = "";
-    
+
     // Check if course name is empty
     if (courseName.value.trim() === "") {
       courseNameError.value = "Se requiere un nombre";
       return false;
     }
-    
+
     return true;
   };
 
@@ -65,7 +65,7 @@
       const iconToUse = hasSelectedCustomIcon.value
         ? selectedIcon.value
         : "fluent:book-16-regular";
-    
+
       // Luego corregir el id, si se pone vacio da error
       const c: Curso = {
         _id: "",
@@ -74,10 +74,10 @@
         docentes: docenteList.value,
         grupos: [],
       };
-    
+
       c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
-    
-      const curso = await $fetch<Curso>("http://localhost:8000/course", {
+
+      const curso = await $fetch<Curso>("http://localhost:8000/courses", {
         method: "POST",
         body: {
           icono: c.icono,
@@ -85,12 +85,12 @@
           docentes: c.docentes,
         },
       });
-    
+
       if (!curso) {
         courseNameError.value = "Error al crear el curso";
         return;
       }
-    
+
       emit("addCourse", curso);
       courseName.value = "";
       isOpen.value = false;
@@ -107,11 +107,11 @@
     // Reset error
     docenteInputError.value = "";
     isDocenteInputValid.value = true;
-    
+
     if (docenteInput.value.trim() === "") {
       return false;
     }
-    
+
     // Check if it's a valid email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(docenteInput.value)) {
@@ -119,14 +119,14 @@
       isDocenteInputValid.value = false;
       return false;
     }
-    
+
     // Check if it ends with the institutional domain
     if (!docenteInput.value.endsWith("@correo.itm.edu.co")) {
       docenteInputError.value = "Debe usar un correo institucional";
       isDocenteInputValid.value = false;
       return false;
     }
-    
+
     return true;
   };
 
@@ -296,7 +296,7 @@
 
               <!-- Left Side - Two Inputs -->
               <UFormGroup label="Nombre del curso" required :error="!!courseNameError" :hint="courseNameError"
-                :ui="{ 
+                :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
@@ -321,7 +321,7 @@
                 />
               </UFormGroup>
               <UFormGroup label="Agregar Docente" :error="!isDocenteInputValid" :hint="docenteInputError"
-                :ui="{ 
+                :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput

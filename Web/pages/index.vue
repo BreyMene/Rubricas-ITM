@@ -8,7 +8,7 @@ const docenteID = useDocenteStore().getID;
 const fetchCourses = async () => {
   try {
     const data = await $fetch<Curso[]>(
-      `http://localhost:8000/course/${docenteID}`,
+      `http://localhost:8000/courses/${docenteID}`,
     );
     courses.value = data;
   } catch (error) {
