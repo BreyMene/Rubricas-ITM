@@ -42,7 +42,7 @@ To run the **entire application** (both frontend and backend), you can use Makef
 
         docker-compose down
 
-### Makefile
+### Makefile (If using Linux)
 - Go to Backend/index.js and make sure you have this URL to connect to mongodb:
 
         const mongoURI = "mongodb://mongo:pass1234@localhost:27017/RubrITM?authSource=admin";
@@ -58,6 +58,24 @@ To run the **entire application** (both frontend and backend), you can use Makef
 - To stop the application, use control+C and:
 
        make clean
+
+### Bat (If using Windows)
+
+- Go to Backend/index.js and make sure you have this URL to connect to mongodb:
+
+        const mongoURI = "mongodb://mongo:pass1234@localhost:27017/RubrITM?authSource=admin";
+
+- Check in Web/.env and check you have this:
+
+        API_URL=http://{your ip}:8000
+
+- Run the following command to start the full app, this will open 2 separate terminals:
+
+        .bat
+
+- To stop the application, use control+C on each terminal and:
+
+       docker-compose down
 
 # RubrITM
 
