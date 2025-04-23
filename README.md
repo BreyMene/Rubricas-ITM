@@ -11,7 +11,7 @@ Make sure you have installed node.js and npm
 
         npm install
 
-        // if it throws you an error: "cannot be loaded becouse running scripts is disabled on this system" 
+        // if it throws you an error: "cannot be loaded becouse running scripts is disabled on this system"
         //execute this command in the same folder
 
         set-ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -27,13 +27,13 @@ To run the **entire application** (both frontend and backend), you can use Makef
 ### Docker
 - Once Docker is installed, open your terminal and navigate to the root folder of the project.
 - Go to Backend/index.js and make sure you have this URL to connect to mongodb:
-  
+
           const mongoURI = "mongodb://mongo:pass1234@db:27017/RubrITM?authSource=admin";
 
 - Check in Web/.env and check you have this:
 
           API_URL=http://localhost:8000
-  
+
 - Run the following command to start the full app:
 
         docker-compose up -d
@@ -44,7 +44,7 @@ To run the **entire application** (both frontend and backend), you can use Makef
 
 ### Makefile
 - Go to Backend/index.js and make sure you have this URL to connect to mongodb:
-  
+
         const mongoURI = "mongodb://mongo:pass1234@localhost:27017/RubrITM?authSource=admin";
 
 - Check in Web/.env and check you have this:
@@ -53,13 +53,12 @@ To run the **entire application** (both frontend and backend), you can use Makef
 
 - Run the following command to start the full app:
 
-        make build
         make run
-  
+
 - To stop the application, use control+C and:
 
        make clean
-  
+
 # RubrITM
 
 This project is a web application designed for the ITM university to facilitate the creation, management, and sharing of evaluation rubrics across different courses. The system allows professors to create and customize rubrics, collaborate with other professors, and efficiently communicate final grades to students via their institutional Outlook email.
