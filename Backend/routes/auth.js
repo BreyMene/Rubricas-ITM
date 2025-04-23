@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Docente } = require("../types");
+const { Docente } = require("../utils/types");
 
 router.post("/register", async (req, res) => {
   try {

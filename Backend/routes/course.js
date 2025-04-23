@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { Curso, Docente } = require("../types");
+const { Curso } = require("../utils/types");
+const { ValidarDocentes } = require("../utils/validations");
 
 router.post("/", async (req, res) => {
   try {
@@ -10,18 +11,7 @@ router.post("/", async (req, res) => {
       return res.status(409).json({ error: "course already created" });
     }
 
-    const docentesF = [];
-
-    for (const d of docentes) {
-      const existente = await Docente.findOne({ correo: d.correo });
-
-      if (existente) {
-        docentesF.push({
-          docente: existente._id,
-          moderador: d.moderador,
-        });
-      }
-    }
+    const docentesF = await ValidarDocentes(docentes);
 
     curso = new Curso({ icono: icono, nombre: nombre, docentes: docentesF });
     await curso.save();
@@ -35,7 +25,7 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const cursos = await Curso.find(
-      { "docentes.docente": id },
+      { "docentes._id": id },
       { docentes: 0 },
     );
     res.status(200).json(cursos);

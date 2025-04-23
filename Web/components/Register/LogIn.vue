@@ -38,6 +38,7 @@ const handleLogin = async (event: FormSubmitEvent<any>) => {
         contraseña: state.password,
       },
     });
+
     useDocenteStore().setDocente(docente);
     await navigateTo("/");
   } catch (error) {
