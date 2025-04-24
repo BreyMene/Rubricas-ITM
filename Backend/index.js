@@ -8,7 +8,7 @@ const groupsRoute = require("./routes/groups");
 
 const app = express();
 const port = 8000;
-//const mongoURI = "mongodb://mongo:pass1234@db:27017/RubrITM?authSource=admin";
+// const mongoURI = "mongodb://mongo:pass1234@db:27017/RubrITM?authSource=admin";
 const mongoURI = "mongodb://mongo:pass1234@localhost:27017/RubrITM?authSource=admin";
 
 app.use(cors());

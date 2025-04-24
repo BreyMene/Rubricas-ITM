@@ -30,8 +30,6 @@ const handleLogin = async (event: FormSubmitEvent<any>) => {
   formError.value = "";
 
   try {
-    console.log("Login data:", state);
-
     const docente = await $fetch<Docente>(`${config.public.apiUrl}/login`, {
       method: "POST",
       body: {

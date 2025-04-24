@@ -22,15 +22,17 @@
     const passwordError = ref('');
     const secPasswordError = ref('');
 
+    const formError = ref("");
+
     const validate = createFormValidator(emailError, passwordError, secPasswordError, {
         isMobile: props.isMobile,
         minPasswordLength: 6
     });
 
     const handleSignIn = async (event: FormSubmitEvent<any>) => {
-        try {
-            console.log('Sign-in data:', state);
+        formError.value = "";
 
+        try {
             const docente: Docente = await $fetch(`${config.public.apiUrl}/register`, {
                 method: 'POST',
                 body: {
@@ -41,8 +43,14 @@
 
             useDocenteStore().setDocente(docente)
             await navigateTo("/")
-        } catch (error) {
-            console.error('Error:', error);
+        } catch (error: any) {
+            if (error.statusCode === 401){
+                formError.value = "Este correo ya está registrado";
+                emailError.value = props.isMobile ? "" : formError.value;
+            }else{
+                formError.value = "Error al registrar. Intente más tarde";
+                emailError.value = props.isMobile ? "" : formError.value;
+            }
         }
     }
 
@@ -67,7 +75,7 @@
         </h2>
         <div class="mb-6">
             <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleSignIn">
-                <UFormGroup label="Email" name="email" :hint="emailError"
+                <UFormGroup label="Email" name="email" :error="formError" :hint="emailError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
