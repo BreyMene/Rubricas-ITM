@@ -4,7 +4,7 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
-  modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/ui', '@pinia/nuxt'],
+  modules: ['@nuxt/image', '@nuxt/fonts', '@nuxt/ui', '@pinia/nuxt','pinia-plugin-persistedstate/nuxt',],
 
   colorMode: {
     preference: 'system', // default theme

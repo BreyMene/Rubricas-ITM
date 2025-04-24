@@ -11,6 +11,12 @@ export const useDocenteStore = defineStore("docente", {
       this.docente = null;
     },
   },
+  persist: {
+    storage: piniaPluginPersistedstate.cookies({
+      maxAge: 3600, // 1 hora
+      sameSite: 'lax'
+    })
+  },
 
   getters: {
     getCorreo: (state): string => {
