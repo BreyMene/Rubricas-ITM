@@ -38,8 +38,12 @@ router.get("/groups/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const curso = await Curso.findById(id).populate({
-        path: "grupos"
+      path: "grupos",
+      populate: {
+        path: "docente",
+      }
     });
+
     res.status(200).json(curso.grupos);
   } catch {
     res.status(500).json({ error: "failed to get groups" });

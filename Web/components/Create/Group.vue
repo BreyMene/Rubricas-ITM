@@ -1,5 +1,8 @@
 <script setup lang="ts">
   const config = useRuntimeConfig();
+  const route = useRoute();
+  import { useDocenteStore } from "~/utils/store";
+
   const isOpen = ref(false);
   const emit = defineEmits(['addGroup']);
 
@@ -97,18 +100,39 @@
     estudianteCorreo.value = '';
   };
 
-  const addGroup = () => {
+  const addGroup = async() => {
     if (!validateGroupName()) {
       return;
     }
 
     // Luego corregir el id, si se pone vacio da error
+    const d: Docente = {
+      _id: useDocenteStore().getID,
+      correo: "",
+    }
     const g: Grupo = {
       _id: "a",
       nombre: groupName.value,
-      manager: "",
+      docente: d,
       estudiantes: estudianteList.value
     };
+
+    const cursoId = computed(() => route.params.id);
+    const grupo = await $fetch<Grupo>(`${config.public.apiUrl}/groups`, {
+      method: "POST",
+      body: {
+        cursoId: cursoId.value,
+        nombre: g.nombre,
+        docente: g.docente._id,
+        estudiantes: g.estudiantes,
+      },
+    });
+
+    if (!grupo) {
+      groupNameError.value = "Error al crear grupo";
+      return;
+    }
+
     console.log("group added", g)
     groupName.value = '';
     estudianteList.value = [];
@@ -137,15 +161,6 @@
       }, 300);
     }
   });
-
-  // const grupo = await $fetch<Curso>(`${config.public.apiUrl}/courses`, {
-  //       method: "POST",
-  //       body: {
-  //         nombre: groupName,
-  //         estudiantes: [],
-  //         docentes: ,
-  //       },
-  //     });
 </script>
 
 <template>

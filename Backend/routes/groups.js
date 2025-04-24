@@ -5,7 +5,7 @@ const { Grupo, Curso } = require("../utils/types");
 router.post("/", async (req, res) => {
   try {
     const { cursoId, nombre, estudiantes, docente } = req.body;
-    let grupo = await Grupo.find({nombre});
+    let grupo = await Grupo.findOne({nombre});
     if (grupo) {
         return res.status(409).json({ error: "group already created" });
     }
@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const grupo = await Grupo.findById(id);
+    const grupo = await Grupo.findById(id).populate("docente");
     res.status(200).json(grupo);
   } catch {
     res.status(500).json({ error: "failed to get groups" });

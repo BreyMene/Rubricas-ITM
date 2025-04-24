@@ -23,7 +23,7 @@
     const fetchGroups = async () => {
         try {
             const data = await $fetch<Grupo[]>(
-            `${config.public.apiUrl}/courses/groups/${courseId}`,
+            `${config.public.apiUrl}/courses/groups/${courseId.value}`,
             );
             groups.value = data;
         } catch (error) {
@@ -70,7 +70,7 @@
         if (!searchTerm.value) return groups.value;
         return groups.value.filter(group =>
             group.nombre.toLowerCase().includes(searchTerm.value) ||
-            group.manager.toLowerCase().includes(searchTerm.value)
+            group.docente.correo.toLowerCase().includes(searchTerm.value)
         );
     });
 
@@ -173,7 +173,7 @@
                             @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
                             >
                                 <h3 class="text-lg font-medium text-center text-Pure-Black dark:text-White-w">{{ group.nombre }}</h3>
-                                <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.manager }}</p>
+                                <p class="text-sm text-Medium-Gray dark:text-Light-Gray">Profesor encargado <br> {{ group.docente.correo }}</p>
                             </UButton>
                         </TransitionGroup>
                     </div>

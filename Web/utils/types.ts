@@ -32,7 +32,7 @@ export interface Curso {
 export interface Grupo {
   _id: string;
   nombre: string;
-  manager: string;
+  docente: Docente;
   estudiantes: Estudiante[];
 }
 
