@@ -12,10 +12,9 @@
     const curso = computed(() => useCursoStore().cursoActivo)
     const groups = ref<Grupo[]>([]);
     
-    const docentesCurso = computed<DocenteEnCurso[]>(() => 
-        curso.value?.docentes || []
-    )
-    
+    const docentesCurso = ref<DocenteEnCurso[]>([])
+    docentesCurso.value = curso.value?.docentes || []
+
     // Controls the Views
     const showGroups = ref(true);
 
@@ -68,7 +67,7 @@
     }
 
     const handleUserDeletion = (correo: string) => {
-        // docentesCurso.value = docentesCurso.value.filter(docente => docente.correo !== correo);
+        docentesCurso.value = docentesCurso.value.filter(docente => docente.correo !== correo);
     };
 
     // SWIRCH BETWEEN GROUPS OR DOCENTES LIST------------
