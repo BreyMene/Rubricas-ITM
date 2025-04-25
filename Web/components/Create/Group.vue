@@ -133,7 +133,7 @@
       return;
     }
 
-    console.log("group added", g)
+    emit("addGroup", grupo);
     groupName.value = '';
     estudianteList.value = [];
     isOpen.value = false;

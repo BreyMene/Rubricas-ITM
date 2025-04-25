@@ -28,7 +28,6 @@ onMounted(() => {
 const navigateToCourse = (course: Curso) => {
   // Using pinia to pass the course data via cookies, to persist the data
   useCursoStore().setCurso(course)
-  console.log("Curso",course)
   navigateTo(`/Curso/${course._id}`)
 }
 

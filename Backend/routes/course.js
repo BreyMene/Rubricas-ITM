@@ -15,7 +15,18 @@ router.post("/", async (req, res) => {
 
     curso = new Curso({ icono: icono, nombre: nombre, docentes: docentesF });
     await curso.save();
-    res.status(201).json(curso);
+    await curso.populate("docentes._id")
+
+    const cursoObj = curso.toObject();
+    cursoObj.docentes = cursoObj.docentes.map((d)=> {
+      return {
+        moderador: d.moderador,
+        _id: d._id._id,
+        correo: d._id.correo
+      }
+    })
+
+    res.status(201).json(cursoObj);
   } catch {
     res.status(500).json({ error: "failed to create course" });
   }

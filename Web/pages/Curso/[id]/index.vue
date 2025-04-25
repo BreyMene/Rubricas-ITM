@@ -15,7 +15,7 @@
     const docentesCurso = computed<DocenteEnCurso[]>(() => 
         curso.value?.docentes || []
     )
-    console.log(docentesCurso.value)
+    
     // Controls the Views
     const showGroups = ref(true);
 
@@ -67,6 +67,9 @@
         groups.value.push(g);
     }
 
+    const handleUserDeletion = (correo: string) => {
+        // docentesCurso.value = docentesCurso.value.filter(docente => docente.correo !== correo);
+    };
 
     // SWIRCH BETWEEN GROUPS OR DOCENTES LIST------------
     // Altern between views
@@ -207,7 +210,7 @@
 
                     <!-- Teachers Table -->
                     <div v-else :key="'teachers'">
-                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm" :data="docentesCurso"/>
+                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm" :data="docentesCurso" @delete-user="handleUserDeletion"/>
                     </div>
                 </transition>
             </div>
