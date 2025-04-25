@@ -24,8 +24,17 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const cursos = await Curso.find({"docentes._id": id });
-    res.status(200).json(cursos);
+    const cursos = await Curso.find({"docentes._id": id }).populate("docentes._id");
+    const cursosObj = cursos.map((curso)=> {
+      const c = curso.toObject();
+      c.docentes = c.docentes.map((d)=> ({
+          moderador: d.moderador,
+          _id: d._id._id,
+          correo: d._id.correo
+        }));
+      return c
+    })
+    res.status(200).json(cursosObj);
   } catch {
     res.status(500).json({ error: "failed to get courses" });
   }
@@ -34,8 +43,16 @@ router.get("/:id", async (req, res) => {
 router.get("/get/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const curso = await Curso.findById(id);
-    res.status(200).json(curso);
+    const curso = await Curso.findById(id).populate("docentes._id");
+    const cursoObj = curso.toObject();
+    cursoObj.docentes = cursoObj.docentes.map((d)=> {
+      return {
+        moderador: d.moderador,
+        _id: d._id._id,
+        correo: d._id.correo
+      }
+    })
+    res.status(200).json(cursoObj);
   } catch {
     res.status(500).json({ error: "failed to get courses" });
   }

@@ -12,6 +12,10 @@
     const curso = computed(() => useCursoStore().cursoActivo)
     const grupo = computed(() => useCursoStore().grupoActivo)
 
+    const estudiantesGrupo = computed<Estudiante[]>(() => 
+        grupo.value?.estudiantes || []
+    )
+
     const items = computed(() => [
         {
             label: 'Inicio',
@@ -98,7 +102,7 @@
                 </div>
 
                 <!-- Content -->
-                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="[]"/>
+                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo"/>
             </div>
 
             <!-- Rubric -->

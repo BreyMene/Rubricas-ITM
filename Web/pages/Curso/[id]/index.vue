@@ -7,13 +7,17 @@
 
     // Get the course ID from the route parameters
     const courseId = computed(() => route.params.id);
-
+    
     // obtaining the course sendend by Pinia
     const curso = computed(() => useCursoStore().cursoActivo)
-
+    const groups = ref<Grupo[]>([]);
+    
     const docentesCurso = computed<DocenteEnCurso[]>(() => 
         curso.value?.docentes || []
     )
+    console.log(docentesCurso.value)
+    // Controls the Views
+    const showGroups = ref(true);
 
     const items = computed(() => [
         {
@@ -28,7 +32,6 @@
         }
     ])
 
-    const groups = ref<Grupo[]>([]);
     const fetchGroups = async () => {
         try {
             const data = await $fetch<Grupo[]>(
@@ -48,6 +51,7 @@
                     `${config.public.apiUrl}/courses/get/${courseId.value}`
                 );
                 useCursoStore().setCurso(cursoApi);
+                console.log("Curso APi", cursoApi.docentes)
             } catch (error) {
                 console.error("No se pudo obtener el curso:", error);
             }
@@ -63,9 +67,8 @@
         groups.value.push(g);
     }
 
-    // Controls the Views
-    const showGroups = ref(true);
 
+    // SWIRCH BETWEEN GROUPS OR DOCENTES LIST------------
     // Altern between views
     const toggleView = () => {
         showGroups.value = !showGroups.value;
