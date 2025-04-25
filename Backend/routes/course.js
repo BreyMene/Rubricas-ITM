@@ -24,11 +24,18 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const cursos = await Curso.find(
-      { "docentes._id": id },
-      { docentes: 0 },
-    );
+    const cursos = await Curso.find({"docentes._id": id });
     res.status(200).json(cursos);
+  } catch {
+    res.status(500).json({ error: "failed to get courses" });
+  }
+});
+
+router.get("/get/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const curso = await Curso.findById(id);
+    res.status(200).json(curso);
   } catch {
     res.status(500).json({ error: "failed to get courses" });
   }

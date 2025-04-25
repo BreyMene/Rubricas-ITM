@@ -27,3 +27,25 @@ export const useDocenteStore = defineStore("docente", {
     },
   },
 });
+
+export const useCursoStore = defineStore('curso', {
+  state: () => ({
+    cursoActivo: null as Curso | null,
+    grupoActivo: null as Grupo | null,
+  }),
+  actions: {
+    setCurso(c: Curso) {
+      this.cursoActivo = c
+    },
+    clearCurso() {
+      this.cursoActivo = null
+    },
+    setGrupo(grupo: Grupo) {
+      this.grupoActivo = grupo;
+    },
+    clearGrupo() {
+      this.grupoActivo = null;
+    },
+  },
+  persist: true,
+})

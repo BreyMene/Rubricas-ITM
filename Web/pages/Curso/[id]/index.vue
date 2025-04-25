@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    import { useCursoStore } from "~/utils/store";
+
     const config = useRuntimeConfig();
     // Get the route object
     const route = useRoute();
@@ -6,18 +8,25 @@
     // Get the course ID from the route parameters
     const courseId = computed(() => route.params.id);
 
-    const items = [
+    // obtaining the course sendend by Pinia
+    const curso = computed(() => useCursoStore().cursoActivo)
+
+    const docentesCurso = computed<DocenteEnCurso[]>(() => 
+        curso.value?.docentes || []
+    )
+
+    const items = computed(() => [
         {
             label: 'Inicio',
             icon: 'fluent:home-12-filled',
             to: '/'
         },
         {
-            label: `Curso ${courseId.value}`,
-            icon: 'fluent:book-32-filled',
+            label: `Curso ${curso.value?.nombre}` || 'Curso',
+            icon: curso.value?.icono || 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}`
         }
-    ]
+    ])
 
     const groups = ref<Grupo[]>([]);
     const fetchGroups = async () => {
@@ -31,8 +40,23 @@
         }
     };
 
+    // Only call the api if Pinia doesn't have any course saved
+    const fetchCourses = async () => {
+        if (!useCursoStore().cursoActivo) {
+            try {
+                const cursoApi = await $fetch<Curso>(
+                    `${config.public.apiUrl}/courses/get/${courseId.value}`
+                );
+                useCursoStore().setCurso(cursoApi);
+            } catch (error) {
+                console.error("No se pudo obtener el curso:", error);
+            }
+        }
+    }
+
     onMounted(() => {
         fetchGroups();
+        fetchCourses();
     });
 
     function addGroup(g: Grupo) {
@@ -180,7 +204,7 @@
 
                     <!-- Teachers Table -->
                     <div v-else :key="'teachers'">
-                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm" :data="[]"/>
+                        <UtilitiesPeopleTable view="docentes" :searchTerm="searchTerm" :data="docentesCurso"/>
                     </div>
                 </transition>
             </div>

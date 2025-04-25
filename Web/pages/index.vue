@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
+import { useCursoStore } from "~/utils/store";
+
 
 // Sample courses data (you can replace this with your actual data)
 const courses = ref<Curso[]>([]);
@@ -18,14 +20,16 @@ const fetchCourses = async () => {
 };
 
 onMounted(() => {
+  useCursoStore().clearCurso();
   fetchCourses();
 });
 
 // Function to handle course navigation
-const navigateToCourse = (courseId: string) => {
-  // Navigate to the dynamic Curso/[id] page
-  navigateTo(`/Curso/${courseId}`);
-};
+const navigateToCourse = (course: Curso) => {
+  // Using pinia to pass the course data via cookies, to persist the data
+  useCursoStore().setCurso(course)
+  navigateTo(`/Curso/${course._id}`)
+}
 
 function addCourse(c: Curso) {
   courses.value.push(c);
@@ -92,7 +96,7 @@ function addCourse(c: Curso) {
             <UButton
               v-for="course in courses"
               :key="course._id"
-              @click="navigateToCourse(course._id)"
+              @click="navigateToCourse(course)"
               variant="ghost"
               class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
             >

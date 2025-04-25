@@ -1,30 +1,62 @@
 <script setup lang="ts">
+    import { useCursoStore } from '~/utils/store'
 
     // Get the route object
     const route = useRoute();
+    const config = useRuntimeConfig();
 
     // Get the course ID from the route parameters
     const courseId = computed(() => route.params.id);
-
     const groupId = computed(() => route.params.groupId);
 
-    const items = [
+    const curso = computed(() => useCursoStore().cursoActivo)
+    const grupo = computed(() => useCursoStore().grupoActivo)
+
+    const items = computed(() => [
         {
             label: 'Inicio',
             icon: 'fluent:home-12-filled',
             to: '/'
         },
         {
-            label: `Curso ${courseId.value}`,
-            icon: 'fluent:book-32-filled',
+            label: `Curso ${curso.value?.nombre}` || 'Curso',
+            icon: curso.value?.icono || 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}`
         },
         {
-            label: `Grupo ${groupId.value}`,
+            label: `Grupo ${grupo.value?.nombre}`,
             icon: 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}/Grupo/${groupId.value}`
         }
-    ]
+    ])
+
+    // Only call the api if Pinia doesn't have any course saved
+    const fetchCourses = async () => {
+        if (!curso.value || curso.value._id !== courseId.value) {
+            try {
+                const cursoApi = await $fetch<Curso>(
+                    `${config.public.apiUrl}/courses/get/${courseId.value}`
+                );
+                useCursoStore().setCurso(cursoApi);
+            } catch (error) {
+                console.error("No se pudo obtener el curso:", error);
+            }
+        }
+    }
+
+    // Only call the api if Pinia doesn't have any group saved
+    const fetchGroup = async () => {
+        if (!useCursoStore().grupoActivo || useCursoStore().grupoActivo?._id !== groupId.value) {
+            try {
+                const grupoApi  = await $fetch<Grupo>(
+                    `${config.public.apiUrl}/groups/${groupId.value}`
+                );
+                useCursoStore().setGrupo(grupoApi);
+            } catch (error) {
+                console.error("No se pudo obtener el curso:", error);
+            }
+        }
+    }
 
     // SEARCH BAR ----------
     const searchTerm = ref('');
@@ -32,6 +64,11 @@
     const handleSearch = (value: string) => {
         searchTerm.value = value;
     };
+
+    onMounted(() => {
+        fetchCourses();
+        fetchGroup();
+    });
 
 </script>
 
