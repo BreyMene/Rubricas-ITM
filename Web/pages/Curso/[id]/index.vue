@@ -12,8 +12,7 @@
   const curso = computed(() => useCursoStore().cursoActivo);
   const groups = ref<Grupo[]>([]);
 
-  const docentesCurso = ref<DocenteEnCurso[]>([]);
-  docentesCurso.value = curso.value?.docentes || [];
+  const docentesCurso = computed<DocenteEnCurso[]>(() => curso.value?.docentes || []);
 
   // Controls the Views
   const showGroups = ref(true);
@@ -50,7 +49,6 @@
           `${config.public.apiUrl}/courses/get/${courseId.value}`,
         );
         useCursoStore().setCurso(cursoApi);
-        console.log("Curso APi", cursoApi.docentes);
       } catch (error) {
         console.error("No se pudo obtener el curso:", error);
       }
@@ -68,14 +66,22 @@
   }
 
   const handleUserDeletion = async(correo: string) => {
-    docentesCurso.value = docentesCurso.value.filter(
-      (docente) => docente.correo !== correo,
-    );
     try {
-      await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/user/${correo}`, {method: "DELETE"} );
-    } catch (error) {
-       console.error("No se pudo eliminar docente", error);
+    await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/user/${correo}`, {
+      method: "DELETE"
+    });
+    
+    //Update the store with the new teachers list
+    if (curso.value && curso.value.docentes) {
+      const updatedDocentes = curso.value.docentes.filter(
+        docente => docente.correo !== correo
+      );
+      
+      useCursoStore().updateCursoDocentes(updatedDocentes);
     }
+  } catch (error) {
+    console.error("No se pudo eliminar docente", error);
+  }
   };
 
   // SWIRCH BETWEEN GROUPS OR DOCENTES LIST------------

@@ -1,5 +1,7 @@
 <script setup lang="ts">
     const useDocente = useDocenteStore();
+    const useCurso = useCursoStore()
+
     const items = [
         [
             {
@@ -16,6 +18,8 @@
                 icon: 'ph:sign-out-bold',
                 click: async() => {
                     useDocente.logout()
+                    useCurso.clearCurso()
+                    useCurso.clearGrupo()
                     await navigateTo("/login")
                 }
             }

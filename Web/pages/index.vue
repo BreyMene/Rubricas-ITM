@@ -21,6 +21,7 @@ const fetchCourses = async () => {
 
 onMounted(() => {
   useCursoStore().clearCurso();
+  useCursoStore().clearGrupo();
   fetchCourses();
 });
 

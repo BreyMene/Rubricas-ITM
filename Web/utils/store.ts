@@ -46,6 +46,16 @@ export const useCursoStore = defineStore('curso', {
     clearGrupo() {
       this.grupoActivo = null;
     },
+    updateCursoDocentes(docentes: DocenteEnCurso[]) {
+      if (this.cursoActivo) {
+        this.cursoActivo.docentes = docentes;
+      }
+    },
+    updateGrupoEstudiantes(estudiantes: Estudiante[]) {
+      if (this.grupoActivo) {
+        this.grupoActivo.estudiantes = estudiantes;
+      }
+    },
   },
   persist: true,
 })

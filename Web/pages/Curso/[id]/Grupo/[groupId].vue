@@ -12,9 +12,8 @@
     const curso = computed(() => useCursoStore().cursoActivo)
     const grupo = computed(() => useCursoStore().grupoActivo)
 
-    const estudiantesGrupo = ref<Estudiante[]>([]);
-    estudiantesGrupo.value = grupo.value?.estudiantes || []
-
+    const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
+    
     const items = computed(() => [
         {
             label: 'Inicio',
@@ -47,7 +46,7 @@
         }
     }
 
-    // Only call the api if Pinia doesn't have any group saved
+    // Only call the api if Pinia doesn't have any group saved or if has another group saved
     const fetchGroup = async () => {
         if (!useCursoStore().grupoActivo || useCursoStore().grupoActivo?._id !== groupId.value) {
             try {
@@ -74,14 +73,23 @@
     });
 
     const handleUserDeletion = async(correo: string) => {
-        estudiantesGrupo.value = estudiantesGrupo.value.filter(
-        (estudiante) => estudiante.correo !== correo,
-        );
         try {
-        await $fetch(`${config.public.apiUrl}/groups/${groupId.value}/user/${correo}`, {method: "DELETE"} );
-        } catch (error) {
-        console.error("No se pudo eliminar estudiante", error);
+        await $fetch(`${config.public.apiUrl}/groups/${groupId.value}/user/${correo}`, {
+            method: "DELETE"
+        });
+        
+        //Update the store with the filtered students list
+        if (grupo.value && grupo.value.estudiantes) {
+            const updatedEstudiantes = grupo.value.estudiantes.filter(
+                estudiante => estudiante.correo !== correo
+            );
+            
+            useCursoStore().updateGrupoEstudiantes(updatedEstudiantes);
         }
+    } catch (error) {
+        console.error("No se pudo eliminar estudiante", error);
+    }
+
     };
 
 </script>
