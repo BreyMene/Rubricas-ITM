@@ -9,17 +9,20 @@
     // Change columns depends of the view
     const columns = computed(() => {
         if (props.view === "docentes") {
-            return [{ key: "correo", label: "Correo" }, { key: "actions" }];
+            return [
+                { key: "correo", label: "Correo", sortable: true },
+                { key: "actions" }
+                ];
         }
         
         const studentColumns = [
-            { key: "nombre", label: "Nombre" },
-            { key: "correo", label: "Correo" },
+            { key: "nombre", label: "Nombre", sortable: true },
+            { key: "correo", label: "Correo", sortable: true },
             { key: "actions" }
         ];
         
         if (!props.hideFinalNote) {
-            studentColumns.splice(2, 0, { key: "promedio", label: "Nota Final" });
+            studentColumns.splice(2, 0, { key: "promedio", label: "Nota Final", sortable: true });
         }
         
         return studentColumns;
