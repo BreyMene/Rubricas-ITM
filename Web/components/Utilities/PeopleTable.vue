@@ -6,6 +6,8 @@
         data: DocenteEnCurso[] | Estudiante[]
     }>();
 
+    const toast = useToast()
+
     // Change columns depends of the view
     const columns = computed(() => {
         if (props.view === "docentes") {
@@ -37,6 +39,34 @@
     const emits = defineEmits(['delete-user']);
 
     const deleteUser = (correo: string) => {
+        const userType = props.view === "docentes" ? "docente" : "estudiante";
+        toast.add({
+            title: `Se elimino el ${userType} ${correo}`,
+            icon: "fluent:alert-urgent-16-filled",
+            timeout: 2000,
+
+            ui: {
+                'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                'rounded': 'rounded-lg',
+                'shadow': 'shadow-lg',
+                'ring': 'ring-0',
+                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                'icon': {
+                    'base': 'flex-shrink-0 w-5 h-5',
+                    'color': 'text-Purple-P dark:text-Muted-Brown'
+                },
+                'progress': {
+                    'base': 'absolute bottom-0 end-0 start-0 h-1',
+                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                },
+                'closeButton': {
+                    'base': 'absolute top-2 right-2',
+                    'icon': 'fluent:add-16-filled',
+                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                }
+            }
+        })
         emits('delete-user', correo);
     };
 

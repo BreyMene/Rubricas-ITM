@@ -105,7 +105,6 @@
       return;
     }
 
-    // Luego corregir el id, si se pone vacio da error
     const d: Docente = {
       _id: useDocenteStore().getID,
       correo: "",

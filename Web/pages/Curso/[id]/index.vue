@@ -61,7 +61,6 @@
   });
 
   function addGroup(g: Grupo) {
-    console.log(g)
     groups.value.push(g);
   }
 
@@ -110,7 +109,6 @@
 
   // Filtered groups based on search
   const filteredGroups = computed(() => {
-    console.log(groups);
 
     if (!searchTerm.value) return groups.value;
     return groups.value.filter(

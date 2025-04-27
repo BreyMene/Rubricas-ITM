@@ -87,7 +87,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true"/>
+              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="[]"/>
             </div>
           </div>
 

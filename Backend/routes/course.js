@@ -25,7 +25,6 @@ router.post("/", async (req, res) => {
         correo: d._id.correo,
       };
     });
-
     res.status(201).json(cursoObj);
   } catch {
     res.status(500).json({ error: "failed to create course" });
