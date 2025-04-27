@@ -13,6 +13,7 @@
         if (props.view === "docentes") {
             return [
                 { key: "correo", label: "Correo", sortable: true },
+                { key: "moderador", label: "", sortable: false },
                 { key: "actions" }
                 ];
         }
@@ -33,6 +34,7 @@
     // Auxiliary Functions
     interface TableRow {
         correo: string;
+        moderador?: boolean;
     }
 
     // Función para eliminar un usuario
@@ -70,18 +72,37 @@
         emits('delete-user', correo);
     };
 
-    const items = (row: TableRow) => [
-        [
-            { label: 'Editar', icon: 'fluent:compose-12-filled'}
-        ],
-        [
-            {
-                label: 'Eliminar',
-                icon: 'fluent:delete-12-regular',
-                click: () => deleteUser(row.correo)
-            }
-        ]
-    ];
+    const items = (row: TableRow) => {
+        const menuItems = [
+            [
+                { label: 'Editar', icon: 'fluent:compose-12-filled'}
+            ],
+            [
+                {
+                    label: 'Eliminar',
+                    icon: 'fluent:delete-12-regular',
+                    click: () => deleteUser(row.correo)
+                }
+            ]
+        ];
+        
+        // Add moderator option only for docentes view
+        if (props.view === "docentes") {
+            const moderatorLabel = row.moderador ? 'Quitar moderador' : 'Hacer moderador';
+            const moderatorIcon = row.moderador ? 'fluent:person-delete-20-filled' : 'fluent:person-key-20-filled';
+            
+            // Insert moderator option after Edit and before Delete
+            menuItems.splice(1, 0, [
+                {
+                    label: moderatorLabel,
+                    icon: moderatorIcon,
+                    //click: () => toggleModerator(row.correo, !!row.moderator)
+                }
+            ]);
+        }
+        
+        return menuItems;
+    };
 
     // Filtered people with proper type checking
     const filteredPeople = computed(() => {
@@ -126,12 +147,23 @@
             }
         }"
         > 
+            <!-- Final Note custom column -->
             <template #finalNote-header>
                 <div class="text-center w-full">Nota Final</div>
             </template>
             <template #finalNote-data="{ row }">
                 <div class="text-center">
                     {{ row.finalNote }}
+                </div>
+            </template>
+
+            <!-- Moderator custom column -->
+            <template #moderador-header>
+                <div class="w-8"></div>
+            </template>
+            <template #moderador-data="{ row }">
+                <div class="flex justify-center w-8">
+                    <UIcon v-if="row.moderador" name="fluent:person-key-20-filled" class="text-Purple-P dark:text-Muted-Brown w-6 h-6" />
                 </div>
             </template>
 
