@@ -15,16 +15,16 @@ router.post("/", async (req, res) => {
 
     curso = new Curso({ icono: icono, nombre: nombre, docentes: docentesF });
     await curso.save();
-    await curso.populate("docentes._id")
+    await curso.populate("docentes._id");
 
     const cursoObj = curso.toObject();
-    cursoObj.docentes = cursoObj.docentes.map((d)=> {
+    cursoObj.docentes = cursoObj.docentes.map((d) => {
       return {
         moderador: d.moderador,
         _id: d._id._id,
-        correo: d._id.correo
-      }
-    })
+        correo: d._id.correo,
+      };
+    });
 
     res.status(201).json(cursoObj);
   } catch {
@@ -35,16 +35,18 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const cursos = await Curso.find({"docentes._id": id }).populate("docentes._id");
-    const cursosObj = cursos.map((curso)=> {
+    const cursos = await Curso.find({ "docentes._id": id }).populate(
+      "docentes._id",
+    );
+    const cursosObj = cursos.map((curso) => {
       const c = curso.toObject();
-      c.docentes = c.docentes.map((d)=> ({
-          moderador: d.moderador,
-          _id: d._id._id,
-          correo: d._id.correo
-        }));
-      return c
-    })
+      c.docentes = c.docentes.map((d) => ({
+        moderador: d.moderador,
+        _id: d._id._id,
+        correo: d._id.correo,
+      }));
+      return c;
+    });
     res.status(200).json(cursosObj);
   } catch {
     res.status(500).json({ error: "failed to get courses" });
@@ -56,13 +58,13 @@ router.get("/get/:id", async (req, res) => {
     const { id } = req.params;
     const curso = await Curso.findById(id).populate("docentes._id");
     const cursoObj = curso.toObject();
-    cursoObj.docentes = cursoObj.docentes.map((d)=> {
+    cursoObj.docentes = cursoObj.docentes.map((d) => {
       return {
         moderador: d.moderador,
         _id: d._id._id,
-        correo: d._id.correo
-      }
-    })
+        correo: d._id.correo,
+      };
+    });
     res.status(200).json(cursoObj);
   } catch {
     res.status(500).json({ error: "failed to get courses" });
@@ -76,12 +78,29 @@ router.get("/groups/:id", async (req, res) => {
       path: "grupos",
       populate: {
         path: "docente",
-      }
+      },
     });
 
     res.status(200).json(curso.grupos);
   } catch {
     res.status(500).json({ error: "failed to get groups" });
+  }
+});
+
+router.delete("/:cId/user/:c", async (req, res) => {
+  try {
+    const { cId, c } = req.params;
+    const curso = await Curso.findById(cId).populate("docentes._id");
+    if (!curso) {
+      return res.status(404).json({ error: "course not found" });
+    }
+
+    curso.docentes = curso.docentes.filter((d) => d._id.correo !== c);
+    await curso.save();
+
+    res.status(200).json({ message: "docente removed successfully" });
+  } catch {
+    res.status(500).json({ error: "failed to delete docente" });
   }
 });
 

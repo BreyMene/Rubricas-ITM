@@ -12,9 +12,8 @@
     const curso = computed(() => useCursoStore().cursoActivo)
     const grupo = computed(() => useCursoStore().grupoActivo)
 
-    const estudiantesGrupo = computed<Estudiante[]>(() => 
-        grupo.value?.estudiantes || []
-    )
+    const estudiantesGrupo = ref<Estudiante[]>([]);
+    estudiantesGrupo.value = grupo.value?.estudiantes || []
 
     const items = computed(() => [
         {
@@ -74,6 +73,17 @@
         fetchGroup();
     });
 
+    const handleUserDeletion = async(correo: string) => {
+        estudiantesGrupo.value = estudiantesGrupo.value.filter(
+        (estudiante) => estudiante.correo !== correo,
+        );
+        try {
+        await $fetch(`${config.public.apiUrl}/groups/${groupId.value}/user/${correo}`, {method: "DELETE"} );
+        } catch (error) {
+        console.error("No se pudo eliminar estudiante", error);
+        }
+    };
+
 </script>
 
 <template>
@@ -90,7 +100,7 @@
                 <UIcon name="fluent:chevron-right-12-filled" class="text-gray-500 dark:text-gray-400 w-4 h-4" />
             </template>
         </UBreadcrumb>
-        
+
         <div class="flex flex-col lg:flex-row gap-16 mt-8">
             <div class="flex-1">
                 <!-- Searchbar and Buttons -->
@@ -102,15 +112,15 @@
                 </div>
 
                 <!-- Content -->
-                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo"/>
+                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo" @delete-user="handleUserDeletion"/>
             </div>
 
             <!-- Rubric -->
             <div class="w-full lg:w-[500px] h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1">
                 <div class="w-full h-full rounded-lg overflow-hidden relative">
-                    <NuxtImg 
-                        src="RubricaTest.PNG" 
-                        class="w-full h-full object-cover" 
+                    <NuxtImg
+                        src="RubricaTest.PNG"
+                        class="w-full h-full object-cover"
                         style="filter: blur(1.5px);"
                     />
                 </div>
