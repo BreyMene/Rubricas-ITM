@@ -1,5 +1,113 @@
 <script setup lang="ts">
   const isOpen = ref(false)
+  const config = useRuntimeConfig();
+  const route = useRoute();
+  const courseId = computed(() => route.params.id);
+
+  const docenteList = ref<DocenteEnCurso[]>([])
+  const docenteInput = ref("");
+  const isDocenteInputValid = ref(true);
+  const docenteInputError = ref("");
+
+  const validateDocenteInput = () => {
+    // Reset error
+    docenteInputError.value = "";
+    isDocenteInputValid.value = true;
+
+    if (docenteInput.value.trim() === "") {
+      return false;
+    }
+
+    // Check if it's a valid email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(docenteInput.value)) {
+      docenteInputError.value = "Email inválido";
+      isDocenteInputValid.value = false;
+      return false;
+    }
+
+    // Check if it ends with the institutional domain
+    if (!docenteInput.value.endsWith("@correo.itm.edu.co")) {
+      docenteInputError.value = "Debe usar un correo institucional";
+      isDocenteInputValid.value = false;
+      return false;
+    }
+
+    return true;
+  };
+
+  const addDocente = () => {
+    if (!validateDocenteInput()) {
+      return;
+    }
+
+    if (docenteList.value.some(docente => docente.correo === docenteInput.value)) {
+      docenteInputError.value = "Correo ya ingresado";
+      isDocenteInputValid.value = false;
+      return;
+    }
+
+    const d: DocenteEnCurso = {
+      _id: "",
+      correo: docenteInput.value,
+      moderador: false
+    };
+    docenteList.value.push(d);
+    docenteInput.value = "";
+    docenteInputError.value = "";
+    isDocenteInputValid.value = true;
+  }
+
+  const handleUserDeletion = (correo: string) => {
+    docenteList.value = docenteList.value.filter(docente => docente.correo !== correo);
+  };
+
+  const handleMakeModerator = (correo: string, mod: boolean) => {
+    const docenteIndex = docenteList.value.findIndex(docente => docente.correo === correo);
+    if (docenteIndex !== -1) {
+      docenteList.value[docenteIndex].moderador = !mod;
+    }
+  };
+
+  const saveChanges = async () => {
+    try {
+      // Filter out docentes that already have an _id (they're already in the database)
+      const newDocentes = docenteList.value.filter(d => !d._id || d._id === "");
+      
+      if (newDocentes.length === 0) {
+        isOpen.value = false;
+        return;
+      }
+      
+      const response = await $fetch<Curso>(`${config.public.apiUrl}/courses/${courseId.value}/docentes`, {
+        method: "PUT",
+        body: {
+          docentes: newDocentes
+        }
+      });
+      
+      console.log(response.docentes)
+      useCursoStore().updateCursoDocentes(response.docentes);
+      isOpen.value = false;
+    } catch (error: any) {
+      if (error.response?.status === 409){
+        console.log("Docentes ya existentes")
+      }
+      else
+        docenteInputError.value = 'Ha ocurrido un error al ingresar los docentes'
+    }
+  };
+
+  watch(isOpen, (newValue) => {
+    if (!newValue) {
+      // Add a delay before resetting the icon
+      setTimeout(() => {
+        docenteInput.value = "";
+        docenteInputError.value = "";
+        docenteList.value = []
+      }, 300);
+    }
+  });
 </script>
 
 <template>
@@ -33,27 +141,48 @@
           <!-- Form Content -->
           <div class="flex flex-col md:flex-row gap-9">  
             <div class="md:w-2/5 space-y-7 my-auto">
-                <UFormGroup label="Agregar Docente">
-                    <UInput size="sm" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
-                    :ui="{
-                        icon: {
-                            trailing: { pointer: '' }
-                        },
-                        ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                        color: {
-                            gray: {
-                                outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                            }
-                        }
-                    }"
-                    color="gray"
+              <UFormGroup label="Agregar Docente" :error="!isDocenteInputValid" :hint="docenteInputError"
+                :ui="{
+                  hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
+                }">
+                <UInput
+                  size="sm"
+                  placeholder="ejemplo@correo.itm.edu.co"
+                  class="w-full"
+                  v-model="docenteInput"
+                  @keyup.enter="addDocente"
+                  @blur="validateDocenteInput"
+                  :ui="{
+                    icon: {
+                      trailing: { pointer: '' },
+                    },
+                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                    color: {
+                      gray: {
+                        outline:
+                          'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown',
+                      },
+                    },
+                  }"
+                  color="gray"
+                >
+                  <template #trailing>
+                    <UButton
+                      v-show="docenteInput !== ''"
+                      color="gray"
+                      variant="link"
+                      icon="fluent:add-16-filled"
+                      :padded="false"
+                      @click="addDocente"
                     />
+                  </template>
+                </UInput>
               </UFormGroup>
             </div>
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes" :data="[]"/>
+              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" @make-moderator="handleMakeModerator"/>
             </div>
           </div>
 
@@ -61,7 +190,7 @@
             <UButton variant="link" color="black" @click="isOpen = false">
               Cancelar
             </UButton>
-            <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="isOpen = false">
+            <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="saveChanges">
               Terminar
             </UButton>
           </div>

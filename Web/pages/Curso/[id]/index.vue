@@ -83,6 +83,30 @@
   }
   };
 
+  const handleMakeModerator = async (correo: string, mod: boolean) => {
+      try {
+      await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/moderator/${correo}`, {
+        method: "PUT",
+        body: {
+          moderador: !mod 
+        }
+      });
+      
+      //Update the local store
+      if (curso.value && curso.value.docentes) {
+        const updatedDocentes = curso.value.docentes.map(docente => {
+          if (docente.correo === correo) {
+            return { ...docente, moderador: !mod };
+          }
+          return docente;
+        });
+        useCursoStore().updateCursoDocentes(updatedDocentes);
+      }
+    } catch (error) {
+      console.error("No se pudo actualizar el estado de moderador", error);
+    }
+  };
+
   // SWIRCH BETWEEN GROUPS OR DOCENTES LIST------------
   // Altern between views
   const toggleView = () => {
@@ -257,6 +281,7 @@
               :searchTerm="searchTerm"
               :data="docentesCurso"
               @delete-user="handleUserDeletion"
+              @make-moderator="handleMakeModerator"
             />
           </div>
         </transition>

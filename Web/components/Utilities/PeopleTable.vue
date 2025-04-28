@@ -38,7 +38,7 @@
     }
 
     // Función para eliminar un usuario
-    const emits = defineEmits(['delete-user']);
+    const emits = defineEmits(['delete-user', 'make-moderator']);
 
     const deleteUser = (correo: string) => {
         const userType = props.view === "docentes" ? "docente" : "estudiante";
@@ -72,6 +72,10 @@
         emits('delete-user', correo);
     };
 
+    const makeModerator = (correo: string, mod: boolean) => {
+        emits('make-moderator', correo, mod);
+    }
+
     const items = (row: TableRow) => {
         const menuItems = [
             [
@@ -96,7 +100,7 @@
                 {
                     label: moderatorLabel,
                     icon: moderatorIcon,
-                    //click: () => toggleModerator(row.correo, !!row.moderator)
+                    click: () => makeModerator(row.correo, !!row.moderador)
                 }
             ]);
         }

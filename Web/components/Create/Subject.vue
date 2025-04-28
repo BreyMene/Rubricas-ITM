@@ -76,7 +76,8 @@
         grupos: [],
       };
 
-      c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
+      if(!docenteList.value.some(docente => docente.correo === useDocenteStore().getCorreo))
+        c.docentes.push({ ...useDocenteStore().docente!, moderador: true });
 
       const curso = await $fetch<Curso>(`${config.public.apiUrl}/courses`, {
         method: "POST",
@@ -162,6 +163,13 @@
 
   const handleUserDeletion = (correo: string) => {
     docenteList.value = docenteList.value.filter(docente => docente.correo !== correo);
+  };
+
+  const handleMakeModerator = (correo: string, mod: boolean) => {
+    const docenteIndex = docenteList.value.findIndex(docente => docente.correo === correo);
+    if (docenteIndex !== -1) {
+      docenteList.value[docenteIndex].moderador = !mod;
+    }
   };
 
   // Add a watch to reset the icon when the modal is closed
@@ -362,7 +370,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" />
+              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" @make-moderator="handleMakeModerator"/>
             </div>
           </div>
 
