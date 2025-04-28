@@ -44,7 +44,7 @@
         </div>
         <div class="flex flex-col w-[80%]">
             <RubricaCriterio 
-                v-for="(row, index) in tema.rows"
+                v-for="(row, index) in tema.criterios"
                 :key="index"
                 :row="row"
                 :rowIndex="index"

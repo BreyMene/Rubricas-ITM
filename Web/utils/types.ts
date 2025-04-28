@@ -6,7 +6,7 @@ export interface Rubrica {
 
 export interface Tema {
   nombre: string;
-  rows: Criterio[];
+  criterios: Criterio[];
 }
 
 export interface Criterio {

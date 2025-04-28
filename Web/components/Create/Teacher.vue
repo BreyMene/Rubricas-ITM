@@ -1,5 +1,7 @@
 <script setup lang="ts">
   const isOpen = ref(false)
+  const toast = useToast()
+
   const config = useRuntimeConfig();
   const route = useRoute();
   const courseId = computed(() => route.params.id);
@@ -86,12 +88,41 @@
         }
       });
       
-      console.log(response.docentes)
       useCursoStore().updateCursoDocentes(response.docentes);
       isOpen.value = false;
     } catch (error: any) {
       if (error.response?.status === 409){
-        console.log("Docentes ya existentes")
+        const alreadyInCourse = error.response?._data?.alreadyInCourse || [];
+        const emailList = alreadyInCourse.join(', ');
+
+        toast.add({
+            title: `Algunos docentes ya existen`,
+            description: `${emailList}`,
+            icon: "fluent:alert-urgent-16-filled",
+            timeout: 3000,
+
+            ui: {
+                'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                'rounded': 'rounded-lg',
+                'shadow': 'shadow-lg',
+                'ring': 'ring-0',
+                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                'icon': {
+                    'base': 'flex-shrink-0 w-5 h-5',
+                    'color': 'text-Purple-P dark:text-Muted-Brown'
+                },
+                'progress': {
+                    'base': 'absolute bottom-0 end-0 start-0 h-1',
+                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                },
+                'closeButton': {
+                    'base': 'absolute top-2 right-2',
+                    'icon': 'fluent:add-16-filled',
+                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                }
+            }
+        })
       }
       else
         docenteInputError.value = 'Ha ocurrido un error al ingresar los docentes'

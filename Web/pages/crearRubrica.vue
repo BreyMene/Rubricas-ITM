@@ -14,7 +14,7 @@
     }
     temas.value.push({
       nombre: '',
-      rows: [rb]
+      criterios: [rb]
     })
   }
 
@@ -26,7 +26,7 @@
       acumulado: 0,
       observaciones: "",
     }
-    temas.value[temaIndex].rows.push(rb)
+    temas.value[temaIndex].criterios.push(rb)
   }
 
   function deleteTema(temaIndex: number) {
@@ -34,7 +34,7 @@
   }
 
   function deleteRow(temaIndex: number, rowIndex: number) {
-    temas.value[temaIndex].rows.splice(rowIndex, 1)
+    temas.value[temaIndex].criterios.splice(rowIndex, 1)
   }
 </script>
 
