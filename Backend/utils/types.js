@@ -43,6 +43,11 @@ const curso = mongoose.Schema(
         ref: "Grupo",
       },
     ],
+    rubricaGuia: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rubrica",
+      required: false
+    }
   },
   { versionKey: false },
 );
@@ -69,14 +74,39 @@ const grupo = mongoose.Schema({
     ref: "Docente",
     required: true,
   },
+  rubricas: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rubrica",
+    }
+  ]
 });
+
+const rubrica = mongoose.Schema({
+  nombre: {
+    type: String,
+    required: true,
+  },
+  temas: [{
+    nombre: String,
+    criterios: [{
+      criterio: String,
+      peso: Number,
+      calificacion: Number,
+      acumulado: Number,
+      observaciones: String,
+    }]
+  }]
+})
 
 const Docente = mongoose.model("Docente", docente);
 const Curso = mongoose.model("Curso", curso);
 const Grupo = mongoose.model("Grupo", grupo);
+const Rubrica = mongoose.model("Rubrica", rubrica);
 
 module.exports = {
   Docente,
   Curso,
   Grupo,
+  Rubrica,
 };

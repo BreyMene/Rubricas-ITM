@@ -1,5 +1,5 @@
 export interface Rubrica {
-  _id: number;
+  _id: string;
   nombre: string;
   temas: Tema[];
 }
@@ -27,6 +27,7 @@ export interface Curso {
   nombre: string;
   docentes: DocenteEnCurso[];
   grupos: Grupo[];
+  rubricaGuia: Rubrica;
 }
 
 export interface Grupo {
@@ -34,6 +35,7 @@ export interface Grupo {
   nombre: string;
   docente: Docente;
   estudiantes: Estudiante[];
+  rubricas: Rubrica[];
 }
 
 export interface Estudiante {

@@ -1,7 +1,8 @@
 <script setup lang="ts">
   import { ref } from 'vue'
-  import type {Criterio, Tema} from '~/utils/types'
+  import type {Criterio, Tema, Rubrica} from '~/utils/types'
 
+  const rubrica = ref<Rubrica>()
   const temas = ref<Tema[]>([])
 
   function addTema() {
@@ -35,6 +36,15 @@
 
   function deleteRow(temaIndex: number, rowIndex: number) {
     temas.value[temaIndex].criterios.splice(rowIndex, 1)
+  }
+
+  const CreateRubric = async() => {
+    const r: Rubrica = {
+      _id: "",
+      nombre: "",
+      temas: temas.value
+    }
+    rubrica.value = r
   }
 </script>
 
