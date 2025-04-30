@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
-  import type {Criterio, Tema, Rubrica, DocenteEnCurso} from '~/utils/types'
+  import type {Criterio, Tema, Rubrica} from '~/utils/types'
   import { useDocenteStore } from "~/utils/store";
 
   const route = useRoute();
@@ -55,11 +55,13 @@
   };
 
   const fetchClone= async () => {
+    console.log("CloneID", cloneId)
     if (cloneId != "") {
       try {
         const data = await $fetch<Rubrica>(
           `${config.public.apiUrl}/rubrics/clone/${cloneId}`,
         );
+        console.log(data)
         temas.value = data.temas;
       } catch (error) {
         console.error("Error fetching groups:", error);
@@ -184,7 +186,7 @@
       if(isGuideRubric){
         await $fetch(`${config.public.apiUrl}/rubrics/${id}/course/${selectedCourseId.value}`, {
         method: "PUT",
-      });
+        });
       }
 
       isOpen.value = false;

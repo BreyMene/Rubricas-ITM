@@ -71,7 +71,8 @@
   };
 
   const selectCourse = (course: Curso) => {
-    selectedCourseId.value = course._id
+    selectedRubrica.value = course.rubricaGuia?._id || "";
+    selectedCourseId.value = course._id;
   }
 
   const openRubric = () => {
@@ -80,12 +81,23 @@
   }
 
   const cloneRubric = () => {
+    console.log(selectedRubrica.value)
     navigateTo({path: '/crearRubrica', query: {clone: selectedRubrica.value} })
   }
 
   onMounted(() => {
     fetchCourses();
     fetchRubrics();
+  });
+
+  watch(openCourses, (newValue) => {
+    if (!newValue) {
+      // Add a delay before resetting the icon
+      setTimeout(() => {
+        selectedCourseId.value = "";
+        selectedRubrica.value = "";
+      }, 300);
+    }
   });
 
 </script>
@@ -270,7 +282,7 @@
                   v-for="course in courses"
                   :key="course._id"
                   class="relative bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-                  :class="course._id == selectedCourseId ? 'border border-white' : 'border-none' "
+                  :class="course._id == selectedCourseId ? 'ring-4 dark:ring-White-w ring-Medium-Gray' : 'ring-0' "
                   @click="selectCourse(course)"
                 >
                   <!-- Course Content -->
