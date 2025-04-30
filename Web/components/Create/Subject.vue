@@ -74,6 +74,11 @@
         nombre: courseName.value,
         docentes: docenteList.value,
         grupos: [],
+        rubricaGuia: {
+          _id: 'a',
+          nombre: 'a',
+          temas: []
+        }
       };
 
       if(!docenteList.value.some(docente => docente.correo === useDocenteStore().getCorreo))

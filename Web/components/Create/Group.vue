@@ -113,7 +113,8 @@
       _id: "a",
       nombre: groupName.value,
       docente: d,
-      estudiantes: estudianteList.value
+      estudiantes: estudianteList.value,
+      rubricas: []
     };
 
     const cursoId = computed(() => route.params.id);

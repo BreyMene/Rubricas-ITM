@@ -1,30 +1,50 @@
 <script setup lang="ts">
-    const rubricas = ref<Rubrica[]>([]);
+  import { useDocenteStore } from "~/utils/store";
+  const config = useRuntimeConfig();
 
-    // Modal state
-    const isOpen = ref(false)
-    const selectedRubrica = ref<number | null>(null);
+  const rubricas = ref<Rubrica[]>([]);
+  const docenteID = useDocenteStore().getID;
 
-    // Function to handle rubrica selection with explicit type
-    const selectRubrica = (rubricaId: number) => {
-        selectedRubrica.value = rubricaId;
-        isOpen.value = true;
-    };
+  // Modal state
+  const isOpen = ref(false)
+  const selectedRubrica = ref<string | null>(null);
 
-    // SEARCH BAR
-    const searchTerm = ref('');
+  // Function to handle rubrica selection with explicit type
+  const selectRubrica = (rubricaId: string) => {
+      selectedRubrica.value = rubricaId;
+      isOpen.value = true;
+  };
 
-    // Filtered rubricas based on search
-    const filteredRubricas = computed(() => {
-        if (!searchTerm.value) return rubricas.value;
-        return rubricas.value.filter(rubrica =>
-            rubrica.nombre.toString().toLowerCase().includes(searchTerm.value)
-        );
-    });
+  // SEARCH BAR
+  const searchTerm = ref('');
 
-    const handleSearch = (value: string) => {
-        searchTerm.value = value;
-    };
+  // Filtered rubricas based on search
+  const filteredRubricas = computed(() => {
+      if (!searchTerm.value) return rubricas.value;
+      return rubricas.value.filter(rubrica =>
+          rubrica.nombre.toString().toLowerCase().includes(searchTerm.value)
+      );
+  });
+
+  const handleSearch = (value: string) => {
+      searchTerm.value = value;
+  };
+
+  const fetchRubrics = async () => {
+    try {
+      const data = await $fetch<Rubrica[]>(
+        `${config.public.apiUrl}/rubrics/user/${docenteID}`,
+      );
+      rubricas.value = data;
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  onMounted(() => {
+    fetchRubrics();
+  });
+
 </script>
 
 <template>
@@ -46,14 +66,14 @@
                 tag="div"
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
             >
-              <div v-if="!rubricas.length" class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2"> 
+              <div v-if="!rubricas.length" class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2">
                   <div class="relative w-80 h-52 flex flex-col items-center justify-center">
                       <!-- Corner decorations -->
                       <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
                       <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
                       <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
                       <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
-                      
+
                       <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
                       <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
                   </div>
@@ -61,8 +81,8 @@
 
               <UButton v-else variant="ghost"
                 v-for="rubrica in filteredRubricas"
-                :key="rubrica.id"
-                @click="selectRubrica(rubrica.id)"
+                :key="rubrica._id"
+                @click="selectRubrica(rubrica._id)"
                 class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
               >
                 <div class="w-full h-full rounded-lg overflow-hidden relative">

@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
 
     r = new Rubrica(rubrica);
     await r.save();
-    res.status(201).json({ message: "rubric created successfully" });
+    res.status(201).json(r._id);
   } catch {
     res.status(500).json({ error: "failed to create rubric" });
   }
@@ -54,34 +54,33 @@ router.get("/:id", async (req, res) => {
 router.get("/user/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const rubricasSet = new Map();
+    const rubricas = [];
 
     const cursos = await Curso.find({ "docentes._id": id, "docentes.moderador": true },
       {rubricaGuia: 1}
-    ).populate("rubricaGuia", "nombre");
+    ).populate({path: "rubricaGuia", select: "nombre"});
 
     const grupos = await Grupo.find({ docente: id }, {rubricas: 1})
-    .populate("rubricas", "nombre");
+    .populate({path: "rubricas", select: "nombre"});
 
-    cursos.forEach((curso) => {
-      if (curso.rubricaGuia) {
-        rubricasSet.set(curso.rubricaGuia._id.toString(), {
-          _id: curso.rubricaGuia._id,
-          nombre: curso.rubricaGuia.nombre,
+    const agregarRubrica = (rubrica) => {
+      if (rubrica && rubrica.nombre &&
+          !rubricas.some(r => r._id.equals(rubrica._id))) {
+        rubricas.push({
+          _id: rubrica._id,
+          nombre: rubrica.nombre
         });
       }
+    };
+
+    cursos.forEach(curso => {
+      agregarRubrica(curso.rubricaGuia);
     });
 
-    grupos.forEach((grupo) => {
-      grupo.rubricas.forEach((r) => {
-        rubricasSet.set(r._id.toString(), {
-          _id: r._id,
-          nombre: r.nombre,
-        });
-      });
+    grupos.forEach(grupo => {
+      grupo.rubricas.forEach(agregarRubrica);
     });
 
-    const rubricas = Array.from(rubricasSet.values());
     res.status(200).json(rubricas);
   } catch {
     res.status(500).json({ error: "failed to get rubrics" });

@@ -47,6 +47,20 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// To get the grups created by a user
+router.get("/user/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const grupos = await Grupo.find({ docente: id });
+    if (!grupos) {
+      return res.status(404).json({ error: "groups  not found" });
+    }
+    res.status(200).json(grupos);
+  } catch (error) {
+    res.status(500).json({ error: "failed to get course groups" });
+  }
+});
+
 // delete users from a group
 router.delete("/:id/user/:c", async (req, res) => {
   try {
