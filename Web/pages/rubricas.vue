@@ -41,6 +41,15 @@
     }
   };
 
+  const openRubric = () => {
+    navigateTo(`/Rubrica/${selectedRubrica.value}`)
+    isOpen.value = false;
+  }
+
+  const cloneRubric = () => {
+    
+  }
+
   onMounted(() => {
     fetchRubrics();
   });
@@ -56,7 +65,10 @@
             <h2 class="text-2xl font-semibold mb-4">Mis Rubricas</h2>
             <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
                 <UtilitiesSearchBar placeholderText="Buscar Rubrica..." @search="handleSearch"/>
-                <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray sm:relative sm:ml-auto fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+                <div class="flex gap-3">
+                  <UButton label="Clonar Rubrica" @click="cloneRubric" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
+                  <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray sm:relative sm:ml-auto fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+                </div>
             </div>
 
           <!-- Rubrics Grid -->
@@ -126,13 +138,10 @@
               <!-- Rúbrica details -->
               <div class="space-y-4">
                   <p class="dark:text-White-w">
-                      Curso al que pertenece:
+                      Curso al que pertenece: 
                   </p>
                   <p class="dark:text-White-w">
                       Grupo al que pertenece:
-                  </p>
-                  <p class="dark:text-White-w">
-                      Actividad al que pertenece:
                   </p>
               </div>
             </div>
@@ -143,7 +152,7 @@
                     @click="isOpen = false">
                     Cerrar
                 </UButton>
-                <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="isOpen = false">
+                <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="openRubric">
                     Ver Rubrica
                 </UButton>
             </div>
