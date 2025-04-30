@@ -37,6 +37,22 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// To get the grups of a course
+router.get("/course/:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const curso = await Curso.findById(courseId).populate("grupos");
+    if (!curso) {
+      return res.status(404).json({ error: "course not found" });
+    }
+    res.status(200).json(curso.grupos);
+  } catch (error) {
+    console.error("Error fetching course groups:", error);
+    res.status(500).json({ error: "failed to get course groups" });
+  }
+});
+
+
 router.delete("/:id/user/:c", async (req, res) => {
   try {
     const { id, c } = req.params;
