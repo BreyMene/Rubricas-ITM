@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Docente } = require("../utils/types");
 
+// Create Account
 router.post("/register", async (req, res) => {
   try {
     const { correo, contraseña } = req.body;
@@ -19,6 +20,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// Login
 router.post("/login", async (req, res) => {
   try {
     const { correo, contraseña } = req.body;

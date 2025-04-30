@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Grupo, Curso } = require("../utils/types");
 
+// Create a new group
 router.post("/", async (req, res) => {
   try {
     const { cursoId, nombre, estudiantes, docente } = req.body;
@@ -27,16 +28,26 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Get a group
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const grupo = await Grupo.findById(id).populate("docente");
+    const grupo = await Grupo.findById(id).populate([
+      {
+        path: "docente",
+      },
+      {
+        path: "rubricas",
+        select: "nombre",
+      }
+    ]);
     res.status(200).json(grupo);
   } catch {
     res.status(500).json({ error: "failed to get groups" });
   }
 });
 
+// delete users from a group
 router.delete("/:id/user/:c", async (req, res) => {
   try {
     const { id, c } = req.params;

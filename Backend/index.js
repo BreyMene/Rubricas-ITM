@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const authRoute = require("./routes/auth");
 const coursesRoute = require("./routes/course");
 const groupsRoute = require("./routes/groups");
+const rubricsRoute = require("./routes/groups");
 
 const app = express();
 const port = 8000;
@@ -19,9 +20,11 @@ mongoose
   .then(() => console.log("connected"))
   .catch((err) => console.error("failed to connect", err));
 
+// API Endpoints
 app.use("/", authRoute);
 app.use("/courses", coursesRoute);
 app.use("/groups", groupsRoute);
+app.use("/rubrics", rubricsRoute);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`listening in port ${port}`);
