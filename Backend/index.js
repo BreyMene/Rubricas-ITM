@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const authRoute = require("./routes/auth");
 const coursesRoute = require("./routes/course");
 const groupsRoute = require("./routes/groups");
-const rubricsRoute = require("./routes/groups");
+const rubricsRoute = require("./routes/rubrics");
 
 const app = express();
 const port = 8000;

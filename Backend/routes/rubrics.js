@@ -6,10 +6,9 @@ const { ClonarRubrica } = require("../utils/clone")
 // Create rubric
 router.post("/", async (req, res) => {
   try {
-    const { rubrica } = req.body;
-    let r = await Rubrica.findOne({ nombre: rubrica.nombre })
+    const { nombre, temas } = req.body;
 
-    r = new Rubrica(rubrica);
+    const r = new Rubrica({nombre, temas});
     await r.save();
     res.status(201).json(r._id);
   } catch {

@@ -8,7 +8,6 @@
   const isMobile = ref(false);
   const toast = useToast();
 
-  const rubrica = ref<Rubrica>()
   const temas = ref<Tema[]>([])
 
   const rubricName = ref('')
@@ -142,23 +141,24 @@
 
     try{
       const r: Rubrica = {
-        _id: "",
+        _id: "a",
         nombre: rubricName.value,
         temas: temas.value
       }
-      rubrica.value = r
 
-      const id  = await $fetch<String>(`${config.public.apiUrl}/rubrics`, {
+      const id  = await $fetch<String>(`${config.public.apiUrl}/rubrics/`, {
         method: "POST",
         body: {
-          rubrica: r,
+          nombre: r.nombre,
+          temas: r.temas
         },
       });
+      console.log(id)
 
       await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
         method: "PUT",
         body: {
-          ids: selectedGroups,
+          ids: selectedGroups.value,
         },
       });
 
