@@ -80,7 +80,7 @@ router.delete("/:id/user/:c", async (req, res) => {
 });
 
 // Add students in a group already created
-router.put("/:gId/docentes", async (req, res) => {
+router.put("/:gId/estudiantes", async (req, res) => {
   try {
     const { gId } = req.params;
     const { estudiantes } = req.body;
