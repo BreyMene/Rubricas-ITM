@@ -402,7 +402,7 @@
                       :label="group.nombre"
                       :ui="{
                         container: 'flex items-center gap-2',
-                        base: 'w-5 h-5 checked:bg-Medium-Blue dark:checked:bg-Muted-Brown transition-colors duration-200',
+                        base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
                         icon: 'text-white',
                         rounded: 'rounded',
                         background: 'bg-Light-Gray dark:bg-Light-Gray/30',
@@ -410,12 +410,15 @@
                       }"
                     />
                   </div>
+                  <div v-if="groups.length === 0" class="text-center text-Light-Gray dark:text-MLight-White/50">
+                    No hay grupos disponibles para este curso.
+                  </div>
                 </div>
 
                 <!-- Only show divider and guide rubric checkbox if user is moderator -->
                 <template v-if="isModerator">
                   <UDivider 
-                    label="Ó" 
+                    label="O" 
                     :orientation="isMobile ? 'horizontal' : 'vertical'" 
                     size="md"
                     :ui="{
@@ -432,7 +435,7 @@
                       label="Hacer rúbrica guía del curso"
                       :ui="{
                         container: 'flex items-center gap-2',
-                        base: 'w-5 h-5 checked:bg-Medium-Blue dark:checked:bg-Muted-Brown transition-colors duration-200',
+                        base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
                         icon: 'text-white',
                         rounded: 'rounded',
                         background: 'bg-Light-Gray dark:bg-Light-Gray/50',
@@ -442,10 +445,7 @@
                   </div>
                 </template>
               </div>
-                  
-              <div v-if="groups.length === 0" class="text-center p-8 text-Light-Gray dark:text-MLight-White/50">
-                No hay grupos disponibles para este curso.
-              </div>
+
             </div>
           </div>
 
