@@ -3,6 +3,8 @@ const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
 import type { FormSubmitEvent } from "#ui/types";
 
+const isLoading = ref(false);
+
 const props = defineProps({
   isMobile: {
     type: Boolean,
@@ -28,6 +30,7 @@ const validate = createFormValidator(emailError, passwordError, undefined, {
 
 const handleLogin = async (event: FormSubmitEvent<any>) => {
   formError.value = "";
+  isLoading.value = true;
 
   try {
     const docente = await $fetch<Docente>(`${config.public.apiUrl}/login`, {
@@ -43,6 +46,8 @@ const handleLogin = async (event: FormSubmitEvent<any>) => {
   } catch (error) {
     formError.value = "Credenciales incorrectas";
     emailError.value = props.isMobile ? "" : formError.value;
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -190,6 +195,8 @@ const show = ref(false);
       </UButton>
     </div>
   </div>
+
+  <UtilitiesLoadingScreen :is-loading="isLoading" message="Iniciando sesión..." />
 </template>
 
 <style scoped>
