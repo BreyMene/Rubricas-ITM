@@ -24,9 +24,9 @@ router.get("/clone/:id", async (req, res) => {
     if (!original) {
       return res.status(404).json({ error: "rubric not found" });
     }
-
+    console.log("antes de clonar")
     const rubrica = ClonarRubrica(original);
-
+    console.log("despues de clonar", rubrica)
     res.status(200).json(rubrica);
   } catch {
     res.status(500).json({ error: "failed to clone rubric" });

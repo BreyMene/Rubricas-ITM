@@ -3,6 +3,7 @@
   import type {Criterio, Tema, Rubrica} from '~/utils/types'
   import { useDocenteStore } from "~/utils/store";
 
+  const route = useRoute();
   const config = useRuntimeConfig();
   const isOpen = ref(false);
   const isMobile = ref(false);
@@ -21,7 +22,10 @@
 
   const selectedCourseId = ref<string>('');
   const selectedCourseName = ref<string>('');
+  const isModerator = ref(false);
   const showGroups = ref(false);
+
+  const cloneId = route.query.clone || "";
 
   const checkIfMobile = () => {
     isMobile.value = window.innerWidth <= 768;
@@ -50,9 +54,26 @@
     }
   };
 
+  const fetchClone= async () => {
+    console.log("CloneID", cloneId)
+    if (cloneId != "") {
+      try {
+        const data = await $fetch<Rubrica>(
+          `${config.public.apiUrl}/rubrics/clone/${cloneId}`,
+        );
+        console.log(data)
+        temas.value = data.temas;
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+        temas.value = [];
+      }
+    }
+  };
+
   onMounted(() => {
     fetchCourses();
     checkIfMobile();
+    fetchClone();
     window.addEventListener('resize', checkIfMobile);
   });
 
@@ -153,7 +174,6 @@
           temas: r.temas
         },
       });
-      console.log(id)
 
       await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
         method: "PUT",
@@ -161,6 +181,13 @@
           ids: selectedGroups.value,
         },
       });
+
+
+      if(isGuideRubric){
+        await $fetch(`${config.public.apiUrl}/rubrics/${id}/course/${selectedCourseId.value}`, {
+        method: "PUT",
+        });
+      }
 
       isOpen.value = false;
     }catch(error: any){
@@ -172,6 +199,7 @@
   const selectCourse = (course: Curso) => {
     selectedCourseId.value = course._id;
     selectedCourseName.value = course.nombre;
+    isModerator.value = course.docentes.some((d)=> d._id == docenteID && d.moderador == true);
     fetchGroups();
     showGroups.value = true;
   }
@@ -362,7 +390,7 @@
               <!-- Groups as checkbox list with guide rubric checkbox -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Group List -->
-                <div class="space-y-3">
+                <div :class="isModerator ? 'space-y-3' : 'space-y-3 md:col-span-3'">
                   <div
                     v-for="group in groups"
                     :key="group._id"
@@ -374,7 +402,7 @@
                       :label="group.nombre"
                       :ui="{
                         container: 'flex items-center gap-2',
-                        base: 'w-5 h-5 checked:bg-Medium-Blue dark:checked:bg-Muted-Brown transition-colors duration-200',
+                        base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
                         icon: 'text-white',
                         rounded: 'rounded',
                         background: 'bg-Light-Gray dark:bg-Light-Gray/30',
@@ -382,34 +410,42 @@
                       }"
                     />
                   </div>
+                  <div v-if="groups.length === 0" class="text-center text-Light-Gray dark:text-MLight-White/50">
+                    No hay grupos disponibles para este curso.
+                  </div>
                 </div>
-                <UDivider label="Ó" :orientation="isMobile ? 'horizontal' : 'vertical'" size="md"
-                  :ui="{
-                    label: 'text-Medium-Blue dark:text-Muted-Brown',
-                    border: {
-                      base: 'rounded border-Medium-Blue dark:border-Muted-Brown'
-                    }
-                  }"/>
-                <!-- Guide Rubric Checkbox -->
-                <div class="flex flex-col justify-start">
-                  <UCheckbox
-                    v-model="isGuideRubric"
-                    label="Hacer rúbrica guía del curso"
+
+                <!-- Only show divider and guide rubric checkbox if user is moderator -->
+                <template v-if="isModerator">
+                  <UDivider 
+                    label="O" 
+                    :orientation="isMobile ? 'horizontal' : 'vertical'" 
+                    size="md"
                     :ui="{
-                      container: 'flex items-center gap-2',
-                      base: 'w-5 h-5 checked:bg-Medium-Blue dark:checked:bg-Muted-Brown transition-colors duration-200',
-                      icon: 'text-white',
-                      rounded: 'rounded',
-                      background: 'bg-Light-Gray dark:bg-Light-Gray/50',
-                      label: 'text-Pure-Black dark:text-White-w font-medium'
+                      label: 'text-Medium-Blue dark:text-Muted-Brown',
+                      border: {
+                        base: 'rounded border-Medium-Blue dark:border-Muted-Brown'
+                      }
                     }"
                   />
-                </div>
+                  <!-- Guide Rubric Checkbox -->
+                  <div class="flex flex-col justify-start">
+                    <UCheckbox
+                      v-model="isGuideRubric"
+                      label="Hacer rúbrica guía del curso"
+                      :ui="{
+                        container: 'flex items-center gap-2',
+                        base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
+                        icon: 'text-white',
+                        rounded: 'rounded',
+                        background: 'bg-Light-Gray dark:bg-Light-Gray/50',
+                        label: 'text-Pure-Black dark:text-White-w font-medium'
+                      }"
+                    />
+                  </div>
+                </template>
               </div>
 
-              <div v-if="groups.length === 0" class="text-center p-8 text-Light-Gray dark:text-MLight-White/50">
-                No hay grupos disponibles para este curso.
-              </div>
             </div>
           </div>
 

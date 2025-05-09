@@ -4,10 +4,28 @@
 
   const rubricas = ref<Rubrica[]>([]);
   const docenteID = useDocenteStore().getID;
+  const courses = ref<Curso[]>([]);
 
   // Modal state
   const isOpen = ref(false)
+  const openCourses = ref(false)
+
   const selectedRubrica = ref<string | null>(null);
+  const selectedCourseId = ref<string>('');
+  const selectedRubricaName = ref<string>('');
+
+  const rubricButtons = computed(() => [
+  [
+      {
+        label: "Crear Rubrica",
+        to: '/crearRubrica',
+      },
+      {
+        label: "Clonar Rubrica",
+        click: () => cloneRubric()
+      }
+  ],
+  ]);
 
   // Function to handle rubrica selection with explicit type
   const selectRubrica = (rubricaId: string) => {
@@ -41,17 +59,45 @@
     }
   };
 
+  const fetchCourses = async () => {
+    try {
+      const data = await $fetch<Curso[]>(
+        `${config.public.apiUrl}/courses/${docenteID}`,
+      );
+      courses.value = data;
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  const selectCourse = (course: Curso) => {
+    selectedRubrica.value = course.rubricaGuia?._id || "";
+    selectedCourseId.value = course._id;
+  }
+
   const openRubric = () => {
     navigateTo(`/Rubrica/${selectedRubrica.value}`)
     isOpen.value = false;
   }
 
   const cloneRubric = () => {
-    
+    console.log(selectedRubrica.value)
+    navigateTo({path: '/crearRubrica', query: {clone: selectedRubrica.value} })
   }
 
   onMounted(() => {
+    fetchCourses();
     fetchRubrics();
+  });
+
+  watch(openCourses, (newValue) => {
+    if (!newValue) {
+      // Add a delay before resetting the icon
+      setTimeout(() => {
+        selectedCourseId.value = "";
+        selectedRubrica.value = "";
+      }, 300);
+    }
   });
 
 </script>
@@ -65,10 +111,37 @@
             <h2 class="text-2xl font-semibold mb-4">Mis Rubricas</h2>
             <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
                 <UtilitiesSearchBar placeholderText="Buscar Rubrica..." @search="handleSearch"/>
-                <div class="flex gap-3">
-                  <UButton label="Clonar Rubrica" @click="cloneRubric" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
-                  <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray sm:relative sm:ml-auto fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+
+                  <!-- Desktop buttons - visible on SM and above -->
+                <div class="hidden sm:flex gap-3">
+                  <UButton label="Clonar Rubrica" @click="openCourses = true" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
+                  <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
                 </div>
+                
+                <!-- Mobile dropdown menu - visible on XS only -->
+                <UDropdown :items="rubricButtons" :ui="{
+                    width: 'w-40',
+                    transition: {
+                      enterActiveClass: 'transition-all duration-200 ease-out',
+                      enterFromClass: 'transform scale-0 opacity-90 origin-bottom-right',
+                      enterToClass: 'transform scale-100 opacity-100 origin-bottom-right',
+                      leaveActiveClass: 'transition-all duration-200 ease-in',
+                      leaveFromClass: 'transform scale-100 opacity-100 origin-bottom-right',
+                      leaveToClass: 'transform scale-92 opacity-0 origin-bottom-right',
+                    },
+                    rounded: 'rounded-2xl',
+                    ring: 'ring-0',
+                    background: 'bg-White-w dark:bg-Pure-Black/60',
+                    item: {
+                        rounded: 'rounded-xl',
+                        active: 'dark:bg-Muted-Brown/60',
+                    },
+                    padding: 'p-2',
+                }"
+                class="sm:hidden fixed bottom-6 right-6 z-10">
+                  <UButton icon="material-symbols:add" size="xl" 
+                    class="rounded-full shadow-lg dark:text-White-w bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
+                </UDropdown>
             </div>
 
           <!-- Rubrics Grid -->
@@ -159,6 +232,94 @@
         </UCard>
     </UModal>
   </div>
+
+  <!-- Open Courses Modal -->
+  <UModal
+      v-model="openCourses"
+      prevent-close
+      :ui="{
+        width: 'w-full sm:max-w-3xl',
+        height: 'max-h-[700px]',
+        container: 'flex items-center justify-center',
+        overlay: {background: 'dark:bg-Light-Gray/15'},
+      }"
+    >
+      <UCard
+        :ui="{
+          background: 'dark:bg-Medium-Dark',
+          ring: '',
+          divide: '',
+          header: { base: 'border-b border-Purple-P dark:border-Dark-Grey'},
+          base: 'w-full',
+        }"
+      >
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-semibold leading-6 dark:text-white">
+              Finalizar Rúbrica
+            </h3>
+            <UButton
+              color="gray"
+              variant="ghost"
+              icon="fluent:dismiss-12-filled"
+              class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+              @click="openCourses=false"
+            />
+          </div>
+        </template>
+
+        <!-- Modal Content -->
+        <div class="p-4">
+          <div class="flex flex-col gap-6">
+            <!-- Course Selection View -->
+            <div class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-6 shadow-md">
+              <h4 class="text-lg font-medium mb-1 dark:text-white">Seleccionar Curso</h4>
+              <h1 class="mb-4 dark:text-white/60">Clonara la ultima rubrica guia</h1>
+
+              <!-- Course Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div
+                  v-for="course in courses"
+                  :key="course._id"
+                  class="relative bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                  :class="course._id == selectedCourseId ? 'ring-4 dark:ring-White-w ring-Medium-Gray' : 'ring-0' "
+                  @click="selectCourse(course)"
+                >
+                  <!-- Course Content -->
+                  <div class="w-full h-full flex flex-col items-center cursor-pointer">
+                    <UIcon
+                      :name="course.icono"
+                      class="text-4xl text-Purple-P dark:text-Muted-Brown"
+                    />
+                    <h3 class="text-md font-medium text-center text-Pure-Black dark:text-White-w mt-2">
+                      {{ course.nombre }}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex justify-end mt-6 gap-4">
+            <UButton
+              variant="link"
+              color="black"
+              @click="openCourses = false"
+            >
+              Cancelar
+            </UButton>
+            <UButton
+              class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
+              @click="cloneRubric"
+            >
+              Clonar
+            </UButton>
+          </div>
+        </div>
+      </UCard>
+    </UModal>
 </template>
 
 <style scoped>
