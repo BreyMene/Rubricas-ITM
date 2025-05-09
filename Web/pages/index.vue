@@ -3,12 +3,14 @@ const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
 import { useCursoStore } from "~/utils/store";
 
+const loading = ref(true);
 
 // Sample courses data (you can replace this with your actual data)
 const courses = ref<Curso[]>([]);
 
 const docenteID = useDocenteStore().getID;
 const fetchCourses = async () => {
+  loading.value = true;
   try {
     const data = await $fetch<Curso[]>(
       `${config.public.apiUrl}/courses/${docenteID}`,
@@ -16,6 +18,8 @@ const fetchCourses = async () => {
     courses.value = data;
   } catch (error) {
     console.error("Error fetching courses:", error);
+  }finally {
+    loading.value = false;
   }
 };
 
@@ -54,64 +58,82 @@ function addCourse(c: Curso) {
             />
           </div>
 
-          <!-- No Courses Warning -->
-          <div
-            v-if="!courses.length"
-            class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
-          >
+          <ClientOnly>
             <div
-              class="relative w-80 h-52 flex flex-col items-center justify-center"
+              v-if="!loading"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-              <!-- Corner decorations -->
+              <!-- No Courses Warning -->
               <div
-                class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"
-              ></div>
-              <div
-                class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"
-              ></div>
-              <div
-                class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"
-              ></div>
-              <div
-                class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"
-              ></div>
-
-              <UIcon
-                name="fluent:warning-24-regular"
-                class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
-              />
-              <p
-                class="text-xl font-medium text-center text-Pure-Black dark:text-White-w"
+                v-if="!courses.length"
+                class="col-span-full flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
               >
-                NO TIENES<br />NINGUN CURSO
-              </p>
+                <div
+                  class="relative w-80 h-52 flex flex-col items-center justify-center"
+                >
+                  <!-- Corner decorations -->
+                  <div
+                    class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"
+                  ></div>
+                  <div
+                    class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"
+                  ></div>
+                  <div
+                    class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"
+                  ></div>
+                  <div
+                    class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"
+                  ></div>
+
+                  <UIcon
+                    name="fluent:warning-24-regular"
+                    class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
+                  />
+                  <p
+                    class="text-xl font-medium text-center text-Pure-Black dark:text-White-w"
+                  >
+                    NO TIENES<br />NINGUN CURSO
+                  </p>
+                </div>
+              </div>
+
+              <!-- Course Cards -->
+              <UButton
+                v-for="course in courses"
+                :key="course._id"
+                @click="navigateToCourse(course)"
+                variant="ghost"
+                class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+              >
+                <UIcon
+                  :name="course.icono"
+                  class="text-6xl text-Purple-P dark:text-Muted-Brown"
+                />
+                <h3
+                  class="text-lg font-medium text-center text-Pure-Black dark:text-White-w"
+                >
+                  {{ course.nombre }}
+                </h3>
+              </UButton>
             </div>
-          </div>
 
-          <!-- Course Grid -->
-          <div
-            v-else
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
-            <!-- Course Cards -->
-            <UButton
-              v-for="course in courses"
-              :key="course._id"
-              @click="navigateToCourse(course)"
-              variant="ghost"
-              class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-            >
-              <UIcon
-                :name="course.icono"
-                class="text-6xl text-Purple-P dark:text-Muted-Brown"
-              />
-              <h3
-                class="text-lg font-medium text-center text-Pure-Black dark:text-White-w"
-              >
-                {{ course.nombre }}
-              </h3>
-            </UButton>
-          </div>
+            <!-- Skeleton Loader -->
+            <template #fallback>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <USkeleton
+                  v-for="i in 4" 
+                  :key="i" 
+                  class="w-full h-[148px] aspect-square"
+                  :ui="{
+                    base: 'animate-pulse',
+                    rounded: 'rounded-xl',
+                    background: 'bg-gray-200 dark:bg-gray-700',
+                  }"
+                />
+              </div>
+            </template>
+          </ClientOnly>
+
         </div>
       </div>
     </div>

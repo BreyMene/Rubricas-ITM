@@ -11,6 +11,9 @@
     const otpEmail = ref('');
     const isResetPass = ref(false);
 
+    const loadMg = ref('')
+    const canLoadScreen = ref(false)
+
     // Para hacer el backToLogin mas rapido en ResetPassword
     const isLeavingFromReset = ref(false);
 
@@ -88,6 +91,11 @@
             console.log(isOTPForm)
         }, 100);
     }
+
+    const loadScreen = (message: string, loadValue: false) => {
+        loadMg.value = message
+        canLoadScreen.value = loadValue
+    }
 </script>
 
 <template>
@@ -153,12 +161,14 @@
                         v-if="isLogin && !isForgotPassword"
                         @show-forgot-password="showForgotPassword"
                         @toggle-form="toggleForm"
+                        @load-screen="loadScreen"
                     />
 
                     <!-- Sign In Form Desktop -->
                     <RegisterSignIn 
                         v-else-if="!isLogin && !isForgotPassword"
                         @toggle-form="toggleForm"
+                        @load-screen="loadScreen"
                     />
 
                     <!-- Olvido Contraseña Desktop -->
@@ -242,6 +252,8 @@
 
             </div>
         </div>
+
+        <UtilitiesLoadingScreen :is-loading="canLoadScreen" :message="loadMg" />
     </div>
 </template>
 

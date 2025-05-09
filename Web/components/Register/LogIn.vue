@@ -3,7 +3,7 @@ const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
 import type { FormSubmitEvent } from "#ui/types";
 
-const isLoading = ref(false);
+const loadScreen = ref(false);
 
 const props = defineProps({
   isMobile: {
@@ -12,7 +12,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["showForgotPassword", "toggleForm"]);
+const emit = defineEmits(["showForgotPassword", "toggleForm", "loadScreen"]);
 
 const state = reactive({
   email: "",
@@ -30,9 +30,10 @@ const validate = createFormValidator(emailError, passwordError, undefined, {
 
 const handleLogin = async (event: FormSubmitEvent<any>) => {
   formError.value = "";
-  isLoading.value = true;
-
+  
   try {
+    loadScreen.value = true;
+    emit("loadScreen", "Iniciando sesión...", loadScreen.value)
     const docente = await $fetch<Docente>(`${config.public.apiUrl}/login`, {
       method: "POST",
       body: {
@@ -47,7 +48,8 @@ const handleLogin = async (event: FormSubmitEvent<any>) => {
     formError.value = "Credenciales incorrectas";
     emailError.value = props.isMobile ? "" : formError.value;
   } finally {
-    isLoading.value = false;
+    loadScreen.value = false;
+    emit("loadScreen", "", loadScreen.value)
   }
 };
 
@@ -196,7 +198,6 @@ const show = ref(false);
     </div>
   </div>
 
-  <UtilitiesLoadingScreen :is-loading="isLoading" message="Iniciando sesión..." />
 </template>
 
 <style scoped>

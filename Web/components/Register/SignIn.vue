@@ -9,7 +9,8 @@
         }
     });
 
-    const emit = defineEmits(['toggleForm']);
+    const loadScreen = ref(false);
+    const emit = defineEmits(['toggleForm', "loadScreen"]);
 
     const state = reactive({
         email: '',
@@ -33,6 +34,8 @@
         formError.value = "";
 
         try {
+            loadScreen.value = true;
+            emit("loadScreen", "Creando Cuenta...", loadScreen.value)
             const docente: Docente = await $fetch(`${config.public.apiUrl}/register`, {
                 method: 'POST',
                 body: {
@@ -51,6 +54,9 @@
                 formError.value = "Error al registrar. Intente más tarde";
                 emailError.value = props.isMobile ? "" : formError.value;
             }
+        }finally {
+            loadScreen.value = false;
+            emit("loadScreen", "", loadScreen.value)
         }
     }
 
