@@ -21,6 +21,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@iconify-json/fluent": "^1.2.20",
     "@types/node": "^22.14.1"
   }
 }

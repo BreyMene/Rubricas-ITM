@@ -71,7 +71,7 @@ router.get("/user/:id", async (req, res) => {
     .populate({path: "rubricas", select: "nombre"});
 
     const agregarRubrica = (rubrica) => {
-      if (rubrica){
+      if (rubrica && !rubricas.some(r => r._id.equals(rubrica._id))){
         rubricas.push({
           _id: rubrica._id,
           nombre: rubrica.nombre

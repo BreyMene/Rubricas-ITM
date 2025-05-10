@@ -86,7 +86,6 @@
   }
 
   const cloneRubric = () => {
-    console.log(selectedRubrica.value)
     navigateTo({path: '/crearRubrica', query: {clone: selectedRubrica.value} })
   }
 
