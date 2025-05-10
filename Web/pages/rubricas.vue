@@ -5,6 +5,7 @@
   const rubricas = ref<Rubrica[]>([]);
   const docenteID = useDocenteStore().getID;
   const courses = ref<Curso[]>([]);
+  const loading = ref(true);
 
   // Modal state
   const isOpen = ref(false)
@@ -50,12 +51,16 @@
 
   const fetchRubrics = async () => {
     try {
+      loading.value = true;
       const data = await $fetch<Rubrica[]>(
         `${config.public.apiUrl}/rubrics/user/${docenteID}`,
       );
       rubricas.value = data;
     } catch (error) {
       console.error("Error fetching courses:", error);
+    }
+    finally {
+      loading.value = false;
     }
   };
 
@@ -146,40 +151,60 @@
 
           <!-- Rubrics Grid -->
           <div class="relative">
-            <TransitionGroup
-                name="list"
-                tag="div"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
-            >
-              <div v-if="!rubricas.length" class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2">
-                  <div class="relative w-80 h-52 flex flex-col items-center justify-center">
-                      <!-- Corner decorations -->
-                      <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                      <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                      <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                      <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
-
-                      <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                      <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
-                  </div>
-              </div>
-
-              <UButton v-else variant="ghost"
-                v-for="rubrica in filteredRubricas"
-                :key="rubrica._id"
-                @click="selectRubrica(rubrica._id)"
-                class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
+            <ClientOnly>
+              <TransitionGroup
+                  v-if="!loading"
+                  name="list"
+                  tag="div"
+                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
               >
-                <div class="w-full h-full rounded-lg overflow-hidden relative">
-                  <NuxtImg
-                    src="RubricaTest.PNG"
-                    class="w-full h-full object-cover"
-                    style="filter: blur(1.5px);"
-                  />
+                <div v-if="!rubricas.length" class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2">
+                    <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                        <!-- Corner decorations -->
+                        <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                        <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                        <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                        <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+
+                        <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
+                    </div>
                 </div>
-                <h3 class="text-Pure-Black dark:text-White-w">{{ rubrica.nombre }}</h3>
-              </UButton>
-            </TransitionGroup>
+
+                <UButton v-else variant="ghost"
+                  v-for="rubrica in filteredRubricas"
+                  :key="rubrica._id"
+                  @click="selectRubrica(rubrica._id)"
+                  class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
+                >
+                  <div class="w-full h-full rounded-lg overflow-hidden relative">
+                    <NuxtImg
+                      src="RubricaTest.PNG"
+                      class="w-full h-full object-cover"
+                      style="filter: blur(1.5px);"
+                    />
+                  </div>
+                  <h3 class="text-Pure-Black dark:text-White-w">{{ rubrica.nombre }}</h3>
+                </UButton>
+              </TransitionGroup>
+
+              <!-- Skeleton Loader -->
+              <template #fallback>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <USkeleton
+                  v-for="i in 4" 
+                  :key="i" 
+                  class="w-full h-[148px] aspect-square"
+                  :ui="{
+                    base: 'animate-pulse',
+                    rounded: 'rounded-xl',
+                    background: 'bg-gray-200 dark:bg-gray-700',
+                  }"
+                />
+              </div>
+              </template>
+            </ClientOnly>
+
           </div>
         </div>
       </div>

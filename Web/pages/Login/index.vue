@@ -253,7 +253,7 @@
             </div>
         </div>
 
-        <UtilitiesLoadingScreen :is-loading="canLoadScreen" :message="loadMg" />
+        <UtilitiesLoadingScreen :is-loading="canLoadScreen" :message="loadMg" :fullscreen="true"/>
     </div>
 </template>
 

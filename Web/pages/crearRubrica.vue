@@ -25,6 +25,9 @@
   const isModerator = ref(false);
   const showGroups = ref(false);
 
+  // For loading screen
+  const isLoadingGroups = ref(false);
+
   const cloneId = route.query.clone || "";
 
   const checkIfMobile = () => {
@@ -44,6 +47,7 @@
 
   const fetchGroups = async () => {
     try {
+      isLoadingGroups.value = true;
       const data = await $fetch<{_id: string, nombre: string}[]>(
         `${config.public.apiUrl}/groups/user/${docenteID}`,
       );
@@ -51,20 +55,19 @@
     } catch (error) {
       console.error("Error fetching groups:", error);
       groups.value = [];
+    } finally {
+      isLoadingGroups.value = false;
     }
   };
 
   const fetchClone= async () => {
-    console.log("CloneID", cloneId)
     if (cloneId != "") {
       try {
         const data = await $fetch<Rubrica>(
           `${config.public.apiUrl}/rubrics/clone/${cloneId}`,
         );
-        console.log(data)
         temas.value = data.temas;
       } catch (error) {
-        console.error("Error fetching groups:", error);
         temas.value = [];
       }
     }
@@ -388,9 +391,18 @@
               </div>
 
               <!-- Groups as checkbox list with guide rubric checkbox -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                <!-- Loading component -->
+                <UtilitiesLoadingScreen 
+                  :isLoading="isLoadingGroups" 
+                  message="" 
+                  :noBackground="true" 
+                  :noSpinnerBackground="true"
+                  spinnerSize="sm"
+                />
+
                 <!-- Group List -->
-                <div :class="isModerator ? 'space-y-3' : 'space-y-3 md:col-span-3'">
+                <div v-if="!isLoadingGroups" :class="isModerator ? 'space-y-3' : 'space-y-3 md:col-span-3'">
                   <div
                     v-for="group in groups"
                     :key="group._id"
@@ -416,7 +428,7 @@
                 </div>
 
                 <!-- Only show divider and guide rubric checkbox if user is moderator -->
-                <template v-if="isModerator">
+                <template v-if="isModerator && !isLoadingGroups">
                   <UDivider 
                     label="O" 
                     :orientation="isMobile ? 'horizontal' : 'vertical'" 
