@@ -49,7 +49,7 @@
     try {
       isLoadingGroups.value = true;
       const data = await $fetch<{_id: string, nombre: string}[]>(
-        `${config.public.apiUrl}/groups/user/${docenteID}`,
+        `${config.public.apiUrl}/groups/course/${selectedCourseId.value}/user/${docenteID}`,
       );
       groups.value = data;
     } catch (error) {
@@ -178,15 +178,17 @@
         },
       });
 
-      await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
-        method: "PUT",
-        body: {
-          ids: selectedGroups.value,
-        },
-      });
+      if (selectedGroups.value.length > 0) {
+        await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
+          method: "PUT",
+          body: {
+            ids: selectedGroups.value,
+          },
+        });
+      }
 
 
-      if(isGuideRubric){
+      if(isGuideRubric.value){
         await $fetch(`${config.public.apiUrl}/rubrics/${id}/course/${selectedCourseId.value}`, {
         method: "PUT",
         });

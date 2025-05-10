@@ -122,7 +122,7 @@
                   <UButton label="Clonar Rubrica" @click="openCourses = true" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
                   <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
                 </div>
-                
+
                 <!-- Mobile dropdown menu - visible on XS only -->
                 <UDropdown :items="rubricButtons" :ui="{
                     width: 'w-40',
@@ -144,7 +144,7 @@
                     padding: 'p-2',
                 }"
                 class="sm:hidden fixed bottom-6 right-6 z-10">
-                  <UButton icon="material-symbols:add" size="xl" 
+                  <UButton icon="material-symbols:add" size="xl"
                     class="rounded-full shadow-lg dark:text-White-w bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
                 </UDropdown>
             </div>
@@ -236,7 +236,7 @@
               <!-- Rúbrica details -->
               <div class="space-y-4">
                   <p class="dark:text-White-w">
-                      Curso al que pertenece: 
+                      Curso al que pertenece:
                   </p>
                   <p class="dark:text-White-w">
                       Grupo al que pertenece:
