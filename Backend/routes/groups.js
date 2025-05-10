@@ -48,13 +48,22 @@ router.get("/:id", async (req, res) => {
 });
 
 // To get the grups created by a user
-router.get("/user/:id", async (req, res) => {
+router.get("/course/:cId/user/:uId", async (req, res) => {
   try {
-    const { id } = req.params;
-    const grupos = await Grupo.find({ docente: id });
-    if (!grupos) {
-      return res.status(404).json({ error: "groups  not found" });
+    const { cId, uId } = req.params;
+
+    const curso = await Curso.findById(cId).populate({
+      path: "grupos",
+      match: { docente: uId }
+    });
+    if (!curso) {
+      return res.status(404).json({ error: "course not found" });
     }
+    const grupos = curso.grupos;
+    if (!grupos || grupos.length === 0) {
+      return res.status(404).json({ error: "no groups found for this user in this course" });
+    }
+
     res.status(200).json(grupos);
   } catch (error) {
     res.status(500).json({ error: "failed to get course groups" });

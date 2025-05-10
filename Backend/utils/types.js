@@ -59,6 +59,7 @@ const grupo = mongoose.Schema({
   },
   estudiantes: [
     {
+      _id: false,
       nombre: {
         type: String,
         required: true,
@@ -80,7 +81,9 @@ const grupo = mongoose.Schema({
       ref: "Rubrica",
     }
   ]
-});
+},
+{ versionKey: false },
+);
 
 const rubrica = mongoose.Schema({
   nombre: {
@@ -88,8 +91,10 @@ const rubrica = mongoose.Schema({
     required: true,
   },
   temas: [{
+    _id: false,
     nombre: String,
     criterios: [{
+      _id: false,
       criterio: String,
       peso: Number,
       calificacion: Number,
@@ -97,7 +102,8 @@ const rubrica = mongoose.Schema({
       observaciones: String,
     }]
   }]
-})
+},
+{ versionKey: false },);
 
 const Docente = mongoose.model("Docente", docente);
 const Curso = mongoose.model("Curso", curso);

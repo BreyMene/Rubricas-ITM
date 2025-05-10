@@ -45,7 +45,7 @@
   const fetchGroups = async () => {
     try {
       const data = await $fetch<{_id: string, nombre: string}[]>(
-        `${config.public.apiUrl}/groups/user/${docenteID}`,
+        `${config.public.apiUrl}/groups/course/${selectedCourseId.value}/user/${docenteID}`,
       );
       groups.value = data;
     } catch (error) {
@@ -175,15 +175,17 @@
         },
       });
 
-      await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
-        method: "PUT",
-        body: {
-          ids: selectedGroups.value,
-        },
-      });
+      if (selectedGroups.value.length > 0) {
+        await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
+          method: "PUT",
+          body: {
+            ids: selectedGroups.value,
+          },
+        });
+      }
 
 
-      if(isGuideRubric){
+      if(isGuideRubric.value){
         await $fetch(`${config.public.apiUrl}/rubrics/${id}/course/${selectedCourseId.value}`, {
         method: "PUT",
         });
@@ -417,9 +419,9 @@
 
                 <!-- Only show divider and guide rubric checkbox if user is moderator -->
                 <template v-if="isModerator">
-                  <UDivider 
-                    label="O" 
-                    :orientation="isMobile ? 'horizontal' : 'vertical'" 
+                  <UDivider
+                    label="O"
+                    :orientation="isMobile ? 'horizontal' : 'vertical'"
                     size="md"
                     :ui="{
                       label: 'text-Medium-Blue dark:text-Muted-Brown',

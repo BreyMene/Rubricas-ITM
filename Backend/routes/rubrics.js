@@ -10,6 +10,7 @@ router.post("/", async (req, res) => {
 
     const r = new Rubrica({nombre, temas});
     await r.save();
+
     res.status(201).json(r._id);
   } catch {
     res.status(500).json({ error: "failed to create rubric" });
@@ -20,13 +21,12 @@ router.post("/", async (req, res) => {
 router.get("/clone/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const original = await Rubrica.findById(id);
+    const original = await Rubrica.findById(id).lean();
     if (!original) {
       return res.status(404).json({ error: "rubric not found" });
     }
-    console.log("antes de clonar")
+
     const rubrica = ClonarRubrica(original);
-    console.log("despues de clonar", rubrica)
     res.status(200).json(rubrica);
   } catch {
     res.status(500).json({ error: "failed to clone rubric" });
@@ -55,16 +55,23 @@ router.get("/user/:id", async (req, res) => {
     const { id } = req.params;
     const rubricas = [];
 
-    const cursos = await Curso.find({ "docentes._id": id, "docentes.moderador": true },
-      {rubricaGuia: 1}
-    ).populate({path: "rubricaGuia", select: "nombre"});
+    const cursos = await Curso.find({
+      docentes: {
+        $elemMatch: {
+          _id: id,
+          moderador: true
+        }
+      }
+    }, { rubricaGuia: 1 }).populate({
+      path: "rubricaGuia",
+      select: "nombre"
+    });
 
     const grupos = await Grupo.find({ docente: id }, {rubricas: 1})
     .populate({path: "rubricas", select: "nombre"});
 
     const agregarRubrica = (rubrica) => {
-      if (rubrica && rubrica.nombre &&
-          !rubricas.some(r => r._id.equals(rubrica._id))) {
+      if (rubrica){
         rubricas.push({
           _id: rubrica._id,
           nombre: rubrica.nombre
@@ -120,15 +127,13 @@ router.put("/:r/group", async (req, res) => {
       return res.status(404).json({ error: "rubric not found" });
     }
 
-    for (const id of ids) {
+    await Promise.all(ids.map(async (id) => {
       const grupo = await Grupo.findById(id);
-      if (!grupo) continue;
-
-      if (!grupo.rubricas.includes(r)) {
+      if (grupo && !grupo.rubricas.includes(r)) {
         grupo.rubricas.push(r);
         await grupo.save();
       }
-    }
+    }));
 
     res.status(200).json({ message: "rubric assigned to groups successfully" });
   } catch {
