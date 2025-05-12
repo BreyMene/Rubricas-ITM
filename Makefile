@@ -5,7 +5,7 @@ mongo-up:
 	docker compose up -d db
 
 web:
-	cd $(WEB_DIR) && npm run dev
+	cd $(WEB_DIR) && npm run build && node .output/server/index.mjs
 
 backend:
 	cd $(BACKEND_DIR) && npm run dev

@@ -195,6 +195,7 @@
       }
 
       isOpen.value = false;
+      await navigateTo(`/rubrica/${id}`);
     }catch(error: any){
 
     }
@@ -395,10 +396,10 @@
               <!-- Groups as checkbox list with guide rubric checkbox -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
                 <!-- Loading component -->
-                <UtilitiesLoadingScreen 
-                  :isLoading="isLoadingGroups" 
-                  message="" 
-                  :noBackground="true" 
+                <UtilitiesLoadingScreen
+                  :isLoading="isLoadingGroups"
+                  message=""
+                  :noBackground="true"
                   :noSpinnerBackground="true"
                   spinnerSize="sm"
                 />
@@ -431,9 +432,9 @@
 
                 <!-- Only show divider and guide rubric checkbox if user is moderator -->
                 <template v-if="isModerator && !isLoadingGroups">
-                  <UDivider 
-                    label="O" 
-                    :orientation="isMobile ? 'horizontal' : 'vertical'" 
+                  <UDivider
+                    label="O"
+                    :orientation="isMobile ? 'horizontal' : 'vertical'"
                     size="md"
                     :ui="{
                       label: 'text-Medium-Blue dark:text-Muted-Brown',
