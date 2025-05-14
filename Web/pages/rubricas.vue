@@ -29,8 +29,9 @@
   ]);
 
   // Function to handle rubrica selection with explicit type
-  const selectRubrica = (rubricaId: string) => {
+  const selectRubrica = (rubricaId: string, rubricaNomb: string) => {
       selectedRubrica.value = rubricaId;
+      selectedRubricaName.value = rubricaNomb;
       isOpen.value = true;
   };
 
@@ -100,6 +101,7 @@
       setTimeout(() => {
         selectedCourseId.value = "";
         selectedRubrica.value = "";
+        selectedRubricaName.value = "";
       }, 300);
     }
   });
@@ -173,7 +175,7 @@
                 <UButton v-else variant="ghost"
                   v-for="rubrica in filteredRubricas"
                   :key="rubrica._id"
-                  @click="selectRubrica(rubrica._id)"
+                  @click="selectRubrica(rubrica._id, rubrica.nombre)"
                   class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
                 >
                   <div class="w-full h-full rounded-lg overflow-hidden relative">
@@ -225,8 +227,8 @@
         }">
             <template #header>
               <div class="flex items-center justify-between">
-                  <h3 class="text-base font-semibold leading-6 dark:text-White-w">
-                      Detalles Rúbrica {{ selectedRubrica }}
+                  <h3 class="flex gap-1 text-base font-medium leading-6 dark:text-White-w">
+                      Detalles Rúbrica: <p class="font-bold text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaName }}</p>
                   </h3>
               </div>
             </template>

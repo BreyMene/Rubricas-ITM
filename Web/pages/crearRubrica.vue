@@ -27,6 +27,7 @@
 
   // For loading screen
   const isLoadingGroups = ref(false);
+  const loadingCreateR = ref(false);
 
   const cloneId = route.query.clone || "";
 
@@ -164,6 +165,7 @@
     }
 
     try{
+      loadingCreateR.value = true;
       const r: Rubrica = {
         _id: "a",
         nombre: rubricName.value,
@@ -198,6 +200,9 @@
       await navigateTo(`/rubrica/${id}`);
     }catch(error: any){
 
+    }
+    finally{
+      loadingCreateR.value = false;
     }
   }
 
@@ -483,5 +488,11 @@
         </div>
       </UCard>
     </UModal>
+
+    <!-- Loading component -->
+    <UtilitiesLoadingScreen
+      :isLoading="loadingCreateR"
+      message=""
+    />
   </div>
 </template>

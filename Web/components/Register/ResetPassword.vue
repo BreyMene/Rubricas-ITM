@@ -8,15 +8,22 @@
 
     const emit = defineEmits(['backToLogin']);
 
+    const passwordError = ref('');
+    const secPasswordError = ref('');
+
     const state = reactive({
         password: '',
-        confirmPassword: ''
+        secPasword: ''
+    });
+
+    const validate = createFormValidator(undefined, passwordError, secPasswordError, {
+        isMobile: props.isMobile,
+        minPasswordLength: 6
     });
 
     const handleSignIn = async () => {
         try {
-            if(state.password && state.confirmPassword){
-                console.log('ResetPassword:', state);
+            if(state.password && state.secPasword){
                 emit('backToLogin', true);
             }
             else{
@@ -47,8 +54,11 @@
             RESTABLECE TU CONTRASEÑA
         </h2>
         <div class="mb-6">
-            <UForm :state="state" class="flex flex-col gap-3" @submit="handleSignIn">
-                <UFormGroup label="Nueva Contraseña" name="password">
+            <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleSignIn">
+                <UFormGroup label="Nueva Contraseña" name="password" :hint="passwordError"
+                    :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
+                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
+                    }">
                     <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
                         :ui="{
                             icon: {
@@ -78,8 +88,11 @@
                     </UInput>
                 </UFormGroup>
 
-                <UFormGroup label="Confirmar Contraseña" name="secPasword">
-                    <UInput size="sm" v-model="state.confirmPassword" :type="showConfirmPassword  ? 'text' : 'password'" class="w-full"
+                <UFormGroup label="Confirmar Contraseña" name="secPasword" :hint="secPasswordError"
+                    :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
+                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
+                    }">
+                    <UInput size="sm" v-model="state.secPasword" :type="showConfirmPassword  ? 'text' : 'password'" class="w-full"
                         :ui="{
                             icon: {
                                 trailing: { pointer: '' }

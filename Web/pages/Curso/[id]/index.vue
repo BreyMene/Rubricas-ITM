@@ -258,17 +258,17 @@
                 v-for="group in filteredGroups"
                 :key="group._id"
                 variant="ghost"
-                class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
                 @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
               >
                 <h3
-                  class="text-lg font-medium text-center text-Pure-Black dark:text-White-w"
+                  class="text-lg font-semibold text-center text-Pure-Black dark:text-White-w"
                 >
                   {{ group.nombre }}
                 </h3>
-                <p class="text-sm text-Medium-Gray dark:text-Light-Gray">
+                <p class="text-sm text-center w-full text-Medium-Gray dark:text-Light-Gray">
                   Profesor encargado <br />
-                  {{ group.docente.correo }}
+                  <span class="block truncate max-w-full text-Medium-Gray/70 dark:text-Light-Gray/70">{{ group.docente.correo }}</span>
                 </p>
               </UButton>
             </TransitionGroup>

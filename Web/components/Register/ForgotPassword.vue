@@ -10,16 +10,21 @@ const props = defineProps({
     }
 });
 
+const emailError = ref("");
+
 const emit = defineEmits(['backToLogin', 'showOTPForm']);
 
 const forgotPasswordState = reactive({
     email: ''
 });
 
+const validate = createFormValidator(emailError, undefined, undefined, {
+  isMobile: props.isMobile,
+});
+
 const handleResetPassword = async () => {
     try {
         if(forgotPasswordState.email) {
-            console.log('ResetPasword Email:', forgotPasswordState);
             emit('showOTPForm', forgotPasswordState.email);
         }
         else {
@@ -49,8 +54,14 @@ const backToLogin = () => {
             RECUPERAR CONTRASEÑA
         </h2>
         <div class="mb-6">
-            <UForm :state="forgotPasswordState" class="flex flex-col gap-3">
-                <UFormGroup label="Email" name="email">
+            <UForm :state="forgotPasswordState" :validate="validate" class="flex flex-col gap-3">
+                <UFormGroup label="Email" name="email" :hint="emailError"
+                :ui="{
+                    hint: 'text-red-500 dark:text-red-500 text-sm',
+                    error: isMobile
+                    ? 'text-red-500 dark:text-red-500 text-sm'
+                    : 'hidden',
+                }">
                     <UInput size="sm" v-model="forgotPasswordState.email" placeholder="ejemplo@correo.itm.edu.co"
                         class="w-full"
                         :ui="{

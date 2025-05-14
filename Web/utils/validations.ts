@@ -21,7 +21,7 @@ export interface ValidationErrors {
 export function validateEmail(
   email: string, 
   errors: FormError[],
-  emailError: Ref<string>,
+  emailError: Ref<string> | undefined,
   options: ValidationOptions
 ): void {
   if (!email) {
@@ -34,10 +34,10 @@ export function validateEmail(
     const message = 'Email inválido';
     if (!options.isMobile) {
       errors.push({ path: 'email', message: ' ' });
-      emailError.value = message;
+      if (emailError) emailError.value = message;
     } else {
       errors.push({ path: 'email', message });
-      emailError.value = '';
+      if (emailError) emailError.value = '';
     }
     return;
   }
@@ -47,10 +47,10 @@ export function validateEmail(
     const message = 'Debe usar un correo institucional';
     if (!options.isMobile) {
       errors.push({ path: 'email', message: ' ' });
-      emailError.value = message;
+      if (emailError) emailError.value = message;
     } else {
       errors.push({ path: 'email', message });
-      emailError.value = '';
+      if (emailError) emailError.value = '';
     }
   }
 }
@@ -107,8 +107,8 @@ export function validatePasswordMatch(
 }
 
 export function createFormValidator(
-  emailError: Ref<string>,
-  passwordError: Ref<string>,
+  emailError?: Ref<string>,
+  passwordError?: Ref<string>,
   secPasswordError?: Ref<string>,
   options: ValidationOptions = { isMobile: false }
 ) {
@@ -116,15 +116,17 @@ export function createFormValidator(
     const errors: FormError[] = [];
     
     // Reset error messages
-    emailError.value = '';
-    passwordError.value = '';
+    if (emailError) emailError.value = '';
+    if (passwordError) passwordError.value = '';
     if (secPasswordError) secPasswordError.value = '';
     
     // Validate email
+    if ('email' in state && state.email !== undefined)
     validateEmail(state.email, errors, emailError, options);
     
     // Validate password
-    validatePassword(state.password, errors, passwordError, options);
+    if ('password' in state && state.password !== undefined && passwordError)
+      validatePassword(state.password, errors, passwordError, options);
     
     // Validate second password if it exists
     if (secPasswordError && state.secPasword !== undefined) {

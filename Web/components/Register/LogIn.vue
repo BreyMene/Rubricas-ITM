@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
-import type { FormSubmitEvent } from "#ui/types";
 
 const loadScreen = ref(false);
 
@@ -28,7 +27,7 @@ const validate = createFormValidator(emailError, passwordError, undefined, {
   isMobile: props.isMobile,
 });
 
-const handleLogin = async (event: FormSubmitEvent<any>) => {
+const handleLogin = async () => {
   formError.value = "";
   
   try {
