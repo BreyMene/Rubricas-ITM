@@ -42,7 +42,7 @@ const spinnerSizes: Record<string, string> = {
       :class="[
         fullscreen ? 'fixed inset-0' : 'absolute inset-0', 
         noBackground ? '' : 'bg-Pure-Black/50 dark:bg-Medium-Gray/50',
-        'flex items-center justify-center z-30 transition-opacity duration-300'
+        'flex items-center justify-center z-50 transition-opacity duration-300'
       ]"
     >
       <div

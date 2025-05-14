@@ -213,7 +213,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" @make-moderator="handleMakeModerator"/>
+              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" @make-moderator="handleMakeModerator" :isModerator="true"/>
             </div>
           </div>
 

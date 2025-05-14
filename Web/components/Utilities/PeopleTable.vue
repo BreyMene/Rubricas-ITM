@@ -1,6 +1,7 @@
 <script setup lang="ts">
     const props = defineProps<{
         view: "docentes" | "estudiantes";
+        isModerator?: boolean; 
         hideFinalNote?: boolean;
         searchTerm?: string;
         data: DocenteEnCurso[] | Estudiante[]
@@ -171,7 +172,7 @@
                 </div>
             </template>
 
-            <template #actions-data="{ row }">
+            <template v-if="props.isModerator" #actions-data="{ row }">
                 <UDropdown :items="items(row)" :ui="{
                     width: 'w-40',
                     rounded: 'rounded-lg',

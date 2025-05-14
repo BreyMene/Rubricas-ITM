@@ -176,4 +176,46 @@ router.put("/:cId/docentes", async (req, res) => {
   }
 });
 
+// Update course name and icon
+router.put('/:cId', async (req, res) => {
+  try {
+    const { cId } = req.params;
+    const { nombre, icono } = req.body;
+    const course = await Curso.findById(cId);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // This part check if the course name or icon has changed
+    let changed = false;
+    if (typeof nombre === 'string' && nombre !== course.nombre) {
+      course.nombre = nombre;
+      changed = true;
+    }
+    if (typeof icono === 'string' && icono !== course.icono) {
+      course.icono = icono;
+      changed = true;
+    }
+    if (!changed) {
+      return res.status(200).json(course);
+    }
+    await course.save();
+    res.status(200).json(course);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update course' });
+  }
+});
+
+// Delete a course by ID
+router.delete('/:cId', async (req, res) => {
+  try {
+    const { cId } = req.params;
+    await Curso.findByIdAndDelete(cId);
+    
+    res.status(200).json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete course' });
+  }
+});
+
 module.exports = router;

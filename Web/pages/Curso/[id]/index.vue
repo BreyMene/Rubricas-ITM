@@ -13,6 +13,8 @@
   const groups = ref<Grupo[]>([]);
 
   const docentesCurso = computed<DocenteEnCurso[]>(() => curso.value?.docentes || []);
+  const docenteID = useDocenteStore().getID;
+  const isModerator = computed(() => curso.value?.docentes.some((d) => d._id == docenteID && d.moderador == true));
 
   // Controls the Views
   const showGroups = ref(true);
@@ -66,25 +68,25 @@
 
   const handleUserDeletion = async(correo: string) => {
     try {
-    await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/user/${correo}`, {
-      method: "DELETE"
-    });
-    
-    //Update the store with the new teachers list
-    if (curso.value && curso.value.docentes) {
-      const updatedDocentes = curso.value.docentes.filter(
-        docente => docente.correo !== correo
-      );
+      await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/user/${correo}`, {
+        method: "DELETE"
+      });
       
-      useCursoStore().updateCursoDocentes(updatedDocentes);
+      //Update the store with the new teachers list
+      if (curso.value && curso.value.docentes) {
+        const updatedDocentes = curso.value.docentes.filter(
+          docente => docente.correo !== correo
+        );
+        
+        useCursoStore().updateCursoDocentes(updatedDocentes);
+      }
+    } catch (error) {
+      console.error("No se pudo eliminar docente", error);
     }
-  } catch (error) {
-    console.error("No se pudo eliminar docente", error);
-  }
   };
 
-  const handleMakeModerator = async (correo: string, mod: boolean) => {
-      try {
+  const handleMakeModerator = async(correo: string, mod: boolean) => {
+    try {
       await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/moderator/${correo}`, {
         method: "PUT",
         body: {
@@ -92,7 +94,7 @@
         }
       });
       
-      //Update the local store
+      // Update the local store
       if (curso.value && curso.value.docentes) {
         const updatedDocentes = curso.value.docentes.map(docente => {
           if (docente.correo === correo) {
@@ -111,7 +113,7 @@
   // Altern between views
   const toggleView = () => {
     showGroups.value = !showGroups.value;
-
+    
     // Reset search bar
     searchTerm.value = "";
   };
@@ -145,6 +147,15 @@
   const handleSearch = (value: string) => {
     searchTerm.value = value;
   };
+
+  // LOAD SCREEN
+  const loadMg = ref('')
+  const canLoadScreen = ref(false)
+
+  const loadScreen = (message: string, loadValue: boolean) => {
+    loadMg.value = message
+    canLoadScreen.value = loadValue
+  }
 </script>
 
 <template>
@@ -185,6 +196,10 @@
             </transition>
 
             <div class="flex items-center gap-4">
+              <transition name="scale" mode="out-in">
+                <UtilitiesCourseSettings v-if="showGroups && isModerator" @load-screen="loadScreen"/>
+              </transition>
+
               <!-- Transition para el icono -->
               <transition name="scale" mode="out-in">
                 <UIcon
@@ -202,7 +217,7 @@
                   class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"
                 >
                   <CreateGroup @addGroup="addGroup" v-if="showGroups" />
-                  <CreateTeacher v-else />
+                  <CreateTeacher v-else-if="!showGroups && isModerator"/>
                 </div>
               </transition>
             </div>
@@ -279,6 +294,7 @@
             <UtilitiesPeopleTable
               view="docentes"
               :searchTerm="searchTerm"
+              :isModerator="isModerator"
               :data="docentesCurso"
               @delete-user="handleUserDeletion"
               @make-moderator="handleMakeModerator"
@@ -317,6 +333,13 @@
         </UButton>
       </div>
     </div>
+
+    <!-- Load Screen -->
+    <UtilitiesLoadingScreen
+      :isLoading="canLoadScreen"
+      :message="loadMg"
+      :fullscreen="true"
+    />
   </div>
 </template>
 

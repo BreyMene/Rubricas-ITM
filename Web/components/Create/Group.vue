@@ -281,7 +281,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion"/>
+              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion" :isModerator="true"/>
             </div>
           </div>
 

@@ -93,7 +93,6 @@
         isOpen.value = false;
         return;
       }
-      console.log("continua")
       
       const response = await $fetch<Grupo>(`${config.public.apiUrl}/groups/${groupId.value}/estudiantes`, {
         method: "PUT",
@@ -101,7 +100,6 @@
           estudiantes: newEstudiantes
         }
       });
-      console.log("respuesta", response)
     
       useCursoStore().updateGrupoEstudiantes(response.estudiantes);
       isOpen.value = false;
@@ -258,7 +256,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion"/>
+              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion" :isModerator="true"/>
             </div>
           </div>
 

@@ -11,6 +11,8 @@
 
     const curso = computed(() => useCursoStore().cursoActivo)
     const grupo = computed(() => useCursoStore().grupoActivo)
+    const docenteID = useDocenteStore().getID;
+    const isModerator = computed(() => curso.value?.docentes.some((d) => d._id == docenteID && d.moderador == true));
 
     const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
     
@@ -120,7 +122,7 @@
                 </div>
 
                 <!-- Content -->
-                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo" @delete-user="handleUserDeletion"/>
+                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo" @delete-user="handleUserDeletion" :isModerator="isModerator"/>
             </div>
 
             <!-- Rubric -->

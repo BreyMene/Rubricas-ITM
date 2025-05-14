@@ -92,7 +92,7 @@
         }, 100);
     }
 
-    const loadScreen = (message: string, loadValue: false) => {
+    const loadScreen = (message: string, loadValue: boolean) => {
         loadMg.value = message
         canLoadScreen.value = loadValue
     }
@@ -215,6 +215,7 @@
                         :is-mobile="true"
                         @show-forgot-password="showForgotPassword"
                         @toggle-form="toggleForm"
+                        @load-screen="loadScreen"
                     />
     
                     <!-- Sign In Form Mobile -->
@@ -222,6 +223,7 @@
                         v-else-if="!isLogin && !isForgotPassword"
                         :is-mobile="true"
                         @toggle-form="toggleForm"
+                        @load-screen="loadScreen"
                     />
     
                     <!-- Olvido Contraseña Mobile -->
