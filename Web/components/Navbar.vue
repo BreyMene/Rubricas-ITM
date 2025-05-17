@@ -41,12 +41,6 @@
     });
   };
 
-  const handleClick = (index: number): void => {
-    if (!isLoading.value) {
-      nextTick(updateIndicator);
-    }
-  };
-
   // Life cycle and events
   onMounted(() => {
     updateIndicator();
@@ -107,7 +101,7 @@
         <div class="w-[30px] h-[30px] flex items-center justify-center">
             <ThemeSelector />
         </div>
-        <Profile />
+        <UserProfile />
       </div>
       
     </div>

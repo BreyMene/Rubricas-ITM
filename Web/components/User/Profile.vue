@@ -11,7 +11,8 @@
             }],
             [{
                 label: 'Ajustes',
-                icon: 'fluent:settings-28-filled'
+                icon: 'fluent:settings-28-filled',
+                click: () => navigateTo('/Ajustes')
             }],
             [{
                 label: 'Cerrar Sesion',
