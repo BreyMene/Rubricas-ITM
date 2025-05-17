@@ -206,6 +206,52 @@ router.put('/:cId', async (req, res) => {
   }
 });
 
+// Update teacher in a course
+router.put('/:cId/user/:c', async (req, res) => {
+  try {
+    const { cId, c } = req.params;
+    const { field, value } = req.body;
+
+    const curso = await Curso.findById(cId).populate("docentes._id");
+    if (!curso) {
+      return res.status(404).json({ error: "course not found" });
+    }
+    // Update the specified field in the teacher's document
+    if (field === 'correo') {
+      // Find the teacher to update using the old email (c)
+      const docenteIndex = curso.docentes.findIndex((d) => d._id.correo === c);
+      if (docenteIndex === -1) {
+        return res.status(404).json({ error: "teacher not found in course" });
+      }
+
+      // Validate if the new email exists in the system
+      const validatedDocentes = await ValidarDocentes([{ correo: value }]);
+      if (validatedDocentes.length === 0) {
+        return res.status(404).json({ error: "teacher email does not exist in the system" });
+      }
+
+      // Update the email
+      curso.docentes[docenteIndex]._id.correo = value;
+    }
+
+    await curso.save();
+    await curso.populate("docentes._id");
+
+    const cursoObj = curso.toObject();
+    cursoObj.docentes = cursoObj.docentes.map((d) => {
+      return {
+        moderador: d.moderador,
+        _id: d._id._id,
+        correo: d._id.correo,
+      };
+    });
+
+    res.status(200).json(cursoObj);
+  } catch (error) {
+    res.status(500).json({ error: "failed to update teacher" });
+  }
+});
+
 // Delete a course by ID
 router.delete('/:cId', async (req, res) => {
   try {

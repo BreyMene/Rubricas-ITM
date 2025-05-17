@@ -84,11 +84,21 @@
     estudianteList.value = estudianteList.value.filter(estudiante => estudiante.correo !== correo);
   };
 
+  const handleEditUser = (correo: string, field: string, value: string) => {
+    const estudianteIndex = estudianteList.value.findIndex(e => e.correo === correo);
+    if (estudianteIndex !== -1) {
+        if (field === 'nombre') {
+            estudianteList.value[estudianteIndex].nombre = value;
+        } else if (field === 'correo') {
+            estudianteList.value[estudianteIndex].correo = value;
+        }
+    }
+  };
+
   const saveChanges = async () => {
     try {
       // Filter out students that already have a name (they're already in the database)
       const newEstudiantes = estudianteList.value
-      console.log("Nuevos Estudiantes", newEstudiantes)
       if (newEstudiantes.length === 0) {
         isOpen.value = false;
         return;
@@ -256,7 +266,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion" :isModerator="true"/>
+              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion" @edit-user="handleEditUser" :isModerator="true"/>
             </div>
           </div>
 

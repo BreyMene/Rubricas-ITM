@@ -4,6 +4,7 @@
   const config = useRuntimeConfig();
   // Get the route object
   const route = useRoute();
+  const toast = useToast()
 
   // Get the course ID from the route parameters
   const courseId = computed(() => route.params.id);
@@ -32,14 +33,19 @@
     },
   ]);
 
+  const loading = ref(true);
+
   const fetchGroups = async () => {
     try {
+      loading.value = true;
       const data = await $fetch<Grupo[]>(
         `${config.public.apiUrl}/courses/groups/${courseId.value}`,
       );
       groups.value = data;
     } catch (error) {
       console.error("Error fetching groups:", error);
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -47,12 +53,15 @@
   const fetchCourses = async () => {
     if (!useCursoStore().cursoActivo) {
       try {
+        loading.value = true;
         const cursoApi = await $fetch<Curso>(
           `${config.public.apiUrl}/courses/get/${courseId.value}`,
         );
         useCursoStore().setCurso(cursoApi);
       } catch (error) {
         console.error("No se pudo obtener el curso:", error);
+      } finally {
+        loading.value = false;
       }
     }
   };
@@ -82,6 +91,59 @@
       }
     } catch (error) {
       console.error("No se pudo eliminar docente", error);
+    }
+  };
+
+  const handleEditUser = async(correo: string, field: string, newValue: string) => {
+    try {
+      await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/user/${correo}`, {
+        method: "PUT",
+        body: {
+          field,
+          value: newValue
+        }
+      });
+      
+      // Update the local store
+      if (curso.value && curso.value.docentes) {
+        const updatedDocentes = curso.value.docentes.map(docente => {
+          if (docente.correo === correo) {
+            return { ...docente, [field]: newValue };
+          }
+          return docente;
+        });
+        useCursoStore().updateCursoDocentes(updatedDocentes);
+      }
+    } catch (error: any) {
+      if (error.data?.error === "teacher email does not exist in the system") {
+        toast.add({
+            title: 'Error al editar',
+            description: 'El correo no existe',
+            icon: "fluent:alert-urgent-16-filled",
+            timeout: 3000,
+            ui: {
+                'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                'rounded': 'rounded-lg',
+                'shadow': 'shadow-lg',
+                'ring': 'ring-0',
+                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                'icon': {
+                    'base': 'flex-shrink-0 w-5 h-5',
+                    'color': 'text-Purple-P dark:text-Muted-Brown'
+                },
+                'progress': {
+                    'base': 'absolute bottom-0 end-0 start-0 h-1',
+                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                },
+                'closeButton': {
+                    'base': 'absolute top-2 right-2',
+                    'icon': 'fluent:add-16-filled',
+                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                }
+            }
+        });
+      }
     }
   };
 
@@ -229,64 +291,84 @@
         <transition name="slide" mode="out-in">
           <!-- Grupos -->
           <div v-if="showGroups" :key="'groups'" class="relative">
-            <!-- No Groups warning -->
-            <div
-              v-if="!groups.length"
-              class="flex items-center justify-center md:mt-24 lg:mt-36 mt-10"
-            >
-              <div
-                class="relative w-80 h-52 flex flex-col items-center justify-center"
-              >
-                <!-- Corner decorations -->
+            <ClientOnly>
+              <template v-if="!loading">
+                <!-- No Groups warning -->
                 <div
-                  class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"
-                ></div>
-                <div
-                  class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"
-                ></div>
-                <div
-                  class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"
-                ></div>
-                <div
-                  class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"
-                ></div>
-
-                <UIcon
-                  name="fluent:warning-24-regular"
-                  class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
-                />
-                <p
-                  class="text-xl font-medium text-center text-Pure-Black dark:text-White-w"
+                  v-if="!groups.length"
+                  class="flex items-center justify-center md:mt-24 lg:mt-36 mt-10"
                 >
-                  NO HAY<br />NINGUN GRUPO
-                </p>
-              </div>
-            </div>
+                  <div
+                    class="relative w-80 h-52 flex flex-col items-center justify-center"
+                  >
+                    <!-- Corner decorations -->
+                    <div
+                      class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"
+                    ></div>
+                    <div
+                      class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"
+                    ></div>
+                    <div
+                      class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"
+                    ></div>
+                    <div
+                      class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"
+                    ></div>
 
-            <TransitionGroup
-              v-else
-              name="list"
-              tag="div"
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-              <UButton
-                v-for="group in filteredGroups"
-                :key="group._id"
-                variant="ghost"
-                class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-                @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
-              >
-                <h3
-                  class="text-lg font-semibold text-center text-Pure-Black dark:text-White-w"
+                    <UIcon
+                      name="fluent:warning-24-regular"
+                      class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
+                    />
+                    <p
+                      class="text-xl font-medium text-center text-Pure-Black dark:text-White-w"
+                    >
+                      NO HAY<br />NINGUN GRUPO
+                    </p>
+                  </div>
+                </div>
+
+                <TransitionGroup
+                  v-else
+                  name="list"
+                  tag="div"
+                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                 >
-                  {{ group.nombre }}
-                </h3>
-                <p class="text-sm text-center w-full text-Medium-Gray dark:text-Light-Gray">
-                  Profesor encargado <br />
-                  <span class="block truncate max-w-full text-Medium-Gray/70 dark:text-Light-Gray/70">{{ group.docente.correo }}</span>
-                </p>
-              </UButton>
-            </TransitionGroup>
+                  <UButton
+                    v-for="group in filteredGroups"
+                    :key="group._id"
+                    variant="ghost"
+                    class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                    @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
+                  >
+                    <h3
+                      class="text-lg font-semibold text-center text-Pure-Black dark:text-White-w"
+                    >
+                      {{ group.nombre }}
+                    </h3>
+                    <p class="text-sm text-center w-full text-Medium-Gray dark:text-Light-Gray">
+                      Profesor encargado <br />
+                      <span class="block truncate max-w-full text-Medium-Gray/70 dark:text-Light-Gray/70">{{ group.docente.correo }}</span>
+                    </p>
+                  </UButton>
+                </TransitionGroup>
+              </template>
+
+              <!-- Skeleton Loader -->
+              <template #fallback>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <USkeleton
+                    v-for="i in 4" 
+                    :key="i" 
+                    class="w-full h-[100px] aspect-square"
+                    :ui="{
+                      base: 'animate-pulse',
+                      rounded: 'rounded-xl',
+                      background: 'bg-gray-200 dark:bg-gray-700',
+                    }"
+                  />
+                </div>
+              </template>
+            </ClientOnly>
           </div>
 
           <!-- Teachers Table -->
@@ -298,6 +380,7 @@
               :data="docentesCurso"
               @delete-user="handleUserDeletion"
               @make-moderator="handleMakeModerator"
+              @edit-user="handleEditUser"
             />
           </div>
         </transition>

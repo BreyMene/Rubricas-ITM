@@ -76,22 +76,46 @@
 
     const handleUserDeletion = async(correo: string) => {
         try {
-        await $fetch(`${config.public.apiUrl}/groups/${groupId.value}/user/${correo}`, {
-            method: "DELETE"
-        });
-        
-        //Update the store with the filtered students list
-        if (grupo.value && grupo.value.estudiantes) {
-            const updatedEstudiantes = grupo.value.estudiantes.filter(
-                estudiante => estudiante.correo !== correo
-            );
+            await $fetch(`${config.public.apiUrl}/groups/${groupId.value}/user/${correo}`, {
+                method: "DELETE"
+            });
             
-            useCursoStore().updateGrupoEstudiantes(updatedEstudiantes);
+            //Update the store with the filtered students list
+            if (grupo.value && grupo.value.estudiantes) {
+                const updatedEstudiantes = grupo.value.estudiantes.filter(
+                    estudiante => estudiante.correo !== correo
+                );
+                
+                useCursoStore().updateGrupoEstudiantes(updatedEstudiantes);
+            }
+        } catch (error) {
+            console.error("No se pudo eliminar estudiante", error);
         }
-    } catch (error) {
-        console.error("No se pudo eliminar estudiante", error);
-    }
+    };
 
+    const handleEditUser = async(correo: string, field: string, newValue: string) => {
+        try {
+            await $fetch(`${config.public.apiUrl}/groups/${groupId.value}/user/${correo}`, {
+                method: "PUT",
+                body: {
+                    field,
+                    value: newValue
+                }
+            });
+            
+            // Update the local store
+            if (grupo.value && grupo.value.estudiantes) {
+                const updatedEstudiantes = grupo.value.estudiantes.map(estudiante => {
+                    if (estudiante.correo === correo) {
+                        return { ...estudiante, [field]: newValue };
+                    }
+                    return estudiante;
+                });
+                useCursoStore().updateGrupoEstudiantes(updatedEstudiantes);
+            }
+        } catch (error) {
+            console.error("No se pudo actualizar el estudiante", error);
+        }
     };
 
 </script>
@@ -122,7 +146,7 @@
                 </div>
 
                 <!-- Content -->
-                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo" @delete-user="handleUserDeletion" :isModerator="isModerator"/>
+                <UtilitiesPeopleTable view="estudiantes" :searchTerm="searchTerm" :data="estudiantesGrupo" @delete-user="handleUserDeletion" :isModerator="isModerator" @edit-user="handleEditUser"/>
             </div>
 
             <!-- Rubric -->

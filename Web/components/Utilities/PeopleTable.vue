@@ -9,6 +9,10 @@
 
     const toast = useToast()
 
+    // Add new state for editing
+    const editingRow = ref<{correo: string, field: string} | null>(null);
+    const editValue = ref('');
+
     // Change columns depends of the view
     const columns = computed(() => {
         if (props.view === "docentes") {
@@ -38,9 +42,10 @@
         moderador?: boolean;
     }
 
-    // Función para eliminar un usuario
-    const emits = defineEmits(['delete-user', 'make-moderator']);
+    // Add new emit for edit
+    const emits = defineEmits(['delete-user', 'make-moderator', 'edit-user']);
 
+    // Función para eliminar un usuario
     const deleteUser = (correo: string) => {
         const userType = props.view === "docentes" ? "docente" : "estudiante";
         toast.add({
@@ -77,10 +82,136 @@
         emits('make-moderator', correo, mod);
     }
 
+    // Add edit handlers
+    const startEditing = (row: TableRow, field: string) => {
+        editingRow.value = { correo: row.correo, field };
+        editValue.value = row[field as keyof TableRow] as string;
+    };
+
+    const saveEdit = () => {
+        if (editingRow.value) {
+            // Validate email format if editing email
+            if (editingRow.value.field === 'correo') {
+                // Check if it's a valid email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(editValue.value)) {
+                    toast.add({
+                        title: 'Error al editar',
+                        description: 'Email inválido',
+                        icon: "fluent:alert-urgent-16-filled",
+                        timeout: 3000,
+                        ui: {
+                            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                            'rounded': 'rounded-lg',
+                            'shadow': 'shadow-lg',
+                            'ring': 'ring-0',
+                            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                            'icon': {
+                                'base': 'flex-shrink-0 w-5 h-5',
+                                'color': 'text-Purple-P dark:text-Muted-Brown'
+                            },
+                            'progress': {
+                                'base': 'absolute bottom-0 end-0 start-0 h-1',
+                                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                            },
+                            'closeButton': {
+                                'base': 'absolute top-2 right-2',
+                                'icon': 'fluent:add-16-filled',
+                                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                // Check if it ends with the institutional domain
+                if (!editValue.value.endsWith('@correo.itm.edu.co')) {
+                    toast.add({
+                        title: 'Error al editar',
+                        description: 'Debe usar un correo institucional',
+                        icon: "fluent:alert-urgent-16-filled",
+                        timeout: 3000,
+                        ui: {
+                            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                            'rounded': 'rounded-lg',
+                            'shadow': 'shadow-lg',
+                            'ring': 'ring-0',
+                            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                            'icon': {
+                                'base': 'flex-shrink-0 w-5 h-5',
+                                'color': 'text-Purple-P dark:text-Muted-Brown'
+                            },
+                            'progress': {
+                                'base': 'absolute bottom-0 end-0 start-0 h-1',
+                                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                            },
+                            'closeButton': {
+                                'base': 'absolute top-2 right-2',
+                                'icon': 'fluent:add-16-filled',
+                                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                // Check if email already exists in the list
+                const emailExists = props.data.some(item => 
+                    item.correo === editValue.value && item.correo !== editingRow.value?.correo
+                );
+                if (emailExists) {
+                    toast.add({
+                        title: 'Error al editar',
+                        description: 'El correo ya existe en la lista',
+                        icon: "fluent:alert-urgent-16-filled",
+                        timeout: 3000,
+                        ui: {
+                            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                            'rounded': 'rounded-lg',
+                            'shadow': 'shadow-lg',
+                            'ring': 'ring-0',
+                            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                            'icon': {
+                                'base': 'flex-shrink-0 w-5 h-5',
+                                'color': 'text-Purple-P dark:text-Muted-Brown'
+                            },
+                            'progress': {
+                                'base': 'absolute bottom-0 end-0 start-0 h-1',
+                                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                            },
+                            'closeButton': {
+                                'base': 'absolute top-2 right-2',
+                                'icon': 'fluent:add-16-filled',
+                                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                            }
+                        }
+                    });
+                    return;
+                }
+            }
+
+            emits('edit-user', editingRow.value.correo, editingRow.value.field, editValue.value);
+            editingRow.value = null;
+            editValue.value = '';
+        }
+    };
+
+    const cancelEdit = () => {
+        editingRow.value = null;
+        editValue.value = '';
+    };
+
     const items = (row: TableRow) => {
         const menuItems = [
             [
-                { label: 'Editar', icon: 'fluent:compose-12-filled'}
+                { 
+                    label: 'Editar', 
+                    icon: 'fluent:compose-12-filled',
+                    click: () => startEditing(row, props.view === "docentes" ? "correo" : "nombre")
+                }
             ],
             [
                 {
@@ -104,6 +235,13 @@
                     click: () => makeModerator(row.correo, !!row.moderador)
                 }
             ]);
+        } else {
+            // Add edit email option for students
+            menuItems[0].push({
+                label: 'Editar Correo',
+                icon: 'fluent:mail-12-filled',
+                click: () => startEditing(row, "correo")
+            });
         }
         
         return menuItems;
@@ -172,6 +310,76 @@
                 </div>
             </template>
 
+            <!-- Editable columns -->
+            <template #nombre-data="{ row }">
+                <div v-if="editingRow?.correo === row.correo && editingRow?.field === 'nombre'" class="flex gap-2 items-center">
+                    <UInput 
+                        v-model="editValue" 
+                        class="flex-1"
+                        :ui="{
+                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                            color: {
+                                gray: {
+                                outline:
+                                    'shadow-md bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown',
+                                },
+                            },
+                        }"
+                        color="gray"
+                    />
+                    <UButton 
+                        icon="fluent:checkmark-12-filled" 
+                        color="green" 
+                        variant="ghost"
+                        class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300"
+                        @click="saveEdit" 
+                    />
+                    <UButton 
+                        icon="fluent:dismiss-12-filled" 
+                        color="red" 
+                        variant="ghost"
+                        class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                        @click="cancelEdit" 
+                    />
+                </div>
+                <div v-else>{{ row.nombre }}</div>
+            </template>
+
+            <template #correo-data="{ row }">
+                <div v-if="editingRow?.correo === row.correo && editingRow?.field === 'correo'" class="flex gap-2 items-center">
+                    <UInput 
+                        v-model="editValue" 
+                        class="flex-1"
+                        :ui="{
+                            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                            color: {
+                                gray: {
+                                outline:
+                                    'shadow-md bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown',
+                                },
+                            },
+                        }"
+                        color="gray"
+                    />
+                    <UButton 
+                        icon="fluent:checkmark-12-filled" 
+                        color="green" 
+                        variant="ghost"
+                        class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300"
+                        @click="saveEdit" 
+                    />
+                    <UButton 
+                        icon="fluent:dismiss-12-filled" 
+                        color="red" 
+                        variant="ghost"
+                        class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                        @click="cancelEdit" 
+                    />
+                </div>
+                <div v-else>{{ row.correo }}</div>
+            </template>
+
+            <!--  -->
             <template v-if="props.isModerator" #actions-data="{ row }">
                 <UDropdown :items="items(row)" :ui="{
                     width: 'w-40',

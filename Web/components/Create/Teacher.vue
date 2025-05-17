@@ -64,6 +64,13 @@
     docenteList.value = docenteList.value.filter(docente => docente.correo !== correo);
   };
 
+  const handleEditUser = (correo: string, field: string, value: string) => {
+    const docenteIndex = docenteList.value.findIndex(d => d.correo === correo);
+    if (docenteIndex !== -1) {
+      docenteList.value[docenteIndex].correo = value;
+    }
+  };
+
   const handleMakeModerator = (correo: string, mod: boolean) => {
     const docenteIndex = docenteList.value.findIndex(docente => docente.correo === correo);
     if (docenteIndex !== -1) {
@@ -213,7 +220,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" @make-moderator="handleMakeModerator" :isModerator="true"/>
+              <UtilitiesPeopleTable view="docentes" :data="docenteList" @delete-user="handleUserDeletion" @make-moderator="handleMakeModerator" @edit-user="handleEditUser" :isModerator="true"/>
             </div>
           </div>
 

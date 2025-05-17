@@ -123,4 +123,30 @@ router.put("/:gId/estudiantes", async (req, res) => {
   }
 });
 
+// Update student in a group
+router.put('/:gId/user/:c', async (req, res) => {
+  try {
+    const { gId, c } = req.params;
+    const { field, value } = req.body;
+
+    const grupo = await Grupo.findById(gId);
+    if (!grupo) {
+      return res.status(404).json({ error: "group not found" });
+    }
+
+    const estudianteIndex = grupo.estudiantes.findIndex((e) => e.correo === c);
+    if (estudianteIndex === -1) {
+      return res.status(404).json({ error: "student not found in group" });
+    }
+
+    // Update the specified field
+    grupo.estudiantes[estudianteIndex][field] = value;
+
+    await grupo.save();
+    res.status(200).json(grupo);
+  } catch (error) {
+    res.status(500).json({ error: "failed to update student" });
+  }
+});
+
 module.exports = router;

@@ -143,6 +143,17 @@
     estudianteList.value = estudianteList.value.filter(estudiante => estudiante.correo !== correo);
   };
 
+  const handleEditUser = (correo: string, field: string, value: string) => {
+    const estudianteIndex = estudianteList.value.findIndex(e => e.correo === correo);
+    if (estudianteIndex !== -1) {
+        if (field === 'nombre') {
+            estudianteList.value[estudianteIndex].nombre = value;
+        } else if (field === 'correo') {
+            estudianteList.value[estudianteIndex].correo = value;
+        }
+    }
+  };
+
   // Reset all fields when modal is closed
   watch(isOpen, (newValue) => {
     if (!newValue) {
@@ -281,7 +292,7 @@
 
             <!-- Right Side - Table -->
             <div class="md:w-2/3 flex flex-col h-full">
-              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion" :isModerator="true"/>
+              <UtilitiesPeopleTable view="estudiantes" :hideFinalNote="true" :data="estudianteList" @delete-user="handleEstudianteDeletion" @edit-user="handleEditUser" :isModerator="true"/>
             </div>
           </div>
 
