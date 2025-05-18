@@ -42,6 +42,13 @@
         moderador?: boolean;
     }
 
+    interface MenuItem {
+        label: string;
+        icon: string;
+        click: () => void;
+        disabled?: boolean;
+    }
+
     // Add new emit for edit
     const emits = defineEmits(['delete-user', 'make-moderator', 'edit-user']);
 
@@ -205,7 +212,7 @@
     };
 
     const items = (row: TableRow) => {
-        const menuItems = [
+        const menuItems: MenuItem[][] = [
             [
                 { 
                     label: 'Editar', 
@@ -227,12 +234,16 @@
             const moderatorLabel = row.moderador ? 'Quitar moderador' : 'Hacer moderador';
             const moderatorIcon = row.moderador ? 'fluent:person-delete-20-filled' : 'fluent:person-key-20-filled';
             
+            // Count how many moderators there are
+            const moderatorCount = props.data.filter(d => (d as DocenteEnCurso).moderador).length;
+            
             // Insert moderator option after Edit and before Delete
             menuItems.splice(1, 0, [
                 {
                     label: moderatorLabel,
                     icon: moderatorIcon,
-                    click: () => makeModerator(row.correo, !!row.moderador)
+                    click: () => makeModerator(row.correo, !!row.moderador),
+                    disabled: row.moderador && moderatorCount <= 1
                 }
             ]);
         } else {
