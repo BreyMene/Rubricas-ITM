@@ -31,6 +31,8 @@
         type="number"
         v-model="row.peso"
         step="0.1"
+        min="0"
+        max="1"
         placeholder="Peso"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
@@ -46,6 +48,9 @@
       <UInput
         type="number"
         v-model="row.calificacion"
+        step="0.1"
+        min="0"
+        max="1"
         placeholder="Calificación"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
@@ -61,6 +66,9 @@
       <UInput
         type="number"
         v-model="row.acumulado"
+        step="0.1"
+        min="0"
+        max="1"
         placeholder="Acumulado"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"

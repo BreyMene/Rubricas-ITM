@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
   import type {Criterio, Tema, Rubrica} from '~/utils/types'
   import { useDocenteStore } from "~/utils/store";
 
@@ -12,6 +12,25 @@
   const toast = useToast();
 
   const temas = ref<Tema[]>([])
+
+  // Add computed properties for totals
+  const totalPeso = computed(() => {
+    return temas.value.reduce((sum, tema) => {
+      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.peso || 0), 0);
+    }, 0);
+  });
+
+  const totalCalificacion = computed(() => {
+    return temas.value.reduce((sum, tema) => {
+      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.calificacion || 0), 0);
+    }, 0);
+  });
+
+  const totalAcumulado = computed(() => {
+    return temas.value.reduce((sum, tema) => {
+      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.acumulado || 0), 0);
+    }, 0);
+  });
 
   const rubricName = ref('')
   const rubricNameError = ref('')
@@ -244,6 +263,16 @@
           @addRow="addRow"
           @deleteRow="deleteRow"
         />
+
+        <!-- Add totals row -->
+        <div v-if="temas.length > 0" class="flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 text-xs lg:text-sm xl:text-base rounded-lg mt-2">
+          <div class="flex-none w-[20%] px-3">Total</div>
+          <div class="flex-none w-[30%] px-3"></div>
+          <div class="flex-none w-[10%] px-3 text-center">{{ totalPeso.toFixed(1) }}</div>
+          <div class="flex-none w-[10%] px-3 text-center">{{ totalCalificacion.toFixed(1) }}</div>
+          <div class="flex-none w-[10%] px-3 text-center">{{ totalAcumulado.toFixed(1) }}</div>
+          <div class="flex-none w-[20%] px-3"></div>
+        </div>
       </div>
     </div>
 
