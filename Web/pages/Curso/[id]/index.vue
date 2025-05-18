@@ -99,7 +99,7 @@
       await $fetch(`${config.public.apiUrl}/courses/${courseId.value}/user/${correo}`, {
         method: "PUT",
         body: {
-          field,
+          field: field,
           value: newValue
         }
       });

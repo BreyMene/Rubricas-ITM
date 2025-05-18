@@ -30,7 +30,7 @@
         minPasswordLength: 6
     });
 
-    const handleSignIn = async (event: FormSubmitEvent<any>) => {
+    const handleSignIn = async () => {
         formError.value = "";
 
         try {

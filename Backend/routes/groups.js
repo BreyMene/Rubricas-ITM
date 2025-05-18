@@ -149,4 +149,63 @@ router.put('/:gId/user/:c', async (req, res) => {
   }
 });
 
+// Update group name
+router.put("/:id/update", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre } = req.body;
+
+    const grupo = await Grupo.findById(id);
+    if (!grupo) {
+      return res.status(404).json({ error: "group not found" });
+    }
+
+    // Check if a group with the new name already exists in the same course
+    const curso = await Curso.findOne({ grupos: id });
+    if (!curso) {
+      return res.status(404).json({ error: "course not found" });
+    }
+
+    const existingGroup = await Grupo.findOne({
+      _id: { $ne: id },
+      nombre: nombre,
+      _id: { $in: curso.grupos }
+    });
+
+    if (existingGroup) {
+      return res.status(409).json({ error: "a group with this name already exists in this course" });
+    }
+
+    grupo.nombre = nombre;
+    await grupo.save();
+
+    res.status(200).json(grupo);
+  } catch (error) {
+    res.status(500).json({ error: "failed to update group" });
+  }
+});
+
+// Delete group
+router.delete("/:id/delete", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const curso = await Curso.findOne({ grupos: id });
+    if (!curso) {
+      return res.status(404).json({ error: "course not found" });
+    }
+
+    // Remove the group from the course's grupos array
+    curso.grupos = curso.grupos.filter(g => g.toString() !== id);
+    await curso.save();
+
+    // Delete the group
+    await Grupo.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "group deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "failed to delete group" });
+  }
+});
+
 module.exports = router;

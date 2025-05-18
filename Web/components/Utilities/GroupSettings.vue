@@ -1,12 +1,11 @@
-<script setup lang="ts">
-  import { useCursoStore } from "~/utils/store";
-  
-  const curso = computed(() => useCursoStore().cursoActivo);
+<script setup lang="ts">  
+  const grupo = computed(() => useCursoStore().grupoActivo);
   const toast = useToast()
   const config = useRuntimeConfig();
 
   const route = useRoute();
   const courseId = computed(() => route.params.id);
+  const grupoId = computed(() => route.params.groupId);
 
   const isOpen = ref(false);
   const isConfirmDeleteOpen = ref(false);
@@ -14,71 +13,38 @@
   const emit = defineEmits(["loadScreen"]);
 
   // Form state
-  const courseName = ref('');
-  const courseNameError = ref('');
-  const isCourseNameValid = ref(true);
+  const groupName = ref('');
+  const groupNameError = ref('');
+  const isGroupNameValid = ref(true);
   
   // Delete state
   const isDeleting = ref(false);   
 
-  // Icon selection state
-  const displayIcon = ref("");
-  const selectedIcon = ref("");
-  const hasSelectedCustomIcon = ref(false);
-
-  // Popover state
-  const isPopoverOpen = ref(false);
-  const iconButtonRef = ref(null);
-  
-  // TO CHECK IF THE POPOVER IS ON MOBILE
-  const isMobile = ref(false);
-  const checkScreenSize = () => {
-    isMobile.value = window.innerWidth < 768;
-  };
-
-  // Watch for screen resizes
-  onMounted(() => {
-    checkScreenSize(); // Check on initial load
-    window.addEventListener("resize", checkScreenSize);
-  });
-
-  onBeforeUnmount(() => {
-    window.removeEventListener("resize", checkScreenSize);
-  });
-  
-  const validateCourseName = () => {
+  const validateGroupName = () => {
     // Reset error
-    courseNameError.value = '';
-    isCourseNameValid.value = true;
+    groupNameError.value = '';
+    isGroupNameValid.value = true;
 
-    // Check if course name is empty
-    if (courseName.value.trim() === '') {
-      courseNameError.value = 'Se requiere un nombre';
-      isCourseNameValid.value = false;
+    // Check if group name is empty
+    if (groupName.value.trim() === '') {
+      groupNameError.value = 'Se requiere un nombre';
+      isGroupNameValid.value = false;
       return false;
     }
 
     return true;
   };
-
-  const selectIcon = (icon: string) => {
-    displayIcon.value = icon;
-    selectedIcon.value = icon;
-    hasSelectedCustomIcon.value = true;
-    isPopoverOpen.value = false;
-  };
   
-  const updateCourse = async () => {
-    if (!validateCourseName()) {
+  const updateGroup = async () => {
+    if (!validateGroupName()) {
       return;
     }
 
-    const originalName = curso.value?.nombre;
-    const originalIcon = curso.value?.icono;
-    if (courseName.value === originalName && displayIcon.value === originalIcon) {
+    const originalName = grupo.value?.nombre;
+    if (groupName.value === originalName) {
         toast.add({
             title: 'Sin cambios',
-            description: 'No se realizaron cambios en el curso.',
+            description: 'No se realizaron cambios en el grupo.',
             icon: "fluent:info-16-filled",
             timeout: 2000,
             ui: {
@@ -109,20 +75,19 @@
     
     try {
         loadScreen.value = true
-        emit("loadScreen", "Actualizando Curso...", loadScreen.value)
+        emit("loadScreen", "Actualizando Grupo...", loadScreen.value)
 
-        const response = await $fetch<Curso>(`${config.public.apiUrl}/courses/${courseId.value}`, {
+        const response = await $fetch<Grupo>(`${config.public.apiUrl}/groups/${grupoId.value}/update`, {
             method: 'PUT',
             body: {
-                nombre: courseName.value,
-                icono: displayIcon.value,
+                nombre: groupName.value,
             },
         });
-        useCursoStore().setCurso(response)
+        useCursoStore().setGrupo(response)
       
         toast.add({
             title: `Actualizacion Exitosa`,
-            description: `El curso "${curso.value?.nombre}" se actualizo con exito`,
+            description: `El grupo "${grupo.value?.nombre}" se actualizo con exito`,
             icon: "fluent:checkmark-circle-16-filled",
             timeout: 3000,
 
@@ -150,29 +115,29 @@
         })
 
         isOpen.value = false;
-    } catch (error) {
-      courseNameError.value = "Error al actualizar el curso";
+    } catch (error: any) {
+      groupNameError.value = "Error al actualizar el grupo";
+      if(error.statusCode == 409) groupNameError.value = "Grupo ya existe"
     } finally{
         loadScreen.value = false
         emit("loadScreen", "", loadScreen.value)
-
     }
   };
   
-  const deleteCourse = async () => {
+  const deleteGroup = async () => {
     isDeleting.value = true;
     
     try {
       loadScreen.value = true
-      emit("loadScreen", "Eliminando Curso...", loadScreen.value)
+      emit("loadScreen", "Eliminando Grupo...", loadScreen.value)
 
-      await $fetch<Curso>(`${config.public.apiUrl}/courses/${courseId.value}`, {
+      await $fetch<Grupo>(`${config.public.apiUrl}/groups/${grupoId.value}/delete`, {
         method: 'DELETE',
       });
 
       toast.add({
             title: `Eliminacion Exitosa`,
-            description: `El curso "${curso.value?.nombre}" se elimino con exito`,
+            description: `El grupo "${grupo.value?.nombre}" se elimino con exito`,
             icon: "fluent:checkmark-circle-16-filled",
             timeout: 3000,
 
@@ -198,11 +163,11 @@
                 }
             }
         })
-      navigateTo('/');
+      navigateTo(`/Curso/${courseId.value}`);
     } catch (error) {
       toast.add({
             title: `Eliminacion Fallida`,
-            description: `El curso "${curso.value?.nombre}" no se pudo eliminar`,
+            description: `El grupo "${grupo.value?.nombre}" no se pudo eliminar`,
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
 
@@ -236,18 +201,14 @@
   };
 
   watch(isOpen, (newValue) => {
-    if (newValue && curso.value) {
-      courseName.value = curso.value.nombre;
-      displayIcon.value = curso.value.icono;
-      selectedIcon.value = curso.value.icono;
-      hasSelectedCustomIcon.value = false;
+    if (newValue && grupo.value) {
+      groupName.value = grupo.value.nombre;
     } else {
       // Reset form when modal closes
       setTimeout(() => {
-        courseName.value = '';
-        courseNameError.value = '';
-        isCourseNameValid.value = true;
-        hasSelectedCustomIcon.value = false;
+        groupName.value = '';
+        groupNameError.value = '';
+        isGroupNameValid.value = true;
       }, 300);
     }
   });
@@ -279,7 +240,7 @@
             <template #header>
                 <div class="flex items-center justify-between">
                     <h3 class="text-base font-semibold leading-6 dark:text-white">
-                        Ajustes del Curso
+                        Ajustes del Grupo
                     </h3>
                     <UButton 
                         color="gray" 
@@ -293,119 +254,44 @@
 
             <!-- Modal Content -->
             <div class="py-4">
-                <!-- Main Section - Icons and Course Name -->
-                <div class="mb-8 grid grid-cols-1 md:grid-cols-5 gap-6">
-                    <!-- Icon Section - Takes up 2/5 of the space -->
-                    <div class="md:col-span-2 flex flex-col items-center justify-center">
-                        <h4 class="mb-3 font-medium dark:text-White-w text-center">Ícono del Curso</h4>
-                        <!-- Icon Selection Button with UPopover -->
-                        <UPopover
-                            v-model="isPopoverOpen"
-                            overlay
-                            :popper="{ placement: isMobile ? 'bottom' : 'auto-end' }"
+                <!-- Main Section - Group Name -->
+                <div class="mb-8">
+                    <UFormGroup 
+                        label="Nombre del Grupo" 
+                        required 
+                        :error="!isGroupNameValid" 
+                        :hint="groupNameError"
+                        :ui="{
+                            hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
+                        }"
+                    >
+                        <UInput 
+                            v-model="groupName" 
+                            size="md" 
+                            placeholder="Ingrese el nombre del grupo" 
+                            class="w-full max-w-lg" 
+                            @blur="validateGroupName"
                             :ui="{
-                                ring: 'ring-0',
-                                overlay: { background: 'dark:bg-Light-Gray/15' },
-                            }"
-                        >
-                            <UButton
-                                ref="iconButtonRef"
-                                class="w-16 h-16 sm:w-24 sm:h-24 rounded-full border-2 border-dashed border-Light-Gray dark:border-Light-Gray/30 hover:bg-Medium-Blue/20 dark:hover:bg-Light-Gray/25 flex items-center justify-center hover:border-Purple-P dark:hover:border-Muted-Brown mx-auto"
-                                variant="ghost"
-                            >
-                                <UIcon
-                                    :name="displayIcon || 'fluent:image-32-regular'"
-                                    class="text-4xl"
-                                    :class="[
-                                        displayIcon
-                                            ? 'text-Purple-P dark:text-Muted-Brown'
-                                            : 'text-gray-400 dark:text-Light-Gray',
-                                    ]"
-                                />
-                                <span class="sr-only">Select course icon</span>
-                            </UButton>
-
-                            <template #panel="{ close }">
-                                <div
-                                    class="p-4 bg-white dark:bg-Medium-Dark rounded-lg shadow-lg"
-                                >
-                                    <div class="flex justify-between mb-4">
-                                        <h3 class="text-base font-semibold dark:text-white">
-                                            Seleccionar icono
-                                        </h3>
-                                        <UButton
-                                            color="gray"
-                                            variant="ghost"
-                                            icon="fluent:dismiss-12-filled"
-                                            class="-m-1 p-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
-                                            @click="close"
-                                        />
-                                    </div>
-
-                                    <div
-                                        class="max-h-[300px] overflow-y-auto grid grid-cols-4 sm:grid-cols-6 gap-4"
-                                    >
-                                        <UButton
-                                            v-for="icon in iconOptions"
-                                            :key="icon"
-                                            variant="ghost"
-                                            class="p-4 h-14 w-14 rounded-lg flex items-center justify-center hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
-                                            @click="selectIcon(icon)"
-                                        >
-                                            <UIcon
-                                                :name="icon"
-                                                class="text-2xl text-gray-700 dark:text-Light-Gray"
-                                            />
-                                        </UButton>
-                                    </div>
-                                </div>
-                            </template>
-                        </UPopover>
-                        
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 text-center">
-                            Haz clic en el icono para cambiarlo
-                        </p>
-                    </div>
-                    
-                    <!-- Course Name Section - Takes up 3/5 of the space -->
-                    <div class="md:col-span-3 flex flex-col justify-center">
-                        <UFormGroup 
-                            label="Nombre del Curso" 
-                            required 
-                            :error="!isCourseNameValid" 
-                            :hint="courseNameError"
-                            :ui="{
-                                hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
-                            }"
-                        >
-                            <UInput 
-                                v-model="courseName" 
-                                size="md" 
-                                placeholder="Ingrese el nombre del curso" 
-                                class="w-full max-w-lg" 
-                                @blur="validateCourseName"
-                                :ui="{
-                                    icon: {
-                                        trailing: { pointer: '' }
-                                    },
-                                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                    color: {
-                                        gray: {
-                                            outline: 'shadow-sm bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                        }
+                                icon: {
+                                    trailing: { pointer: '' }
+                                },
+                                ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                                color: {
+                                    gray: {
+                                        outline: 'shadow-sm bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
                                     }
-                                }"
-                                color="gray"
-                            />
-                        </UFormGroup>
-                    </div>
+                                }
+                            }"
+                            color="gray"
+                        />
+                    </UFormGroup>
                 </div>
                 
                 <!-- Danger Zone -->
                 <div class="mt-10 border border-red-500/30 rounded-lg p-4">
                     <h4 class="text-red-500 font-medium mb-2">Zona de Peligro</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        Eliminar un curso es una acción permanente y no puede ser revertida. Se eliminarán todos los grupos y datos asociados.
+                        Eliminar un grupo es una acción permanente y no puede ser revertida. Se eliminarán todos los datos asociados.
                     </p>
                     <UButton 
                         color="red" 
@@ -413,7 +299,7 @@
                         class="w-auto"
                         @click="isConfirmDeleteOpen = true"
                     >
-                        Eliminar Curso
+                        Eliminar Grupo
                     </UButton>
                 </div>
                 
@@ -428,7 +314,7 @@
                     </UButton>
                     <UButton 
                         class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
-                        @click="updateCourse"
+                        @click="updateGroup"
                     >
                         Guardar Cambios
                     </UButton>
@@ -457,7 +343,7 @@
                 </div>
                 
                 <p class="mb-6 text-gray-700 dark:text-gray-300">
-                    ¿Estás seguro que deseas eliminar este curso? Esta acción es irreversible.
+                    ¿Estás seguro que deseas eliminar este grupo? Esta acción es irreversible.
                 </p>
                 
                 <div class="flex justify-end gap-3">
@@ -471,7 +357,7 @@
                     </UButton>
                     <UButton 
                         color="red" 
-                        @click="deleteCourse"
+                        @click="deleteGroup"
                     >
                         Eliminar
                     </UButton>

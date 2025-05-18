@@ -118,6 +118,14 @@
         }
     };
 
+    // LOAD SCREEN
+    const loadMg = ref('')
+    const canLoadScreen = ref(false)
+
+    const loadScreen = (message: string, loadValue: boolean) => {
+        loadMg.value = message
+        canLoadScreen.value = loadValue
+    }
 </script>
 
 <template>
@@ -141,7 +149,10 @@
                 <div class="mb-6">
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
                         <UtilitiesSearchBar placeholderText="Buscar Estudiante..." @search="handleSearch"/>
-                        <CreateStudent class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+                        <div class="flex items-center gap-2">
+                            <UtilitiesGroupSettings @load-screen="loadScreen"/>
+                            <CreateStudent class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
+                        </div>
                     </div>
                 </div>
 
@@ -170,6 +181,13 @@
                 </UButton>
             </div>
         </div>
+
+        <!-- Load Screen -->
+        <UtilitiesLoadingScreen
+        :isLoading="canLoadScreen"
+        :message="loadMg"
+        :fullscreen="true"
+        />
     </div>
 </template>
 

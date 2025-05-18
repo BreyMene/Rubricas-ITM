@@ -216,22 +216,36 @@ router.put('/:cId/user/:c', async (req, res) => {
     if (!curso) {
       return res.status(404).json({ error: "course not found" });
     }
-    // Update the specified field in the teacher's document
-    if (field === 'correo') {
-      // Find the teacher to update using the old email (c)
-      const docenteIndex = curso.docentes.findIndex((d) => d._id.correo === c);
-      if (docenteIndex === -1) {
-        return res.status(404).json({ error: "teacher not found in course" });
-      }
 
-      // Validate if the new email exists in the system
-      const validatedDocentes = await ValidarDocentes([{ correo: value }]);
+    if (field === 'correo') {
+      console.log("Updating email from", c, "to", value);
+      
+      // Validate if the new email exists in the system first
+      const validatedDocentes = await ValidarDocentes([{ correo: value }]);      
       if (validatedDocentes.length === 0) {
         return res.status(404).json({ error: "teacher email does not exist in the system" });
       }
 
-      // Update the email
-      curso.docentes[docenteIndex]._id.correo = value;
+      // Check if the new email is already in use in this course
+      const emailExists = curso.docentes.some(d => d._id.correo === value);
+      if (emailExists) {
+        return res.status(409).json({ error: "email already in use in this course" });
+      }
+
+      // Find the teacher to update using the old email (c)
+      const docenteIndex = curso.docentes.findIndex((d) => d._id.correo === c);
+      
+      if (docenteIndex === -1) {
+        // If we can't find the teacher with the old email, check if the new email is valid
+        // and add it as a new teacher
+        curso.docentes.push({
+          _id: validatedDocentes[0]._id,
+          moderador: false
+        });
+      } else {
+        // Update existing teacher
+        curso.docentes[docenteIndex]._id = validatedDocentes[0]._id;
+      }
     }
 
     await curso.save();
@@ -248,6 +262,7 @@ router.put('/:cId/user/:c', async (req, res) => {
 
     res.status(200).json(cursoObj);
   } catch (error) {
+    console.error("Error updating teacher:", error);
     res.status(500).json({ error: "failed to update teacher" });
   }
 });
