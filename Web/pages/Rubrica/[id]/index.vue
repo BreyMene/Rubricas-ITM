@@ -5,6 +5,7 @@
 
   const route = useRoute();
   const rubricaId = computed(() => route.params.id);
+  const rubricEstado = ref('activo'); // Change this later
 
   const config = useRuntimeConfig();
   const isOpen = ref(false);
@@ -178,6 +179,7 @@
       const r: Rubrica = {
         _id: "a",
         nombre: rubricName.value,
+        estado: rubricEstado.value,
         temas: temas.value
       }
 
@@ -185,6 +187,7 @@
         method: "POST",
         body: {
           nombre: r.nombre,
+          estado: r.estado,
           temas: r.temas
         },
       });

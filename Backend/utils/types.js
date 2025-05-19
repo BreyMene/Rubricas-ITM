@@ -90,6 +90,11 @@ const rubrica = mongoose.Schema({
     type: String,
     required: true,
   },
+  estado: {
+    type: String,
+    required: true,
+    default: "guardado"
+  },
   temas: [{
     _id: false,
     nombre: String,

@@ -1,6 +1,7 @@
 export interface Rubrica {
   _id: string;
   nombre: string;
+  estado: string;
   temas: Tema[];
 }
 

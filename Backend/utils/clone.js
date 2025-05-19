@@ -1,6 +1,7 @@
 export function ClonarRubrica(rubrica) {
     const cloned = {
         nombre: rubrica.nombre,
+        estado: rubrica.estado,
         temas: rubrica.temas?.map((tema) => ({
             nombre: tema.nombre || "",
             criterios: tema.criterios?.map((c) => ({

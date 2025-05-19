@@ -32,6 +32,7 @@
 
   const rubricName = ref('')
   const rubricNameError = ref('')
+  const rubricEstado = ref('activo'); // Change this later
 
   const courses = ref<Curso[]>([]);
   const docenteID = useDocenteStore().getID;
@@ -188,13 +189,16 @@
       const r: Rubrica = {
         _id: "a",
         nombre: rubricName.value,
+        estado: rubricEstado.value,
         temas: temas.value
       }
+
 
       const id  = await $fetch<String>(`${config.public.apiUrl}/rubrics/`, {
         method: "POST",
         body: {
           nombre: r.nombre,
+          estado: r.estado,
           temas: r.temas
         },
       });
@@ -207,7 +211,6 @@
           },
         });
       }
-
 
       if(isGuideRubric.value){
         await $fetch(`${config.public.apiUrl}/rubrics/${id}/course/${selectedCourseId.value}`, {
