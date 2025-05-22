@@ -7,6 +7,7 @@
   const config = useRuntimeConfig();
   const isOpen = ref(false);
   const isMobile = ref(false);
+  const isSaveModalOpen = ref(false);
   const toast = useToast();
 
   const temas = ref<Tema[]>([])
@@ -32,7 +33,7 @@
 
   const rubricName = ref('')
   const rubricNameError = ref('')
-  const rubricEstado = ref('activo'); // Change this later
+  const rubricEstado = ref('borrador'); // Default state
 
   const courses = ref<Curso[]>([]);
   const docenteID = useDocenteStore().getID;
@@ -304,13 +305,33 @@
   });
 
   const saveRubric = async () => {
-    if (!validateTotals(true)) {
+    if (!validateRubricName() || !validateTotals(true)) {
       return;
     }
 
     try {
+      loadingCreateR.value = true;
+      const r: Rubrica = {
+        _id: "a",
+        nombre: rubricName.value,
+        estado: "borrador",
+        temas: temas.value,
+        docente: docenteID
+      }
 
+      const id = await $fetch<String>(`${config.public.apiUrl}/rubrics/`, {
+        method: "POST",
+        body: {
+          nombre: r.nombre,
+          estado: r.estado,
+          temas: r.temas,
+          docente: r.docente
+        },
+      });
 
+      isSaveModalOpen.value = false;
+      await navigateTo(`/rubrica/${id}`);
+      
       toast.add({
         title: 'Rúbrica guardada exitosamente',
         icon: "fluent:checkmark-circle-16-filled",
@@ -365,8 +386,19 @@
             }
         }
       });
+    } finally {
+      loadingCreateR.value = false;
     }
   };
+
+  watch(isSaveModalOpen, (newValue) => {
+    if (!newValue) {
+      setTimeout(() => {
+        rubricName.value = '';
+        rubricNameError.value = '';
+      }, 300);
+    }
+  });
 </script>
 
 <!-- pages/rubricas.vue -->
@@ -425,7 +457,7 @@
       <UButton
         size="xl"
         class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
-        @click="saveRubric"
+        @click="isSaveModalOpen = true"
       >
         <UIcon name="fluent:save-16-filled" class="text-xl dark:text-White-w"/>
         <span class="text-white">Guardar</span>
@@ -630,6 +662,91 @@
               @click="CreateRubric"
             >
               Finalizar
+            </UButton>
+          </div>
+        </div>
+      </UCard>
+    </UModal>
+
+    <!-- Save Draft Modal -->
+    <UModal
+      v-model="isSaveModalOpen"
+      prevent-close
+      :ui="{
+        width: 'w-full sm:max-w-3xl',
+        height: 'max-h-[700px]',
+        container: 'flex items-center justify-center',
+        overlay: {background: 'dark:bg-Light-Gray/15'},
+      }"
+    >
+      <UCard
+        :ui="{
+          background: 'dark:bg-Medium-Dark',
+          ring: '',
+          divide: '',
+          header: { base: 'border-b border-Purple-P dark:border-Dark-Grey'},
+          base: 'w-full',
+        }"
+      >
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-semibold leading-6 dark:text-white">
+              Guardar Borrador
+            </h3>
+            <UButton
+              color="gray"
+              variant="ghost"
+              icon="fluent:dismiss-12-filled"
+              class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+              @click="isSaveModalOpen=false"
+            />
+          </div>
+        </template>
+
+        <!-- Modal Content -->
+        <div class="p-4">
+          <div class="flex flex-col gap-6">
+            <!-- Rubric Name Input -->
+            <div class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-4 shadow-md mx-0 sm:mx-36">
+              <UFormGroup label="Nombre de la Rúbrica" required :error="!!rubricNameError" :hint="rubricNameError"
+                :ui="{
+                  hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
+                }">
+                <UInput
+                  v-model="rubricName"
+                  size="sm"
+                  placeholder="Ingrese el nombre de la rúbrica"
+                  class="w-full"
+                  :ui="{
+                    icon: { trailing: { pointer: '' } },
+                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                    color: {
+                      gray: {
+                        outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                      }
+                    }
+                  }"
+                  color="gray"
+                  @blur="validateRubricName"
+                />
+              </UFormGroup>
+            </div>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex justify-end mt-6 gap-4">
+            <UButton
+              variant="link"
+              color="black"
+              @click="isSaveModalOpen = false"
+            >
+              Cancelar
+            </UButton>
+            <UButton
+              class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
+              @click="saveRubric"
+            >
+              Guardar
             </UButton>
           </div>
         </div>

@@ -5,8 +5,8 @@
 
   const route = useRoute();
   const rubricaId = computed(() => route.params.id);
-  const rubricEstado = ref('activo'); // Change this later
-
+  const rubricEstado = ref('borrador'); // Default state
+  
   const config = useRuntimeConfig();
   const isOpen = ref(false);
   const isMobile = ref(false);
@@ -82,6 +82,7 @@
   const selectedCourseId = ref<string>('');
   const selectedCourseName = ref<string>('');
   const showGroups = ref(false);
+  const isModerator = ref(false);
 
   const checkIfMobile = () => {
     isMobile.value = window.innerWidth <= 768;
@@ -101,7 +102,7 @@
   const fetchGroups = async () => {
     try {
       const data = await $fetch<{_id: string, nombre: string}[]>(
-        `${config.public.apiUrl}/groups/user/${docenteID}`,
+        `${config.public.apiUrl}/groups/course/${selectedCourseId.value}/user/${docenteID}`,
       );
       groups.value = data;
     } catch (error) {
@@ -116,9 +117,9 @@
         `${config.public.apiUrl}/rubrics/${rubricaId.value}`,
       );
       temas.value = data.temas;
+      rubricEstado.value = data.estado;
     } catch (error) {
-      console.error("Error fetching groups:", error);
-      groups.value = [];
+      console.error("Error fetching rubric:", error);
     }
   };
 
@@ -185,15 +186,37 @@
     validateTotals(true);
   });
 
+  const selectCourse = (course: Curso) => {
+    selectedCourseId.value = course._id;
+    selectedCourseName.value = course.nombre;
+    isModerator.value = course.docentes.some((d)=> d._id == docenteID && d.moderador == true);
+    fetchGroups();
+    showGroups.value = true;
+  }
+
+  const goBackToCourses = () => {
+    showGroups.value = false;
+    selectedCourseId.value = '';
+    selectedCourseName.value = '';
+    selectedGroups.value = [];
+    isGuideRubric.value = false;
+  }
+
   const saveRubric = async () => {
     if (!validateTotals(true)) {
       return;
     }
 
     try {
+      await $fetch(`${config.public.apiUrl}/rubrics/${rubricaId.value}`, {
+        method: "PUT",
+        body: {
+          temas: temas.value
+        },
+      });
 
       toast.add({
-        title: 'Rúbrica guardada exitosamente',
+        title: 'Cambios guardados exitosamente',
         icon: "fluent:checkmark-circle-16-filled",
         timeout: 3000,
         ui: {
@@ -205,11 +228,11 @@
           'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
           'icon': {
             'base': 'flex-shrink-0 w-5 h-5',
-            'color': 'text-green-500 dark:text-green-400'
+            'color': 'text-Purple-P dark:text-Muted-Brown'
           },
           'progress': {
             'base': 'absolute bottom-0 end-0 start-0 h-1',
-            'background': 'bg-green-500/60 dark:bg-green-400/60'
+            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
           },
           'closeButton': {
             'base': 'absolute top-2 right-2',
@@ -220,7 +243,7 @@
       });
     } catch (error) {
       toast.add({
-        title: 'Error al guardar la rúbrica',
+        title: 'Error al guardar los cambios',
         icon: "fluent:alert-urgent-16-filled",
         timeout: 3000,
         ui: {
@@ -232,11 +255,98 @@
           'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
           'icon': {
             'base': 'flex-shrink-0 w-5 h-5',
-            'color': 'text-red-500 dark:text-red-400'
+            'color': 'text-Purple-P dark:text-Muted-Brown'
           },
           'progress': {
             'base': 'absolute bottom-0 end-0 start-0 h-1',
-            'background': 'bg-red-500/60 dark:bg-red-400/60'
+            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+          },
+          'closeButton': {
+            'base': 'absolute top-2 right-2',
+            'icon': 'fluent:add-16-filled',
+            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+          }
+        }
+      });
+    }
+  };
+
+  const assignRubric = async () => {
+    if (selectedGroups.value.length === 0 && !isGuideRubric.value) {
+      toast.add({
+        title: 'Debe seleccionar al menos un grupo o marcar como rúbrica guía',
+        icon: "fluent:alert-urgent-16-filled",
+        timeout: 3000,
+        ui: {
+          'background': 'bg-Warm-White dark:bg-Medium-Dark',
+          'rounded': 'rounded-lg',
+          'shadow': 'shadow-lg',
+          'ring': 'ring-0',
+          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+          'icon': {
+            'base': 'flex-shrink-0 w-5 h-5',
+            'color': 'text-Purple-P dark:text-Muted-Brown'
+          },
+          'progress': {
+            'base': 'absolute bottom-0 end-0 start-0 h-1',
+            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+          },
+          'closeButton': {
+            'base': 'absolute top-2 right-2',
+            'icon': 'fluent:add-16-filled',
+            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+          }
+        }
+      });
+      return;
+    }
+
+    try {
+      // Update rubric state to active
+      await $fetch(`${config.public.apiUrl}/rubrics/${rubricaId.value}`, {
+        method: "PUT",
+        body: {
+          estado: 'activo'
+        },
+      });
+
+      if (selectedGroups.value.length > 0) {
+        await $fetch(`${config.public.apiUrl}/rubrics/${rubricaId.value}/group`, {
+          method: "PUT",
+          body: {
+            ids: selectedGroups.value,
+          },
+        });
+      }
+
+      if(isGuideRubric.value){
+        await $fetch(`${config.public.apiUrl}/rubrics/${rubricaId.value}/course/${selectedCourseId.value}`, {
+          method: "PUT",
+        });
+      }
+
+      isOpen.value = false;
+      await navigateTo('/rubricas');
+    } catch (error) {
+      toast.add({
+        title: 'Error al asignar la rúbrica',
+        icon: "fluent:alert-urgent-16-filled",
+        timeout: 3000,
+        ui: {
+          'background': 'bg-Warm-White dark:bg-Medium-Dark',
+          'rounded': 'rounded-lg',
+          'shadow': 'shadow-lg',
+          'ring': 'ring-0',
+          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+          'icon': {
+            'base': 'flex-shrink-0 w-5 h-5',
+            'color': 'text-Purple-P dark:text-Muted-Brown'
+          },
+          'progress': {
+            'base': 'absolute bottom-0 end-0 start-0 h-1',
+            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
           },
           'closeButton': {
             'base': 'absolute top-2 right-2',
@@ -310,6 +420,173 @@
         <UIcon name="fluent:save-16-filled" class="text-xl dark:text-White-w"/>
         <span class="text-white">Guardar</span>
       </UButton>
+      <UButton
+        v-if="rubricEstado === 'borrador'"
+        size="xl"
+        @click="isOpen = true"
+        class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
+      >
+        <UIcon name="fluent:checkmark-24-filled" class="mr-2 text-xl dark:text-White-w"/>
+        <span class="text-white">Asignar Rúbrica</span>
+      </UButton>
     </div>
   </div>
+
+  <!-- Assign Rubric Modal -->
+  <UModal
+    v-model="isOpen"
+    prevent-close
+    :ui="{
+      width: 'w-full sm:max-w-3xl',
+      height: 'max-h-[700px]',
+      container: 'flex items-center justify-center',
+      overlay: {background: 'dark:bg-Light-Gray/15'},
+    }"
+  >
+    <UCard
+      :ui="{
+        background: 'dark:bg-Medium-Dark',
+        ring: '',
+        divide: '',
+        header: { base: 'border-b border-Purple-P dark:border-Dark-Grey'},
+        base: 'w-full',
+      }"
+    >
+      <template #header>
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold leading-6 dark:text-white">
+            Asignar Rúbrica
+          </h3>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="fluent:dismiss-12-filled"
+            class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+            @click="isOpen=false"
+          />
+        </div>
+      </template>
+
+      <!-- Modal Content -->
+      <div class="p-4">
+        <div class="flex flex-col gap-6">
+          <!-- Course Selection View -->
+          <div v-if="!showGroups" class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-6 shadow-md">
+            <h4 class="text-lg font-medium mb-4 dark:text-white">Seleccionar Curso</h4>
+
+            <!-- Course Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="course in courses"
+                :key="course._id"
+                class="relative bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                @click="selectCourse(course)"
+              >
+                <!-- Course Content -->
+                <div class="w-full h-full flex flex-col items-center cursor-pointer">
+                  <UIcon
+                    :name="course.icono"
+                    class="text-4xl text-Purple-P dark:text-Muted-Brown"
+                  />
+                  <h3 class="text-md font-medium text-center text-Pure-Black dark:text-White-w mt-2">
+                    {{ course.nombre }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group Selection View -->
+          <div v-else class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-6 shadow-md">
+            <div class="flex items-center mb-4">
+              <UButton
+                icon="fluent:arrow-left-12-filled"
+                variant="ghost"
+                color="gray"
+                class="mr-2 dark:text-White-w hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+                @click="goBackToCourses"
+              />
+              <h4 class="text-lg font-medium dark:text-white">{{ selectedCourseName }}</h4>
+            </div>
+
+            <!-- Groups as checkbox list with guide rubric checkbox -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+              <!-- Group List -->
+              <div :class="isModerator ? 'space-y-3' : 'space-y-3 md:col-span-3'">
+                <div
+                  v-for="group in groups"
+                  :key="group._id"
+                  class="flex items-center gap-3 px-2"
+                >
+                  <UCheckbox
+                    v-model="selectedGroups"
+                    :value="group._id"
+                    :label="group.nombre"
+                    :ui="{
+                      container: 'flex items-center gap-2',
+                      base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
+                      icon: 'text-white',
+                      rounded: 'rounded',
+                      background: 'bg-Light-Gray dark:bg-Light-Gray/30',
+                      label: 'text-Pure-Black dark:text-White-w font-medium'
+                    }"
+                  />
+                </div>
+                <div v-if="groups.length === 0" class="text-center text-Light-Gray dark:text-MLight-White/50">
+                  No hay grupos disponibles para este curso.
+                </div>
+              </div>
+
+              <!-- Only show divider and guide rubric checkbox if user is moderator -->
+              <template v-if="isModerator">
+                <UDivider
+                  label="O"
+                  :orientation="isMobile ? 'horizontal' : 'vertical'"
+                  size="md"
+                  :ui="{
+                    label: 'text-Medium-Blue dark:text-Muted-Brown',
+                    border: {
+                      base: 'rounded border-Medium-Blue dark:border-Muted-Brown'
+                    }
+                  }"
+                />
+                <!-- Guide Rubric Checkbox -->
+                <div class="flex flex-col justify-start">
+                  <UCheckbox
+                    v-model="isGuideRubric"
+                    label="Hacer rúbrica guía del curso"
+                    :ui="{
+                      container: 'flex items-center gap-2',
+                      base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
+                      icon: 'text-white',
+                      rounded: 'rounded',
+                      background: 'bg-Light-Gray dark:bg-Light-Gray/50',
+                      label: 'text-Pure-Black dark:text-White-w font-medium'
+                    }"
+                  />
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex justify-end mt-6 gap-4">
+          <UButton
+            variant="link"
+            color="black"
+            @click="isOpen = false"
+          >
+            Cancelar
+          </UButton>
+          <UButton
+            class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
+            @click="assignRubric"
+          >
+            Asignar
+          </UButton>
+        </div>
+      </div>
+    </UCard>
+  </UModal>
 </template>

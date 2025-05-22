@@ -43,11 +43,11 @@ const curso = mongoose.Schema(
         ref: "Grupo",
       },
     ],
-    rubricaGuia: {
+    rubricasGuia: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Rubrica",
       required: false
-    }
+    }]
   },
   { versionKey: false },
 );

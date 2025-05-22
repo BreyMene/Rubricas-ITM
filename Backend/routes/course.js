@@ -38,7 +38,7 @@ router.get("/:id", async (req, res) => {
     const { id } = req.params;
     const cursos = await Curso.find({ "docentes._id": id }).populate(
       "docentes._id",
-    ).populate("rubricaGuia", "nombre");
+    ).populate("rubricasGuia", "nombre estado");
     const cursosObj = cursos.map((curso) => {
       const c = curso.toObject();
       c.docentes = c.docentes.map((d) => ({
@@ -58,7 +58,7 @@ router.get("/:id", async (req, res) => {
 router.get("/get/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const curso = await Curso.findById(id).populate("docentes._id").populate("rubricaGuia", "nombre");
+    const curso = await Curso.findById(id).populate("docentes._id").populate("rubricasGuia", "nombre estado");
     const cursoObj = curso.toObject();
     cursoObj.docentes = cursoObj.docentes.map((d) => {
       return {

@@ -3,6 +3,7 @@ export interface Rubrica {
   nombre: string;
   estado: string;
   temas: Tema[];
+  docente?: string;
 }
 
 export interface Tema {
@@ -28,7 +29,7 @@ export interface Curso {
   nombre: string;
   docentes: DocenteEnCurso[];
   grupos: Grupo[];
-  rubricaGuia?: Rubrica;
+  rubricasGuia?: Rubrica[];
 }
 
 export interface Grupo {

@@ -14,6 +14,10 @@
   const selectedRubrica = ref<string | null>(null);
   const selectedCourseId = ref<string>('');
   const selectedRubricaName = ref<string>('');
+  const selectedRubricaState = ref<string>('');
+  const selectedRubricaCourse = ref<string>('');
+  const selectedRubricaGroup = ref<string>('');
+  const isDeleteModalOpen = ref(false);
 
   const rubricButtons = computed(() => [
   [
@@ -28,10 +32,33 @@
   ],
   ]);
 
+  // Add computed property for state display
+  const getStateDisplay = (state: string) => {
+    switch (state) {
+      case 'borrador':
+        return 'Borrador';
+      case 'activo':
+        return 'Activa';
+      case 'inactivo':
+        return 'Desactivada';
+      default:
+        return state;
+    }
+  };
+
   // Function to handle rubrica selection with explicit type
-  const selectRubrica = (rubricaId: string, rubricaNomb: string) => {
+  const selectRubrica = (rubricaId: string, rubricaNomb: string, estado: string) => {
       selectedRubrica.value = rubricaId;
       selectedRubricaName.value = rubricaNomb;
+      selectedRubricaState.value = estado;
+      
+      // Find course and group info
+      const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId));
+      const group = courses.value.flatMap(c => c.grupos || []).find(g => g.rubricas?.some(r => r._id === rubricaId));
+      
+      selectedRubricaCourse.value = course?.nombre || 'No asignado a ningún curso';
+      selectedRubricaGroup.value = group?.nombre || 'No asignado a ningún grupo';
+      
       isOpen.value = true;
   };
 
@@ -76,9 +103,18 @@
     }
   };
 
-  const selectCourse = (course: Curso) => {
-    selectedRubrica.value = course.rubricaGuia?._id || "";
-    selectedCourseId.value = course._id;
+  const selectCourse = async (course: Curso) => {
+    try {
+      const activeRubric = await $fetch<Rubrica>(
+        `${config.public.apiUrl}/rubrics/course/${course._id}/active`
+      );
+      selectedRubrica.value = activeRubric._id;
+      selectedCourseId.value = course._id;
+    } catch (error) {
+      console.error("Error getting active guide rubric:", error);
+      selectedRubrica.value = course.rubricasGuia?.[0]?._id || "";
+      selectedCourseId.value = course._id;
+    }
   }
 
   const openRubric = () => {
@@ -89,6 +125,19 @@
   const cloneRubric = () => {
     navigateTo({path: '/crearRubrica', query: {clone: selectedRubrica.value} })
   }
+
+  const deleteRubric = async () => {
+    try {
+      await $fetch(`${config.public.apiUrl}/rubrics/${selectedRubrica.value}`, {
+        method: 'DELETE'
+      });
+      await fetchRubrics();
+      isOpen.value = false;
+      isDeleteModalOpen.value = false;
+    } catch (error) {
+      console.error("Error deleting rubric:", error);
+    }
+  };
 
   onMounted(() => {
     fetchCourses();
@@ -175,7 +224,7 @@
                 <UButton v-else variant="ghost"
                   v-for="rubrica in filteredRubricas"
                   :key="rubrica._id"
-                  @click="selectRubrica(rubrica._id, rubrica.nombre)"
+                  @click="selectRubrica(rubrica._id, rubrica.nombre, rubrica.estado)"
                   class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
                 >
                   <div class="w-full h-full rounded-lg overflow-hidden relative">
@@ -184,8 +233,16 @@
                       class="w-full h-full object-cover"
                       style="filter: blur(1.5px);"
                     />
+                    <!-- State Circle -->
+                    <UChip
+                      v-if="rubrica.estado"
+                      :color="rubrica.estado === 'activo' ? 'green' : rubrica.estado === 'inactivo' ? 'red' : 'gray'"
+                      size="xl"
+                      position="top-right"
+                      class="absolute top-4 right-4"
+                    />
                   </div>
-                  <h3 class="text-Pure-Black dark:text-White-w">{{ rubrica.nombre }}</h3>
+                  <h3 class="text-Pure-Black dark:text-White-w flex justify-between items-center">{{ rubrica.nombre }}</h3>
                 </UButton>
               </TransitionGroup>
 
@@ -213,8 +270,9 @@
 
     <!-- Modal For the Information of the Rubric -->
     <UModal
-        v-model="isOpen"
+        v-model="isOpen" :prevent-close="isDeleteModalOpen"
         :ui="{
+            wrapper: 'z-10',
             container: 'flex items-center justify-center',
             overlay: { background: 'dark:bg-Light-Gray/15' }
         }"
@@ -236,24 +294,93 @@
             <div class="flex-1 overflow-y-auto">
               <!-- Rúbrica details -->
               <div class="space-y-4">
-                  <p class="dark:text-White-w">
-                      Curso al que pertenece:
-                  </p>
-                  <p class="dark:text-White-w">
-                      Grupo al que pertenece:
-                  </p>
+                  <div class="flex items-center gap-2">
+                    <p class="dark:text-White-w">Estado:</p>
+                    <span class="px-3 py-1 text-white rounded-full text-sm font-medium"
+                      :class="{
+                        'bg-green-500': selectedRubricaState === 'activo',
+                        'bg-red-500': selectedRubricaState === 'inactivo',
+                        'bg-gray-500': selectedRubricaState === 'borrador'
+                      }"
+                    >
+                      {{ getStateDisplay(selectedRubricaState) }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <p class="dark:text-White-w">Curso al que pertenece:</p>
+                    <span class="text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaCourse }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <p class="dark:text-White-w">Grupo al que pertenece:</p>
+                    <span class="text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaGroup }}</span>
+                  </div>
               </div>
             </div>
 
-            <div class="mt-4 flex justify-end">
+            <div class="mt-4 flex justify-between">
                 <UButton
-                    variant="link" color="black"
-                    @click="isOpen = false">
-                    Cerrar
+                    color="red"
+                    variant="soft"
+                    @click="isDeleteModalOpen = true">
+                    <UIcon name="fluent:delete-12-regular" />
                 </UButton>
-                <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="openRubric">
-                    Ver Rubrica
-                </UButton>
+                <div class="flex gap-2">
+                    <UButton
+                        variant="link" color="black"
+                        @click="isOpen = false">
+                        Cerrar
+                    </UButton>
+                    <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="openRubric">
+                        Ver Rubrica
+                    </UButton>
+                </div>
+            </div>
+        </UCard>
+    </UModal>
+
+    <!-- Delete Confirmation Modal -->
+    <UModal
+        v-model="isDeleteModalOpen"
+        prevent-close
+        :ui="{
+            wrapper: 'z-20',
+            width: 'w-full sm:max-w-md',
+            height: 'max-h-[700px]',
+            container: 'flex items-center justify-center',
+            overlay: { background: 'dark:bg-Light-Gray/15' },
+        }"
+        >
+        <UCard :ui="{
+          background: 'dark:bg-Medium-Dark',
+          ring: '',
+          divide: '',
+          base: 'w-full',
+        }">
+            <div class="p-4">
+                <div class="flex items-center mb-4">
+                    <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
+                    <h3 class="text-lg font-semibold dark:text-white">Confirmar Eliminación</h3>
+                </div>
+                
+                <p class="mb-6 text-gray-700 dark:text-gray-300">
+                    ¿Estás seguro que deseas eliminar la rúbrica "{{ selectedRubricaName }}"? Esta acción es irreversible.
+                </p>
+                
+                <div class="flex justify-end gap-3">
+                    <UButton 
+                        variant="link" 
+                        color="gray"
+                        @click="isDeleteModalOpen = false"
+                    >
+                        Cancelar
+                    </UButton>
+                    <UButton 
+                        color="red" 
+                        @click="deleteRubric"
+                    >
+                        Eliminar
+                    </UButton>
+                </div>
             </div>
         </UCard>
     </UModal>
