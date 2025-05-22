@@ -28,7 +28,7 @@ export interface Curso {
   nombre: string;
   docentes: DocenteEnCurso[];
   grupos: Grupo[];
-  rubricaGuia: Rubrica;
+  rubricaGuia?: Rubrica;
 }
 
 export interface Grupo {

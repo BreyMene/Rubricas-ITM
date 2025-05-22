@@ -26,7 +26,7 @@
 
   const totalAcumulado = computed(() => {
     return temas.value.reduce((sum, tema) => {
-      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.acumulado || 0), 0);
+      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
     }, 0);
   });
 
@@ -149,8 +149,45 @@
     return true;
   };
 
+  // Add validation for peso and acumulado
+  const validateTotals = (showToast: boolean) => {
+    if (totalPeso.value > 5) {
+      // Only show toast if showToast is true
+      if (showToast) {
+        toast.add({
+          title: 'El peso total no puede exceder 5',
+          icon: "fluent:alert-urgent-16-filled",
+          timeout: 3000,
+          ui: {
+            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+            'rounded': 'rounded-lg',
+            'shadow': 'shadow-lg',
+            'ring': 'ring-0',
+            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+            'icon': {
+              'base': 'flex-shrink-0 w-5 h-5',
+              'color': 'text-Purple-P dark:text-Muted-Brown'
+            },
+            'progress': {
+              'base': 'absolute bottom-0 end-0 start-0 h-1',
+              'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+            },
+            'closeButton': {
+              'base': 'absolute top-2 right-2',
+              'icon': 'fluent:add-16-filled',
+              'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+            }
+          }
+        });
+      }
+      return false;
+    }
+    return true;
+  };
+
   const CreateRubric = async() => {
-    if (!validateRubricName()) {
+    if (!validateRubricName() || !validateTotals(true)) {
       return;
     }
 
@@ -260,6 +297,76 @@
       }, 300);
     }
   });
+
+  // Real time validation
+  watch([totalPeso], () => {
+    validateTotals(true);
+  });
+
+  const saveRubric = async () => {
+    if (!validateTotals(true)) {
+      return;
+    }
+
+    try {
+
+
+      toast.add({
+        title: 'Rúbrica guardada exitosamente',
+        icon: "fluent:checkmark-circle-16-filled",
+        timeout: 3000,
+        ui: {
+            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+            'rounded': 'rounded-lg',
+            'shadow': 'shadow-lg',
+            'ring': 'ring-0',
+            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+            'icon': {
+                'base': 'flex-shrink-0 w-5 h-5',
+                'color': 'text-Purple-P dark:text-Muted-Brown'
+            },
+            'progress': {
+                'base': 'absolute bottom-0 end-0 start-0 h-1',
+                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+            },
+            'closeButton': {
+                'base': 'absolute top-2 right-2',
+                'icon': 'fluent:add-16-filled',
+                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+            }
+        }
+      });
+
+    } catch (error) {
+      toast.add({
+        title: 'Error al guardar la rúbrica',
+        icon: "fluent:alert-urgent-16-filled",
+        timeout: 3000,
+        ui: {
+            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+            'rounded': 'rounded-lg',
+            'shadow': 'shadow-lg',
+            'ring': 'ring-0',
+            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+            'icon': {
+                'base': 'flex-shrink-0 w-5 h-5',
+                'color': 'text-Purple-P dark:text-Muted-Brown'
+            },
+            'progress': {
+                'base': 'absolute bottom-0 end-0 start-0 h-1',
+                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+            },
+            'closeButton': {
+                'base': 'absolute top-2 right-2',
+                'icon': 'fluent:add-16-filled',
+                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+            }
+        }
+      });
+    }
+  };
 </script>
 
 <!-- pages/rubricas.vue -->
@@ -314,14 +421,22 @@
     </div>
 
     <!-- Finish Rubric Button -->
-    <div class="flex justify-end p-4">
+    <div class="flex justify-end p-4 gap-4">
+      <UButton
+        size="xl"
+        class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
+        @click="saveRubric"
+      >
+        <UIcon name="fluent:save-16-filled" class="text-xl dark:text-White-w"/>
+        <span class="text-white">Guardar</span>
+      </UButton>
       <UButton
         size="xl"
         @click="isOpen = true"
         class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
       >
         <UIcon name="fluent:checkmark-24-filled" class="mr-2 text-xl dark:text-White-w"/>
-        <span class="text-white">Finalizar Rúbrica</span>
+        <span class="text-white">Asignar Rúbrica</span>
       </UButton>
     </div>
   </div>

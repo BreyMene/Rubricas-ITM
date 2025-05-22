@@ -93,7 +93,13 @@ const rubrica = mongoose.Schema({
   estado: {
     type: String,
     required: true,
-    default: "guardado"
+    default: "borrador",
+    enum: ["borrador", "activo", "inactivo"]
+  },
+  docente: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Docente",
+    required: false
   },
   temas: [{
     _id: false,

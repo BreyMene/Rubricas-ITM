@@ -29,9 +29,46 @@
 
   const totalAcumulado = computed(() => {
     return temas.value.reduce((sum, tema) => {
-      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.acumulado || 0), 0);
+      return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
     }, 0);
   });
+
+  // Add validation for peso and acumulado
+  const validateTotals = (showToast: boolean) => {
+    if (totalPeso.value > 5) {
+      // Only show toast if showToast is true
+      if (showToast) {
+        toast.add({
+          title: 'El peso total no puede exceder 5',
+          icon: "fluent:alert-urgent-16-filled",
+          timeout: 3000,
+          ui: {
+            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+            'rounded': 'rounded-lg',
+            'shadow': 'shadow-lg',
+            'ring': 'ring-0',
+            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+            'icon': {
+              'base': 'flex-shrink-0 w-5 h-5',
+              'color': 'text-Purple-P dark:text-Muted-Brown'
+            },
+            'progress': {
+              'base': 'absolute bottom-0 end-0 start-0 h-1',
+              'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+            },
+            'closeButton': {
+              'base': 'absolute top-2 right-2',
+              'icon': 'fluent:add-16-filled',
+              'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+            }
+          }
+        });
+      }
+      return false;
+    }
+    return true;
+  };
 
   const rubricName = ref('')
   const rubricNameError = ref('')
@@ -129,100 +166,6 @@
     temas.value[temaIndex].criterios.splice(rowIndex, 1)
   }
 
-  const validateRubricName = () => {
-    rubricNameError.value = "";
-
-    if (rubricName.value.trim() === "") {
-      rubricNameError.value = "Se requiere un nombre";
-      return false;
-    }
-
-    return true;
-  };
-
-  const CreateRubric = async() => {
-    if (!validateRubricName()) {
-      return;
-    }
-
-    if (selectedGroups.value.length === 0 && !isGuideRubric.value) {
-      toast.add({
-        title: 'Debe seleccionar al menos un grupo o marcar como rúbrica guía',
-        icon: "fluent:alert-urgent-16-filled",
-        timeout: 3000,
-        ui: {
-                'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                'rounded': 'rounded-lg',
-                'shadow': 'shadow-lg',
-                'ring': 'ring-0',
-                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                'icon': {
-                    'base': 'flex-shrink-0 w-5 h-5',
-                    'color': 'text-Purple-P dark:text-Muted-Brown'
-                },
-                'progress': {
-                    'base': 'absolute bottom-0 end-0 start-0 h-1',
-                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                },
-                'closeButton': {
-                    'base': 'absolute top-2 right-2',
-                    'icon': 'fluent:add-16-filled',
-                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                }
-            }
-      });
-      return;
-    }
-
-    try{
-      const r: Rubrica = {
-        _id: "a",
-        nombre: rubricName.value,
-        estado: rubricEstado.value,
-        temas: temas.value
-      }
-
-      const id  = await $fetch<String>(`${config.public.apiUrl}/rubrics/`, {
-        method: "POST",
-        body: {
-          nombre: r.nombre,
-          estado: r.estado,
-          temas: r.temas
-        },
-      });
-      console.log(id)
-
-      await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
-        method: "PUT",
-        body: {
-          ids: selectedGroups.value,
-        },
-      });
-
-      isOpen.value = false;
-    }catch(error: any){
-
-    }
-  }
-
-  // Function to handle course selection
-  const selectCourse = (course: Curso) => {
-    selectedCourseId.value = course._id;
-    selectedCourseName.value = course.nombre;
-    fetchGroups();
-    showGroups.value = true;
-  }
-
-  // Function to go back to course selection
-  const goBackToCourses = () => {
-    showGroups.value = false;
-    selectedCourseId.value = '';
-    selectedCourseName.value = '';
-    selectedGroups.value = [];
-    isGuideRubric.value = false;
-  }
-
   watch(isOpen, (newValue) => {
     if (!newValue) {
       // Add a delay before resetting the icon
@@ -237,6 +180,73 @@
       }, 300);
     }
   });
+
+  watch([totalPeso], () => {
+    validateTotals(true);
+  });
+
+  const saveRubric = async () => {
+    if (!validateTotals(true)) {
+      return;
+    }
+
+    try {
+
+      toast.add({
+        title: 'Rúbrica guardada exitosamente',
+        icon: "fluent:checkmark-circle-16-filled",
+        timeout: 3000,
+        ui: {
+          'background': 'bg-Warm-White dark:bg-Medium-Dark',
+          'rounded': 'rounded-lg',
+          'shadow': 'shadow-lg',
+          'ring': 'ring-0',
+          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+          'icon': {
+            'base': 'flex-shrink-0 w-5 h-5',
+            'color': 'text-green-500 dark:text-green-400'
+          },
+          'progress': {
+            'base': 'absolute bottom-0 end-0 start-0 h-1',
+            'background': 'bg-green-500/60 dark:bg-green-400/60'
+          },
+          'closeButton': {
+            'base': 'absolute top-2 right-2',
+            'icon': 'fluent:add-16-filled',
+            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+          }
+        }
+      });
+    } catch (error) {
+      toast.add({
+        title: 'Error al guardar la rúbrica',
+        icon: "fluent:alert-urgent-16-filled",
+        timeout: 3000,
+        ui: {
+          'background': 'bg-Warm-White dark:bg-Medium-Dark',
+          'rounded': 'rounded-lg',
+          'shadow': 'shadow-lg',
+          'ring': 'ring-0',
+          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+          'icon': {
+            'base': 'flex-shrink-0 w-5 h-5',
+            'color': 'text-red-500 dark:text-red-400'
+          },
+          'progress': {
+            'base': 'absolute bottom-0 end-0 start-0 h-1',
+            'background': 'bg-red-500/60 dark:bg-red-400/60'
+          },
+          'closeButton': {
+            'base': 'absolute top-2 right-2',
+            'icon': 'fluent:add-16-filled',
+            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+          }
+        }
+      });
+    }
+  };
 </script>
 
 <!-- pages/rubricas.vue -->
@@ -291,12 +301,13 @@
     </div>
 
     <!-- Finish Rubric Button -->
-    <div class="flex justify-end p-4">
+    <div class="flex justify-end p-4 gap-4">
       <UButton
         size="xl"
         class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
+        @click="saveRubric"
       >
-        <UIcon name="fluent:save-16-filled" class="mr-2 text-xl dark:text-White-w"/>
+        <UIcon name="fluent:save-16-filled" class="text-xl dark:text-White-w"/>
         <span class="text-white">Guardar</span>
       </UButton>
     </div>
