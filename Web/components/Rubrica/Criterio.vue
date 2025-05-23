@@ -69,9 +69,20 @@
             }
         }"
       />
-      <div class="flex-none w-[12.4%] p-3 text-center">
-        {{ acumulado.toFixed(1) }}
-      </div>
+      <UInput
+        :model-value="acumulado.toFixed(1)"
+        disabled
+        color="gray"
+        class="flex-none w-[12.4%] p-3 text-center"
+        :ui="{
+            ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+            color: {
+                gray: {
+                    outline: 'shadow-md bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                }
+            }
+        }"
+      />
       <div class="flex flex-grow p-3 items-center">
         <UInput
           v-model="row.observaciones"
