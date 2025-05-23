@@ -186,7 +186,7 @@
                     },
                     rounded: 'rounded-2xl',
                     ring: 'ring-0',
-                    background: 'bg-White-w dark:bg-Pure-Black/60',
+                    background: 'bg-White-w dark:bg-Pure-Black',
                     item: {
                         rounded: 'rounded-xl',
                         active: 'dark:bg-Muted-Brown/60',

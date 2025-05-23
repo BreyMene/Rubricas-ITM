@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const useDocente = useDocenteStore();
 const email = ref(useDocente.getCorreo);
-const language = ref('Español'); // Default to Spanish
+const language = ref('Español');
 const isConfirmDeleteOpen = ref(false);
 const isDeleting = ref(false);
 
@@ -11,15 +11,13 @@ const languages = [
 ];
 
 const updateEmail = async () => {
-    // TODO: Implement email update logic
-    console.log('Updating email to:', email.value);
+
 };
 
 const deleteAccount = async () => {
     isDeleting.value = true;
     
     try {
-        console.log('Deleting account');
         await navigateTo('/login');
     } catch (error) {
         console.error('Error deleting account:', error);
