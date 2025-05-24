@@ -64,17 +64,62 @@
 
   // SEARCH BAR
   const searchTerm = ref('');
+  const selectedState = ref('all');
 
-  // Filtered rubricas based on search
+  // State filter options with better styling
+  const stateOptions = [
+    { 
+      label: 'Todos los estados', 
+      value: 'all',
+      icon: 'fluent:filter-24-regular'
+    },
+    { 
+      label: 'Activas', 
+      value: 'activo',
+      icon: 'fluent:checkmark-circle-24-filled'
+    },
+    { 
+      label: 'Borradores', 
+      value: 'borrador',
+      icon: 'fluent:drafts-16-filled'
+    },
+    { 
+      label: 'Inactivas', 
+      value: 'inactivo',
+      icon: 'fluent:dismiss-circle-24-filled'
+    }
+  ];
+
+  // Get current filter option
+  const currentStateOption = computed(() => 
+    stateOptions.find(option => option.value === selectedState.value) || stateOptions[0]
+  );
+
+  // Filtered rubricas based on search and state
   const filteredRubricas = computed(() => {
-      if (!searchTerm.value) return rubricas.value;
-      return rubricas.value.filter(rubrica =>
-          rubrica.nombre.toString().toLowerCase().includes(searchTerm.value)
-      );
+      let filtered = rubricas.value;
+      
+      // Apply state filter
+      if (selectedState.value !== 'all') {
+          filtered = filtered.filter(rubrica => rubrica.estado === selectedState.value);
+      }
+      
+      // Apply search filter
+      if (searchTerm.value) {
+          filtered = filtered.filter(rubrica =>
+              rubrica.nombre.toString().toLowerCase().includes(searchTerm.value.toLowerCase())
+          );
+      }
+      
+      return filtered;
   });
 
   const handleSearch = (value: string) => {
       searchTerm.value = value;
+  };
+
+  const handleStateFilter = (state: string) => {
+      selectedState.value = state;
   };
 
   const fetchRubrics = async () => {
@@ -164,10 +209,67 @@
       <div class="flex-1">
         <div class="mb-6">
             <h2 class="text-2xl font-semibold mb-4">Mis Rubricas</h2>
-            <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
-                <UtilitiesSearchBar placeholderText="Buscar Rubrica..." @search="handleSearch"/>
+            <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between sm:items-center relative">
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <UtilitiesSearchBar placeholderText="Buscar Rubrica..." @search="handleSearch"/>
+                    
+                    <!-- Enhanced State Filter -->
+                    <UDropdown 
+                      :items="[[
+                        ...stateOptions.map(option => ({
+                          label: option.label,
+                          icon: option.icon,
+                          click: () => handleStateFilter(option.value),
+                          active: selectedState === option.value,
+                          class: option.value === 'activo' ? 'text-green-600 dark:text-green-400' :
+                                 option.value === 'borrador' ? 'text-yellow-600 dark:text-yellow-400' :
+                                 option.value === 'inactivo' ? 'text-red-600 dark:text-red-400' : 
+                                 'text-gray-600 dark:text-gray-400'
+                        }))
+                      ]]"
+                      :ui="{
+                        width: 'w-64',
+                        transition: {
+                          enterActiveClass: 'transition-all duration-200 ease-out',
+                          enterFromClass: 'transform scale-95 opacity-0',
+                          enterToClass: 'transform scale-100 opacity-100',
+                          leaveActiveClass: 'transition-all duration-150 ease-in',
+                          leaveFromClass: 'transform scale-100 opacity-100',
+                          leaveToClass: 'transform scale-95 opacity-0',
+                        },
+                        rounded: 'rounded-xl',
+                        ring: 'ring-0',
+                        background: 'bg-Warm-White dark:bg-Warm-Dark',
+                        shadow: 'shadow-lg',
+                        item: {
+                          rounded: 'rounded-lg',
+                          padding: 'px-3 py-2',
+                          active: 'bg-Purple-P/10 dark:bg-Muted-Brown/20',
+                          base: 'flex items-center gap-3 w-full'
+                        },
+                        padding: 'p-2',
+                      }"
+                    >
+                      <UButton
+                        :icon="currentStateOption.icon"
+                        :label="currentStateOption.label"
+                        trailing-icon="heroicons:chevron-down-20-solid"
+                        variant="soft"
+                        size="md"
+                        :class="[
+                          'justify-between w-fit rounded-xl transition-all duration-200',
+                          'bg-Warm-White dark:bg-Warm-Dark hover:bg-MLight-White dark:hover:bg-Dark-Grey',
+                          'text-Pure-Black dark:text-White-w',
+                          currentStateOption.value === 'activo' ? 'text-green-600 dark:text-green-400' :
+                          currentStateOption.value === 'borrador' ? 'text-yellow-600 dark:text-yellow-400' :
+                          currentStateOption.value === 'inactivo' ? 'text-red-600 dark:text-red-400' : 
+                          'text-gray-600 dark:text-gray-400'
+                        ]"
+                      />
+                    </UDropdown>
+                </div>
 
-                  <!-- Desktop buttons - visible on SM and above -->
+                <!-- Desktop buttons - visible on SM and above -->
                 <div class="hidden sm:flex gap-3">
                   <UButton label="Clonar Rubrica" @click="openCourses = true" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
                   <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
@@ -202,49 +304,67 @@
           <!-- Rubrics Grid -->
           <div class="relative">
             <ClientOnly>
-              <TransitionGroup
-                  v-if="!loading"
-                  name="list"
-                  tag="div"
-                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
-              >
-                <div v-if="!rubricas.length" class="flex items-center justify-center mt-24 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2">
-                    <div class="relative w-80 h-52 flex flex-col items-center justify-center">
-                        <!-- Corner decorations -->
-                        <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                        <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                        <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                        <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                <!-- Grid Container with fixed height to prevent layout shifts -->
+                <div class="min-h-[400px] relative">
+                  <TransitionGroup
+                      name="rubric-list"
+                      tag="div"
+                      v-if="!loading"
+                      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
+                  >
+                    <!-- No Results State - Fixed positioning -->
+                    <div v-if="!filteredRubricas.length && rubricas.length > 0" class="absolute inset-0 flex items-center justify-center">
+                        <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                            <!-- Corner decorations -->
+                            <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                            <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                            <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                            <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
 
-                        <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
+                            <UIcon name="fluent:filter-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO SE ENCONTRARON<br>RUBRICAS</p>
+                        </div>
                     </div>
-                </div>
 
-                <UButton v-else variant="ghost"
-                  v-for="rubrica in filteredRubricas"
-                  :key="rubrica._id"
-                  @click="selectRubrica(rubrica._id, rubrica.nombre, rubrica.estado)"
-                  class="w-full lg:w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1 hover:shadow-xl transition-shadow duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey"
-                >
-                  <div class="w-full h-full rounded-lg overflow-hidden relative">
-                    <NuxtImg
-                      src="RubricaTest.PNG"
-                      class="w-full h-full object-cover"
-                      style="filter: blur(1.5px);"
-                    />
-                    <!-- State Circle -->
-                    <UChip
-                      v-if="rubrica.estado"
-                      :color="rubrica.estado === 'activo' ? 'green' : rubrica.estado === 'inactivo' ? 'red' : 'gray'"
-                      size="xl"
-                      position="top-right"
-                      class="absolute top-4 right-4"
-                    />
-                  </div>
-                  <h3 class="text-Pure-Black dark:text-White-w flex justify-between items-center">{{ rubrica.nombre }}</h3>
-                </UButton>
-              </TransitionGroup>
+                    <!-- Empty State (no rubricas at all) -->
+                    <div v-else-if="!rubricas.length" class="absolute inset-0 flex items-center justify-center">
+                        <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                            <!-- Corner decorations -->
+                            <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                            <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                            <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                            <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+
+                            <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
+                        </div>
+                    </div>
+                    
+                    <UButton v-for="rubrica in filteredRubricas"
+                      :key="rubrica._id"
+                      variant="ghost"
+                      @click="selectRubrica(rubrica._id, rubrica.nombre, rubrica.estado)"
+                      class="w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col hover:shadow-xl transition-[transform,box-shadow] duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey hover:-translate-y-1"
+                    >
+                      <div class="w-full h-full rounded-lg overflow-hidden relative">
+                        <NuxtImg
+                          src="RubricaTest.PNG"
+                          class="w-full h-full object-cover"
+                          style="filter: blur(1.5px);"
+                        />
+                        <!-- State Circle -->
+                        <UChip
+                          v-if="rubrica.estado"
+                          :color="rubrica.estado === 'activo' ? 'green' : rubrica.estado === 'inactivo' ? 'red' : 'yellow'"
+                          size="xl"
+                          position="top-right"
+                          class="absolute top-4 right-4"
+                        />
+                      </div>
+                      <h3 class="text-Pure-Black dark:text-White-w flex justify-between items-center">{{ rubrica.nombre }}</h3>
+                    </UButton>
+                  </TransitionGroup>
+                </div>
 
               <!-- Skeleton Loader -->
               <template #fallback>
@@ -300,7 +420,7 @@
                       :class="{
                         'bg-green-500': selectedRubricaState === 'activo',
                         'bg-red-500': selectedRubricaState === 'inactivo',
-                        'bg-gray-500': selectedRubricaState === 'borrador'
+                        'bg-yellow-600': selectedRubricaState === 'borrador'
                       }"
                     >
                       {{ getStateDisplay(selectedRubricaState) }}
@@ -476,33 +596,53 @@
 </template>
 
 <style scoped>
-  /* Group Animations when the searchbar is used */
-  .list-move,
-  .list-enter-active,
-  .list-leave-active {
-      transition: all 0.3s ease;
+  /* Smooth animations without stretching */
+  .rubric-list-enter-active {
+      transition: all 0.3s ease-out;
   }
 
-  .list-enter-from,
-  .list-leave-to {
+  .rubric-list-leave-active {
+      transition: all 0.3s ease-in;
+  }
+
+  .rubric-list-move {
+      transition: transform 0.3s ease-out;
+  }
+
+  .rubric-list-enter-from {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(30px) scale(0.95);
   }
 
-  .list-leave-active {
+  .rubric-list-leave-to {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+  }
+
+  /* Prevent layout shifts during animations */
+  .rubric-list-leave-active {
       position: absolute;
-      width: calc(33.33% - 16px);
+      top: 0;
+      left: 0;
+      z-index: 0;
   }
 
-  @media (max-width: 768px) {
-      .list-leave-active {
-          width: calc(50% - 16px);
+  /* Responsive grid item sizing for leaving elements */
+  @media (min-width: 1024px) {
+      .rubric-list-leave-active {
+          width: calc((100% - 32px) / 3);
       }
   }
 
-  @media (max-width: 640px) {
-      .list-leave-active {
-          width: calc(100% - 16px);
+  @media (min-width: 768px) and (max-width: 1023px) {
+      .rubric-list-leave-active {
+          width: calc((100% - 16px) / 2);
+      }
+  }
+
+  @media (max-width: 767px) {
+      .rubric-list-leave-active {
+          width: 100%;
       }
   }
 </style>
