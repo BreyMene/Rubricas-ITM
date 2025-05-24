@@ -207,8 +207,8 @@
     <div class="flex flex-col md:flex-row gap-6">
       <!-- Main Content Area -->
       <div class="flex-1">
-        <div class="mb-6">
-            <h2 class="text-2xl font-semibold mb-4">Mis Rubricas</h2>
+        <div class="mb-6 transition-colors duration-150">
+            <h2 class="text-2xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">Mis Rubricas</h2>
             <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between sm:items-center relative">
                 <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                     <UtilitiesSearchBar placeholderText="Buscar Rubrica..." @search="handleSearch"/>
@@ -257,7 +257,7 @@
                         variant="soft"
                         size="md"
                         :class="[
-                          'justify-between w-fit rounded-xl transition-all duration-200',
+                          'justify-between w-fit rounded-xl transition-all duration-150',
                           'bg-Warm-White dark:bg-Warm-Dark hover:bg-MLight-White dark:hover:bg-Dark-Grey',
                           'text-Pure-Black dark:text-White-w',
                           currentStateOption.value === 'activo' ? 'text-green-600 dark:text-green-400' :
@@ -305,65 +305,71 @@
           <div class="relative">
             <ClientOnly>
                 <!-- Grid Container with fixed height to prevent layout shifts -->
-                <div class="min-h-[400px] relative">
-                  <TransitionGroup
-                      name="rubric-list"
-                      tag="div"
-                      v-if="!loading"
-                      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none"
+                <div class="min-h-[400px] relative transition-colors duration-150">
+                  <div 
+                    v-if="!loading"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none transition-all duration-500 ease-out"
                   >
-                    <!-- No Results State - Fixed positioning -->
-                    <div v-if="!filteredRubricas.length && rubricas.length > 0" class="absolute inset-0 flex items-center justify-center">
-                        <div class="relative w-80 h-52 flex flex-col items-center justify-center">
-                            <!-- Corner decorations -->
-                            <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                            <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                            <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                            <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                    <!-- No Results State -->
+                    <div v-if="!filteredRubricas.length && rubricas.length > 0" class="col-span-full flex items-center justify-center py-20">
+                      <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                        <!-- Corner decorations -->
+                        <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg transition-colors duration-150"></div>
+                        <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg transition-colors duration-150"></div>
+                        <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg transition-colors duration-150"></div>
+                        <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"></div>
 
-                            <UIcon name="fluent:filter-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO SE ENCONTRARON<br>RUBRICAS</p>
-                        </div>
+                        <UIcon name="fluent:filter-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4 transition-colors duration-[0.1s]" />
+                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2 transition-colors duration-150">NO SE ENCONTRARON<br>RUBRICAS</p>
+                      </div>
                     </div>
 
                     <!-- Empty State (no rubricas at all) -->
-                    <div v-else-if="!rubricas.length" class="absolute inset-0 flex items-center justify-center">
-                        <div class="relative w-80 h-52 flex flex-col items-center justify-center">
-                            <!-- Corner decorations -->
-                            <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                            <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                            <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                            <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                    <div v-else-if="!rubricas.length" class="col-span-full flex items-center justify-center py-20">
+                      <div class="relative w-80 h-52 flex flex-col items-center justify-center">
+                        <!-- Corner decorations -->
+                        <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                        <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                        <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                        <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
 
-                            <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
-                        </div>
+                        <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
+                      </div>
                     </div>
                     
-                    <UButton v-for="rubrica in filteredRubricas"
-                      :key="rubrica._id"
-                      variant="ghost"
-                      @click="selectRubrica(rubrica._id, rubrica.nombre, rubrica.estado)"
-                      class="w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col hover:shadow-xl transition-[transform,box-shadow] duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey hover:-translate-y-1"
+                    <!-- Rubric Cards with individual transitions -->
+                    <Transition
+                      v-for="rubrica in filteredRubricas"
+                      :key="`${rubrica._id}-${selectedState}-${searchTerm}`"
+                      name="rubric-item"
+                      appear
+                      mode="out-in"
                     >
-                      <div class="w-full h-full rounded-lg overflow-hidden relative">
-                        <NuxtImg
-                          src="RubricaTest.PNG"
-                          class="w-full h-full object-cover"
-                          style="filter: blur(1.5px);"
-                        />
-                        <!-- State Circle -->
-                        <UChip
-                          v-if="rubrica.estado"
-                          :color="rubrica.estado === 'activo' ? 'green' : rubrica.estado === 'inactivo' ? 'red' : 'yellow'"
-                          size="xl"
-                          position="top-right"
-                          class="absolute top-4 right-4"
-                        />
-                      </div>
-                      <h3 class="text-Pure-Black dark:text-White-w flex justify-between items-center">{{ rubrica.nombre }}</h3>
-                    </UButton>
-                  </TransitionGroup>
+                      <UButton
+                        variant="ghost"
+                        @click="selectRubrica(rubrica._id, rubrica.nombre, rubrica.estado)"
+                        class="w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col hover:shadow-xl transition-[transform,box-shadow] duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey hover:-translate-y-1"
+                      >
+                        <div class="w-full h-full rounded-lg overflow-hidden relative">
+                          <NuxtImg
+                            src="RubricaTest.PNG"
+                            class="w-full h-full object-cover"
+                            style="filter: blur(1.5px);"
+                          />
+                          <!-- State Circle -->
+                          <UChip
+                            v-if="rubrica.estado"
+                            :color="rubrica.estado === 'activo' ? 'green' : rubrica.estado === 'inactivo' ? 'red' : 'yellow'"
+                            size="xl"
+                            position="top-right"
+                            class="absolute top-4 right-4 transition-colors duration-150"
+                          />
+                        </div>
+                        <h3 class="text-Pure-Black dark:text-White-w flex justify-between items-center">{{ rubrica.nombre }}</h3>
+                      </UButton>
+                    </Transition>
+                  </div>
                 </div>
 
               <!-- Skeleton Loader -->
@@ -554,7 +560,7 @@
                 <div
                   v-for="course in courses"
                   :key="course._id"
-                  class="relative bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
+                  class="relative bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey"
                   :class="course._id == selectedCourseId ? 'ring-4 dark:ring-White-w ring-Medium-Gray' : 'ring-0' "
                   @click="selectCourse(course)"
                 >
@@ -596,53 +602,36 @@
 </template>
 
 <style scoped>
-  /* Smooth animations without stretching */
-  .rubric-list-enter-active {
-      transition: all 0.3s ease-out;
+  /* Simplified transitions */
+  .rubric-item-enter-active {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  .rubric-list-leave-active {
-      transition: all 0.3s ease-in;
+  .rubric-item-leave-active {
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
   }
 
-  .rubric-list-move {
-      transition: transform 0.3s ease-out;
+  .rubric-item-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
   }
 
-  .rubric-list-enter-from {
-      opacity: 0;
-      transform: translateY(30px) scale(0.95);
+  .rubric-item-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
   }
 
-  .rubric-list-leave-to {
-      opacity: 0;
-      transform: translateY(-30px) scale(0.95);
+  /* Enhanced hover effects */
+  .rubric-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  /* Prevent layout shifts during animations */
-  .rubric-list-leave-active {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
+  .rubric-card:hover {
+    transform: translateY(-4px) scale(1.02);
   }
 
-  /* Responsive grid item sizing for leaving elements */
-  @media (min-width: 1024px) {
-      .rubric-list-leave-active {
-          width: calc((100% - 32px) / 3);
-      }
-  }
-
-  @media (min-width: 768px) and (max-width: 1023px) {
-      .rubric-list-leave-active {
-          width: calc((100% - 16px) / 2);
-      }
-  }
-
-  @media (max-width: 767px) {
-      .rubric-list-leave-active {
-          width: 100%;
-      }
+  /* Grid container smooth transitions */
+  .grid {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 </style>

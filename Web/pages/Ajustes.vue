@@ -32,18 +32,18 @@ const deleteAccount = async () => {
     <div class="container mx-auto p-6">
         <div class="flex flex-col gap-6">
             <div class="flex-1">
-                <div class="max-w-3xl mx-auto bg-White-w dark:bg-Warm-Dark/60 rounded-lg shadow-lg p-8">
-                    <h1 class="text-2xl font-bold mb-8 text-Pure-Black dark:text-White-w">Ajustes</h1>
+                <div class="max-w-3xl mx-auto bg-White-w dark:bg-Warm-Dark/60 rounded-lg shadow-lg p-8 transition-colors duration-150">
+                    <h1 class="text-2xl font-bold mb-8 text-Pure-Black dark:text-White-w transition-colors duration-150">Ajustes</h1>
                     
                     <!-- Email Section -->
-                    <div class="mb-8 p-6 bg-Warm-White/50 dark:bg-Pure-Black/50 rounded-xl shadow-md">
-                        <h2 class="text-xl font-semibold mb-4 text-Pure-Black dark:text-White-w">Correo Electrónico</h2>
+                    <div class="mb-8 p-6 bg-Warm-White/50 dark:bg-Pure-Black/50 rounded-xl shadow-md transition-all duration-150 hover:shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">Correo Electrónico</h2>
                         <div class="flex gap-4">
                             <UInput 
                                 v-model="email" 
                                 type="email" 
                                 placeholder="Tu correo electrónico" 
-                                class="flex-1"
+                                class="flex-1 transition-all duration-150"
                                 :ui="{
                                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                                     color: {
@@ -56,7 +56,7 @@ const deleteAccount = async () => {
                             />
                             <UButton 
                                 @click="updateEmail" 
-                                class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300"
+                                class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-150"
                             >
                                 Actualizar
                             </UButton>
@@ -69,8 +69,8 @@ const deleteAccount = async () => {
                     </div>
 
                     <!-- Language Section -->
-                    <div class="mb-8 p-6 bg-Warm-White/50 dark:bg-Pure-Black/50 rounded-xl shadow-md">
-                        <h2 class="text-xl font-semibold mb-4 text-Pure-Black dark:text-White-w">Idioma</h2>
+                    <div class="mb-8 p-6 bg-Warm-White/50 dark:bg-Pure-Black/50 rounded-xl shadow-md transition-all duration-150 hover:shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">Idioma</h2>
                         <USelectMenu 
                             v-model="language" 
                             :options="languages"
@@ -113,10 +113,10 @@ const deleteAccount = async () => {
                     </div>
 
                     <!-- Delete Account Section -->
-                    <div class="mb-8 p-6 border border-red-500/30 rounded-lg">
+                    <div class="mb-8 p-6 border border-red-500/30 rounded-lg transition-all duration-150 hover:border-red-500/50 hover:shadow-lg">
                         <div class="flex items-center mb-4">
-                            <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
-                            <h2 class="text-xl font-semibold text-red-500">Eliminar Cuenta</h2>
+                            <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2 transition-transform duration-150 hover:scale-110" />
+                            <h2 class="text-xl font-semibold text-red-500 transition-colors duration-150">Eliminar Cuenta</h2>
                         </div>
                         <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
                             Eliminar tu cuenta es una acción permanente y no puede ser revertida. Se eliminarán todos tus datos asociados, incluyendo cursos, grupos y rúbricas.

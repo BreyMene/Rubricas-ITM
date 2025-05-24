@@ -267,7 +267,7 @@
                 <UIcon
                   :key="currentIcon"
                   :name="currentIcon"
-                  class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown cursor-pointer"
+                  class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown cursor-pointer transition-all duration-150 hover:-translate-y-1"
                   @click="toggleView"
                 />
               </transition>
@@ -276,7 +276,7 @@
               <transition name="scale" mode="out-in">
                 <div
                   :key="showGroups ? 'group-btn' : 'teacher-btn'"
-                  class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"
+                  class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0 transition-all duration-300"
                 >
                   <CreateGroup @addGroup="addGroup" v-if="showGroups" />
                   <CreateTeacher v-else-if="!showGroups && isModerator"/>
@@ -293,64 +293,66 @@
           <div v-if="showGroups" :key="'groups'" class="relative">
             <ClientOnly>
               <template v-if="!loading">
-                <!-- No Groups warning -->
-                <div
-                  v-if="!groups.length"
-                  class="flex items-center justify-center md:mt-24 lg:mt-36 mt-10"
-                >
+                <Transition name="fade-minimal" appear>
+                  <!-- No Groups warning -->
                   <div
-                    class="relative w-80 h-52 flex flex-col items-center justify-center"
+                    v-if="!groups.length"
+                    class="flex items-center justify-center md:mt-24 lg:mt-36 mt-10 transition-colors duration-150"
                   >
-                    <!-- Corner decorations -->
                     <div
-                      class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"
-                    ></div>
-                    <div
-                      class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"
-                    ></div>
-                    <div
-                      class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"
-                    ></div>
-                    <div
-                      class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"
-                    ></div>
-
-                    <UIcon
-                      name="fluent:warning-24-regular"
-                      class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
-                    />
-                    <p
-                      class="text-xl font-medium text-center text-Pure-Black dark:text-White-w"
+                      class="relative w-80 h-52 flex flex-col items-center justify-center transition-colors duration-150"
                     >
-                      NO HAY<br />NINGUN GRUPO
-                    </p>
-                  </div>
-                </div>
+                      <!-- Corner decorations -->
+                      <div
+                        class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg transition-colors duration-150"
+                      ></div>
+                      <div
+                        class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg transition-colors duration-150"
+                      ></div>
+                      <div
+                        class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg transition-colors duration-150"
+                      ></div>
+                      <div
+                        class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"
+                      ></div>
 
-                <TransitionGroup
-                  v-else
-                  name="list"
-                  tag="div"
-                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                >
-                  <UButton
+                      <UIcon
+                        name="fluent:warning-24-regular"
+                        class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
+                      />
+                      <p
+                        class="text-xl font-medium text-center text-Pure-Black dark:text-White-w transition-colors duration-150"
+                      >
+                        NO HAY<br />NINGUN GRUPO
+                      </p>
+                    </div>
+                  </div>
+                </Transition>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Transition
                     v-for="group in filteredGroups"
                     :key="group._id"
-                    variant="ghost"
-                    class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-colors duration-200"
-                    @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
+                    name="course-item"
+                    appear
                   >
-                    <h3
-                      class="text-lg font-semibold text-center text-Pure-Black dark:text-White-w"
+                    <UButton
+                      variant="ghost"
+                      class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1"
+                      @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
                     >
-                      {{ group.nombre }}
-                    </h3>
-                    <p class="text-sm text-center w-full text-Medium-Gray dark:text-Light-Gray">
-                      Profesor encargado <br />
-                      <span class="block truncate max-w-full text-Medium-Gray/70 dark:text-Light-Gray/70">{{ group.docente.correo }}</span>
-                    </p>
-                  </UButton>
-                </TransitionGroup>
+                      <h3
+                        class="text-lg font-semibold text-center text-Pure-Black dark:text-White-w transition-colors duration-[0.1s]"
+                      >
+                        {{ group.nombre }}
+                      </h3>
+                      <p class="text-sm text-center w-full text-Medium-Gray dark:text-Light-Gray transition-colors duration-[0.1s]">
+                        Profesor encargado <br />
+                        <span class="block truncate max-w-full text-Medium-Gray/70 dark:text-Light-Gray/70 transition-colors duration-[0.1s]">{{ group.docente.correo }}</span>
+                      </p>
+                    </UButton>
+                  </Transition>
+                </div>
               </template>
 
               <!-- Skeleton Loader -->
@@ -410,7 +412,7 @@
 
         <UButton
           size="lg"
-          class="absolute bottom-4 sm:right-4 rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w"
+          class="absolute bottom-4 sm:right-4 rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
         >
           Modificar
         </UButton>
@@ -427,6 +429,45 @@
 </template>
 
 <style scoped>
+/* Course item transitions reutilizadas */
+.course-item-enter-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.course-item-leave-active {
+  transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+.course-item-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+.course-item-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+
+/* Minimal fade transition for the no groups warning */
+.fade-minimal-enter-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-minimal-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-minimal-enter-from,
+.fade-minimal-leave-to {
+  opacity: 0;
+}
+
+/* Grid container smooth transitions */
+.grid {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+
 /* Transition for Icons and Buttons */
 .scale-enter-active,
 .scale-leave-active {

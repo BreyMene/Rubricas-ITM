@@ -298,15 +298,15 @@
             td: {
                 base: 'text-left text-base px-4',
                 padding: 'p-2',
-            }
+            },
         }"
         > 
             <!-- Final Note custom column -->
             <template #finalNote-header>
-                <div class="text-center w-full">Nota Final</div>
+                <div class="text-center w-full transition-colors duration-150">Nota Final</div>
             </template>
             <template #finalNote-data="{ row }">
-                <div class="text-center">
+                <div class="text-center transition-colors duration-150">
                     {{ row.finalNote }}
                 </div>
             </template>
@@ -316,17 +316,17 @@
                 <div class="w-8"></div>
             </template>
             <template #moderador-data="{ row }">
-                <div class="flex justify-center w-8">
-                    <UIcon v-if="row.moderador" name="fluent:person-key-20-filled" class="text-Purple-P dark:text-Muted-Brown w-6 h-6" />
+                <div class="flex justify-center w-8 transition-colors duration-150">
+                    <UIcon v-if="row.moderador" name="fluent:person-key-20-filled" class="text-Purple-P dark:text-Muted-Brown w-6 h-6 transition-colors duration-[0.1s]" />
                 </div>
             </template>
 
             <!-- Editable columns -->
             <template #nombre-data="{ row }">
-                <div v-if="editingRow?.correo === row.correo && editingRow?.field === 'nombre'" class="flex gap-2 items-center">
+                <div v-if="editingRow?.correo === row.correo && editingRow?.field === 'nombre'" class="flex gap-2 items-center transition-colors duration-150">
                     <UInput 
                         v-model="editValue" 
-                        class="flex-1"
+                        class="flex-1 transition-colors duration-150"
                         :ui="{
                             ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                             color: {
@@ -342,14 +342,14 @@
                         icon="fluent:checkmark-12-filled" 
                         color="green" 
                         variant="ghost"
-                        class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300"
+                        class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-150"
                         @click="saveEdit" 
                     />
                     <UButton 
                         icon="fluent:dismiss-12-filled" 
                         color="red" 
                         variant="ghost"
-                        class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                        class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-150"
                         @click="cancelEdit" 
                     />
                 </div>
@@ -357,10 +357,10 @@
             </template>
 
             <template #correo-data="{ row }">
-                <div v-if="editingRow?.correo === row.correo && editingRow?.field === 'correo'" class="flex gap-2 items-center">
+                <div v-if="editingRow?.correo === row.correo && editingRow?.field === 'correo'" class="flex gap-2 items-center transition-colors    duration-150">
                     <UInput 
                         v-model="editValue" 
-                        class="flex-1"
+                        class="flex-1 transition-colors duration-150"
                         :ui="{
                             ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                             color: {
@@ -376,14 +376,14 @@
                         icon="fluent:checkmark-12-filled" 
                         color="green" 
                         variant="ghost"
-                        class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300"
+                        class="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-150"
                         @click="saveEdit" 
                     />
                     <UButton 
                         icon="fluent:dismiss-12-filled" 
                         color="red" 
                         variant="ghost"
-                        class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                        class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-150"
                         @click="cancelEdit" 
                     />
                 </div>
@@ -409,10 +409,10 @@
             </template>
 
             <template #empty-state>
-                <div class="flex flex-col items-center justify-center py-6 gap-3">
-                    <UIcon name="fluent:beach-24-regular" class="text-7xl"/>
-                    <span v-if="view == 'docentes'" class="italic text-sm">No hay docentes!</span>
-                    <span v-else class="italic text-sm">No hay estudiantes!</span>
+                <div class="flex flex-col items-center justify-center py-6 gap-3 transition-colors duration-150">
+                    <UIcon name="fluent:beach-24-regular" class="text-7xl transition-colors duration-[0.1s]"/>
+                    <span v-if="view == 'docentes'" class="italic text-sm transition-colors duration-[0.1s]">No hay docentes!</span>
+                    <span v-else class="italic text-sm transition-colors duration-[0.1s]">No hay estudiantes!</span>
                 </div>
             </template>
 
@@ -420,7 +420,7 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex justify-center px-3 py-3.5 border-t border-Purple-P dark:border-Muted-Brown">
+    <div class="flex justify-center px-3 py-3.5 border-t border-Purple-P dark:border-Muted-Brown transition-colors duration-150">
         <UPagination v-model="page" :page-count="pageCount" :total="totalItems" 
         :ui="{
             wrapper: 'flex items-center gap-1',

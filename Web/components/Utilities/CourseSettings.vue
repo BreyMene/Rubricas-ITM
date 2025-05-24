@@ -257,7 +257,7 @@
   <div class="inline-flex">
     <UIcon
         name="fluent:settings-24-filled"
-        class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown cursor-pointer"
+        class="text-4xl hover:bg-Medium-Blue hover:dark:bg-Muted-Brown cursor-pointer transition-all duration-150 hover:-translate-y-1"
         @click="isOpen = true"
     />
 
