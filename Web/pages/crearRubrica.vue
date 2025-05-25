@@ -227,10 +227,9 @@
       const r: Rubrica = {
         _id: "a",
         nombre: rubricName.value,
-        estado: rubricEstado.value,
+        estado: selectedGroups.value.length > 0 ? 'activo' : rubricEstado.value,
         temas: temas.value
       }
-
 
       const id  = await $fetch<String>(`${config.public.apiUrl}/rubrics/`, {
         method: "POST",
@@ -242,6 +241,26 @@
       });
 
       if (selectedGroups.value.length > 0) {
+        // First, get all groups to find their current active rubrics
+        const groupPromises = selectedGroups.value.map(groupId =>
+          $fetch<Grupo>(`${config.public.apiUrl}/groups/${groupId}`)
+        );
+        const groups = await Promise.all(groupPromises);
+
+        // Deactivate all active rubrics in the selected groups
+        for (const group of groups) {
+          const activeRubrics = group.rubricas.filter(r => r.estado === 'activo');
+          for (const rubric of activeRubrics) {
+            await $fetch(`${config.public.apiUrl}/rubrics/${rubric._id}`, {
+              method: "PUT",
+              body: {
+                estado: 'inactivo'
+              }
+            });
+          }
+        }
+
+        // Now assign the new rubric to the groups
         await $fetch(`${config.public.apiUrl}/rubrics/${id}/group`, {
           method: "PUT",
           body: {
@@ -259,7 +278,7 @@
       isOpen.value = false;
       await navigateTo(`/rubrica/${id}`);
     }catch(error: any){
-
+      console.error("Error creating rubric:", error);
     }
     finally{
       loadingCreateR.value = false;
