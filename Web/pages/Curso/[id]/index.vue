@@ -600,7 +600,7 @@
             >
               <div class="flex items-center justify-between">
                 <h4 class="text-sm font-medium text-Pure-Black dark:text-White-w truncate">{{ rubric.nombre }}</h4>
-                <UToggle
+                <UToggle v-if="isModerator"
                   v-model="getRubricState(rubric).value"
                   on-icon="fluent:checkmark-circle-24-filled"
                   off-icon="fluent:dismiss-circle-24-filled"
