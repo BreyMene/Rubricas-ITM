@@ -1,6 +1,6 @@
 @echo off
 echo Iniciando MongoDB...
-docker compose up -d db
+docker compose up -d db redis
 
 echo Iniciando Web...
 @REM start cmd /k "cd Web && npm run build && node .output\server\index.mjs"

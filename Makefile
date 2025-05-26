@@ -2,10 +2,11 @@ WEB_DIR=Web
 BACKEND_DIR=Backend
 
 mongo-up:
-	docker compose up -d db
+	docker compose up -d db redis
 
 web:
-	cd $(WEB_DIR) && npm run build && node .output/server/index.mjs
+	cd $(WEB_DIR) && npm run dev
+	# build && node .output/server/index.mjs
 
 backend:
 	cd $(BACKEND_DIR) && npm run dev

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const config = useRuntimeConfig();
+
 const props = defineProps({
     isMobile: {
         type: Boolean,
@@ -25,6 +27,12 @@ const validate = createFormValidator(emailError, undefined, undefined, {
 const handleResetPassword = async () => {
     try {
         if(forgotPasswordState.email) {
+            const response = await $fetch(`${config.public.apiUrl}/recover`, {
+                method: "POST",
+                body: {
+                    correo: forgotPasswordState.email,
+                },
+            });
             emit('showOTPForm', forgotPasswordState.email);
         }
         else {
@@ -42,8 +50,8 @@ const backToLogin = () => {
 
 <template>
     <div :class="[
-        props.isMobile 
-            ? 'px-6 py-8 min-h-[450px] flex flex-col justify-center' 
+        props.isMobile
+            ? 'px-6 py-8 min-h-[450px] flex flex-col justify-center'
             : 'form-container w-full px-60 py-8 mt-[12.5%] absolute left-0 right-0',
         {'faster-transition-out': props.isReturningFromForgot}
     ]">
@@ -54,7 +62,7 @@ const backToLogin = () => {
             RECUPERAR CONTRASEÑA
         </h2>
         <div class="mb-6">
-            <UForm :state="forgotPasswordState" :validate="validate" class="flex flex-col gap-3">
+            <UForm :state="forgotPasswordState" :validate="validate" @submit="handleResetPassword" class="flex flex-col gap-3">
                 <UFormGroup label="Email" name="email" :hint="emailError"
                 :ui="{
                     hint: 'text-red-500 dark:text-red-500 text-sm',
@@ -79,7 +87,7 @@ const backToLogin = () => {
                     />
                 </UFormGroup>
 
-                <UButton class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium" @click="handleResetPassword">
+                <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
                     Enviar Codigo
                 </UButton>
             </UForm>

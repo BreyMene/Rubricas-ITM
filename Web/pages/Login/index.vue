@@ -32,13 +32,13 @@
     }
 
     const showForgotPassword = () => {
-        if (isAnimating.value) return;  
+        if (isAnimating.value) return;
         isAnimating.value = true;
         isForgotPassword.value = true;
         isLogin.value = false;
         isReturningFromForgot.value = false;
         isOTPForm.value = false;
-        
+
         setTimeout(() => {
             isAnimating.value = false;
         }, 750);
@@ -49,7 +49,7 @@
         isAnimating.value = true;
         isReturningFromForgot.value = true;
         isOTPForm.value = false;
-        
+
         if (fromReset) {
             isLeavingFromReset.value = true;
         }
@@ -58,7 +58,7 @@
             isForgotPassword.value = false;
             isLogin.value = true;
             isResetPass.value = false;
-            
+
             setTimeout(() => {
                 isAnimating.value = false;
                 isReturningFromForgot.value = false;
@@ -106,7 +106,7 @@
             <!-- Desktop Layout -->
             <div class="hidden md:block">
                 <!-- Logo Section for Desktop -->
-                <div 
+                <div
                     v-if="!isForgotPassword"
                     class="absolute bg-[#a9b3de] dark:bg-Warm-Dark transition-transform z-10"
                     :class="[
@@ -118,18 +118,18 @@
                     ]"
                 >
                     <div class="flex items-center justify-center h-full p-8">
-                        <NuxtImg 
-                            sizes="50px sm:200px" 
-                            src="/img/ITMLogo.png" 
-                            format="webp" 
-                            densities="x1 x2" 
-                            class="dark:brightness-0 dark:invert pointer-events-none select-none" 
+                        <NuxtImg
+                            sizes="50px sm:200px"
+                            src="/img/ITMLogo.png"
+                            format="webp"
+                            densities="x1 x2"
+                            class="dark:brightness-0 dark:invert pointer-events-none select-none"
                         />
                     </div>
                 </div>
 
                 <!-- Logo Section for Forgot Password Desktop -->
-                <div 
+                <div
                     v-if="isForgotPassword || isAnimating && (isForgotPassword || isReturningFromForgot)"
                     class="absolute bg-[#a9b3de] dark:bg-Warm-Dark transition-transform z-10"
                     :class="[
@@ -139,11 +139,11 @@
                     ]"
                 >
                     <div class="flex items-center justify-center h-full p-8">
-                        <NuxtImg 
-                            sizes="50px sm:200px" 
-                            src="/img/ITMLogo.png" 
-                            format="webp" 
-                            densities="x1 x2" 
+                        <NuxtImg
+                            sizes="50px sm:200px"
+                            src="/img/ITMLogo.png"
+                            format="webp"
+                            densities="x1 x2"
                             class="dark:brightness-0 dark:invert pointer-events-none select-none transition-all duration-500"
                             :class="[
                                 {'w-[200px]': !isForgotPassword || isReturningFromForgot},
@@ -165,14 +165,14 @@
                     />
 
                     <!-- Sign In Form Desktop -->
-                    <RegisterSignIn 
+                    <RegisterSignIn
                         v-else-if="!isLogin && !isForgotPassword"
                         @toggle-form="toggleForm"
                         @load-screen="loadScreen"
                     />
 
                     <!-- Olvido Contraseña Desktop -->
-                    <RegisterForgotPassword 
+                    <RegisterForgotPassword
                         v-else-if="isForgotPassword && !isOTPForm && !isResetPass"
                         :is-returning-from-forgot="isReturningFromForgot"
                         @back-to-login="backToLogin"
@@ -180,7 +180,7 @@
                     />
 
                     <!-- OPT para olvidar contraseña -->
-                    <RegisterOTP 
+                    <RegisterOTP
                         v-else-if="isForgotPassword && isOTPForm && !isResetPass"
                         :email="otpEmail"
                         :otpLength="6"
@@ -188,8 +188,9 @@
                         @show-reset-password = 'showResetPassword'
                     />
 
-                    <RegisterResetPassword 
+                    <RegisterResetPassword
                         v-else-if="isForgotPassword && !isOTPForm && isResetPass"
+                        :email="otpEmail"
                         @back-to-login="backToLogin"
                     />
                 </transition>
@@ -199,12 +200,12 @@
             <div class="md:hidden flex flex-col">
                 <!-- Logo Section for Mobile -->
                 <div class="w-full bg-[#a9b3de] dark:bg-Warm-Dark py-4 flex justify-center items-center">
-                    <NuxtImg 
-                        sizes="120px" 
-                        src="/img/ITMLogo.png" 
-                        format="webp" 
-                        densities="x1 x2" 
-                        class="dark:brightness-0 dark:invert pointer-events-none select-none w-32" 
+                    <NuxtImg
+                        sizes="120px"
+                        src="/img/ITMLogo.png"
+                        format="webp"
+                        densities="x1 x2"
+                        class="dark:brightness-0 dark:invert pointer-events-none select-none w-32"
                     />
                 </div>
 
@@ -217,17 +218,17 @@
                         @toggle-form="toggleForm"
                         @load-screen="loadScreen"
                     />
-    
+
                     <!-- Sign In Form Mobile -->
-                    <RegisterSignIn 
+                    <RegisterSignIn
                         v-else-if="!isLogin && !isForgotPassword"
                         :is-mobile="true"
                         @toggle-form="toggleForm"
                         @load-screen="loadScreen"
                     />
-    
+
                     <!-- Olvido Contraseña Mobile -->
-                    <RegisterForgotPassword 
+                    <RegisterForgotPassword
                         v-else-if="isForgotPassword && !isOTPForm && !isResetPass"
                         :is-mobile="true"
                         :is-returning-from-forgot="isReturningFromForgot"
@@ -236,7 +237,7 @@
                     />
 
                     <!-- OPT para olvidar contraseña -->
-                    <RegisterOTP 
+                    <RegisterOTP
                         v-else-if="isForgotPassword && isOTPForm && !isResetPass"
                         :is-mobile="true"
                         :email="otpEmail"
@@ -245,9 +246,10 @@
                         @show-reset-password = 'showResetPassword'
                     />
 
-                    <RegisterResetPassword 
+                    <RegisterResetPassword
                         v-else-if="isForgotPassword && !isOTPForm && isResetPass"
                         :is-mobile="true"
+                        :email="otpEmail"
                         @back-to-login="backToLogin"
                     />
                 </transition>
@@ -308,11 +310,11 @@
                 width: 40%;
             }
         }
-        
+
         .animate-to-right {
             animation: toRight 1s ease-in-out forwards;
         }
-        
+
         .animate-to-left {
             animation: toLeft 1s ease-in-out forwards;
         }
