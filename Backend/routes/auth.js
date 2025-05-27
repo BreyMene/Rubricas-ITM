@@ -46,8 +46,8 @@ router.post("/recover", async (req, res) => {
     const docente = await Docente.findOne({ correo });
     if (!docente) return res.status(404).json({ error: "failed to get user" });
 
-    const code = await redis.get(`recover:${correo}`);
-    if (!existingCode) {
+    let code = await redis.get(`recover:${correo}`);
+    if (!code) {
       code = Math.floor(100000 + Math.random() * 900000).toString();
 
       await redis.setex(`recover:${correo}`, 600, code);

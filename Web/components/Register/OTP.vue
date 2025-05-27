@@ -54,9 +54,15 @@
         emit('backToForgotPassword');
     }
 
-    const resendCode = () => {
+    const resendCode = async () => {
         // Reset the OTP fields
         if (otpRef.value) {
+            const response = await $fetch(`${config.public.apiUrl}/recover`, {
+                method: "POST",
+                body: {
+                    correo: props.email,
+                },
+            });
             otpRef.value.resetOtp();
         }
         // Code to resend OTP
