@@ -1,11 +1,31 @@
 <script setup lang="ts">
+const config = useRuntimeConfig();
 const isOpen = ref(false);
 
 const currentPassword = ref('');
-const newPassword = ref('');
-const confirmPassword = ref('');
 const showOTP = ref(false);
 const showNewPassword = ref(false);
+
+// Error states
+const currentPasswordError = ref('');
+const passwordError = ref('');
+const secPasswordError = ref('');
+const formError = ref('');
+
+// Define the type for the OtpInput component ref
+interface OtpInputInstance {
+    resetOtp: () => void;
+    getOtpValue: () => string;
+}
+
+// OTP ref
+const otpRef = ref<OtpInputInstance | null>(null);
+
+// Form state
+const state = reactive({
+    password: '',
+    secPasword: ''
+});
 
 // Watch for modal close to reset all states
 watch(isOpen, (newValue) => {
@@ -13,40 +33,155 @@ watch(isOpen, (newValue) => {
         setTimeout(() => {
             // Reset all states when modal is closed
             currentPassword.value = '';
-            newPassword.value = '';
-            confirmPassword.value = '';
+            state.password = '';
+            state.secPasword = '';
             showOTP.value = false;
             showNewPassword.value = false;
+            currentPasswordError.value = '';
+            passwordError.value = '';
+            secPasswordError.value = '';
+            formError.value = '';
         }, 300);
     }
 });
 
-const sendOTP = async () => {
-    // TODO: Implement OTP sending logic
-    console.log('Sending OTP...');
-    showOTP.value = true;
+const validateCurrentPassword = () => {
+    currentPasswordError.value = '';
+    formError.value = '';
+
+    if (!currentPassword.value) {
+        currentPasswordError.value = 'La contraseña es requerida';
+        return false;
+    }
+
+    return true;
 };
 
-const verifyOTP = () => {
-    // TODO: Implement OTP verification
-    showOTP.value = false;
-    showNewPassword.value = true;
+// Create form validator for new password form
+const validateNewPasswordForm = createFormValidator(
+    undefined,
+    passwordError,
+    secPasswordError,
+    { isMobile: false, minPasswordLength: 6 }
+);
+
+const sendOTP = async () => {
+    if (!validateCurrentPassword()) return;
+
+    try {
+        const docenteStore = useDocenteStore();
+        if (!docenteStore.docente) {
+            formError.value = 'No hay usuario autenticado';
+            currentPasswordError.value = formError.value;
+            return;
+        }
+
+        // Verify current password
+        const response = await $fetch<{ valid: boolean }>(`${config.public.apiUrl}/verify-password`, {
+            method: 'POST',
+            body: {
+                contraseña: currentPassword.value,
+                correo: docenteStore.docente.correo
+            },
+        });
+
+        if (response.valid) {
+            // Send password change OTP
+            await $fetch(`${config.public.apiUrl}/send-password-change-code`, {
+                method: 'POST',
+                body: {
+                    correo: docenteStore.docente.correo,
+                },
+            });
+            showOTP.value = true;
+        }
+    } catch (error: any) {
+        formError.value = 'Contraseña incorrecta';
+        currentPasswordError.value = formError.value;
+    }
+};
+
+const verifyOTP = async () => {
+    try {
+        if (otpRef.value) {
+            const code = otpRef.value.getOtpValue();
+            if (code.length === 6) {
+                const docenteStore = useDocenteStore();
+                if (!docenteStore.docente) {
+                    formError.value = 'No hay usuario autenticado';
+                    return;
+                }
+
+                // Validate password change OTP
+                await $fetch(`${config.public.apiUrl}/validate-password-change`, {
+                    method: "POST",
+                    body: {
+                        correo: docenteStore.docente.correo,
+                        codigo: code,
+                    },
+                });
+                showOTP.value = false;
+                showNewPassword.value = true;
+            } else {
+                formError.value = 'Código incompleto';
+            }
+        }
+    } catch (error) {
+        formError.value = 'Código inválido o expirado';
+    }
+};
+
+const resendOTP = async () => {
+    try {
+        const docenteStore = useDocenteStore();
+        if (!docenteStore.docente) {
+            formError.value = 'No hay usuario autenticado';
+            return;
+        }
+
+        // Resend password change OTP
+        await $fetch(`${config.public.apiUrl}/send-password-change-code`, {
+            method: 'POST',
+            body: {
+                correo: docenteStore.docente.correo,
+            },
+        });
+        if (otpRef.value) {
+            otpRef.value.resetOtp();
+        }
+    } catch (error) {
+        formError.value = 'Error al reenviar el código';
+    }
 };
 
 const updatePassword = async () => {
-    if (newPassword.value !== confirmPassword.value) {
-        alert('Las contraseñas no coinciden');
-        return;
+    try {
+        const docenteStore = useDocenteStore();
+        if (!docenteStore.docente) {
+            formError.value = 'No hay usuario autenticado';
+            return;
+        }
+
+        await $fetch(`${config.public.apiUrl}/change-password`, {
+            method: "PUT",
+            body: {
+                correo: docenteStore.docente.correo,
+                contraseña: state.password,
+            },
+        });
+        isOpen.value = false;
+    } catch (error) {
+        formError.value = 'Error al cambiar la contraseña';
     }
-    // TODO: Implement password update logic
-    console.log('Updating password');
-    isOpen.value = false;
 };
 
 const backToPassword = () => {
     showOTP.value = false;
     showNewPassword.value = false;
 };
+
+const show = ref(false);
+const showConfirm = ref(false);
 </script>
 
 <template>
@@ -99,21 +234,32 @@ const backToPassword = () => {
                             Para cambiar tu contraseña, primero necesitamos verificar tu identidad.
                         </p>
                         
-                        <UInput 
-                            v-model="currentPassword" 
-                            type="password" 
-                            placeholder="Contraseña actual"
-                            class="mb-4"
+                        <UFormGroup
+                            label="Contraseña actual"
+                            name="currentPassword"
+                            :hint="currentPasswordError"
+                            :error="formError"
                             :ui="{
-                                ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                color: {
-                                    gray: {
-                                        outline: 'shadow-lg bg-White-w dark:bg-Warm-Dark text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                    }
-                                }
+                                hint: 'text-red-500 dark:text-red-500 text-sm',
+                                error: 'hidden'
                             }"
-                            color="gray"
-                        />
+                        >
+                            <UInput 
+                                v-model="currentPassword" 
+                                type="password" 
+                                placeholder="Contraseña actual"
+                                class="mb-4"
+                                :ui="{
+                                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                                    color: {
+                                        gray: {
+                                            outline: 'shadow-lg bg-White-w dark:bg-Warm-Dark text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                                        }
+                                    }
+                                }"
+                                color="gray"
+                            />
+                        </UFormGroup>
                         
                         <div class="flex justify-end gap-3">
                             <UButton 
@@ -163,6 +309,18 @@ const backToPassword = () => {
                                 Verificar
                             </UButton>
                         </div>
+
+                        <div class="mt-4 text-center">
+                            <p class="text-sm">¿No recibiste el código?
+                                <UButton
+                                    variant="link"
+                                    @click="resendOTP"
+                                    class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
+                                >
+                                    Reenviar código
+                                </UButton>
+                            </p>
+                        </div>
                     </div>
 
                     <!-- New Password Form -->
@@ -172,52 +330,86 @@ const backToPassword = () => {
                             <h3 class="text-lg font-semibold dark:text-white">Nueva Contraseña</h3>
                         </div>
                         
-                        <div class="space-y-4">
-                            <UInput 
-                                v-model="newPassword" 
-                                type="password" 
-                                placeholder="Nueva contraseña"
-                                :ui="{
-                                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                    color: {
-                                        gray: {
-                                            outline: 'shadow-lg bg-White-w dark:bg-Warm-Dark text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                        <UForm :state="state" :validate="validateNewPasswordForm" class="flex flex-col gap-3" @submit="updatePassword">
+                            <UFormGroup label="Contraseña" name="password" :hint="passwordError"
+                                :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
+                                    error: 'hidden'
+                                }">
+                                <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
+                                    :ui="{
+                                        icon: {
+                                            trailing: { pointer: '' }
+                                        },
+                                        ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                                        color: {
+                                            gray: {
+                                                outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                                            }
                                         }
-                                    }
-                                }"
-                                color="gray"
-                            />
-                            <UInput 
-                                v-model="confirmPassword" 
-                                type="password" 
-                                placeholder="Confirmar nueva contraseña"
-                                :ui="{
-                                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                    color: {
-                                        gray: {
-                                            outline: 'shadow-lg bg-White-w dark:bg-Warm-Dark text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                                    }"
+                                    color="gray"
+                                >
+                                    <template #trailing>
+                                        <UButton
+                                            color="gray"
+                                            variant="link"
+                                            size="sm"
+                                            :icon="show ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
+                                            :aria-label="show ? 'Hide password' : 'Show password'"
+                                            :aria-pressed="show"
+                                            aria-controls="password"
+                                            @click="show = !show"
+                                        />
+                                    </template>
+                                </UInput>
+                            </UFormGroup>
+
+                            <UFormGroup label="Verifica Contraseña" name="secPasword" :hint="secPasswordError"
+                                :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
+                                    error: 'hidden'
+                                }">
+                                <UInput size="sm" v-model="state.secPasword" :type="showConfirm ? 'text' : 'password'" class="w-full"
+                                    :ui="{
+                                        icon: {
+                                            trailing: { pointer: '' }
+                                        },
+                                        ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                                        color: {
+                                            gray: {
+                                                outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
+                                            }
                                         }
-                                    }
-                                }"
-                                color="gray"
-                            />
-                        </div>
-                        
-                        <div class="flex justify-end gap-3 mt-6">
-                            <UButton 
-                                variant="link" 
-                                color="gray"
-                                @click="backToPassword"
-                            >
-                                Volver
-                            </UButton>
-                            <UButton 
-                                @click="updatePassword"
-                                class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300"
-                            >
-                                Cambiar Contraseña
-                            </UButton>
-                        </div>
+                                    }"
+                                    color="gray"
+                                >
+                                    <template #trailing>
+                                        <UButton
+                                            color="gray"
+                                            variant="link"
+                                            size="sm"
+                                            :icon="showConfirm ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
+                                            :aria-label="showConfirm ? 'Hide password' : 'Show password'"
+                                            :aria-pressed="showConfirm"
+                                            aria-controls="password"
+                                            @click="showConfirm = !showConfirm"
+                                        />
+                                    </template>
+                                </UInput>
+                            </UFormGroup>
+
+                            <div class="flex justify-end gap-3 mt-6">
+                                <UButton 
+                                    variant="link" 
+                                    color="gray"
+                                    @click="isOpen = false"
+                                >
+                                    Cancelar
+                                </UButton>
+                                <UButton type="submit" class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
+                                    Cambiar Contraseña
+                                </UButton>
+                            </div>
+                        </UForm>
                     </div>
                 </div>
             </UCard>

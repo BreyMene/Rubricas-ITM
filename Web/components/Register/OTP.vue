@@ -38,7 +38,6 @@
                         },
                     });
                     emit('showResetPassword');
-                    console.log('OTP:', code);
                 } else {
                     console.log('Código incompleto');
                 }
