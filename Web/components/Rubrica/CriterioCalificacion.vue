@@ -7,10 +7,6 @@
         rowIndex: number
     }>();
 
-    const emit = defineEmits(['deleteRow']);
-
-    const deleteRow = () => emit('deleteRow', props.rowIndex);
-
     // Compute acumulado based on peso and calificacion
     const acumulado = computed(() => {
         return (props.row.peso || 0) * (props.row.calificacion || 0);
@@ -24,6 +20,7 @@
         placeholder="Criterio"
         class="flex-none w-[37%] p-3"
         color="gray"
+        disabled
         :ui="{
             ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
             color: {
@@ -42,6 +39,7 @@
         placeholder="Peso"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
+        disabled
         :ui="{
             ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
             color: {
@@ -57,7 +55,6 @@
         step="0.1"
         min="0"
         max="1"
-        disabled
         placeholder="Calificación"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
@@ -90,7 +87,6 @@
           placeholder="Observaciones"
           class="flex-grow mr-2"
           color="gray"
-          disabled
           :ui="{
               ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
               color: {
@@ -100,13 +96,6 @@
               }
           }"
         />
-        <UButton
-          icon="fluent:delete-12-regular"
-          variant="ghost"
-          color="red"
-          size="xs"
-          @click="deleteRow"
-        />
       </div>
     </div>
-</template>
+</template> 

@@ -6,6 +6,7 @@ const authRoute = require("./routes/auth");
 const coursesRoute = require("./routes/course");
 const groupsRoute = require("./routes/groups");
 const rubricsRoute = require("./routes/rubrics");
+const notasRoutes = require('./routes/notas');
 
 const app = express();
 const port = 8000;
@@ -25,6 +26,7 @@ app.use("/", authRoute);
 app.use("/courses", coursesRoute);
 app.use("/groups", groupsRoute);
 app.use("/rubrics", rubricsRoute);
+app.use("/grades", notasRoutes);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`listening in port ${port}`);

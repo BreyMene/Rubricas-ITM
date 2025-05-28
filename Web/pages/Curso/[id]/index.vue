@@ -90,8 +90,6 @@
     return rubrics.value[0] || null;
   });
 
-  // Get other rubrics (all except the active one)
-  const otherRubrics = computed(() => rubrics.value.filter(r => r.estado !== 'activo'));
 
   const fetchRubrics = async () => {
     try {

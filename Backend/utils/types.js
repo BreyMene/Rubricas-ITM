@@ -67,7 +67,39 @@ const grupo = mongoose.Schema({
       correo: {
         type: String,
         required: true,
-      }
+      },
+      promedio: {
+        type: Number,
+        default: 0
+      },
+      calificaciones: [{
+        _id: false,
+        rubrica: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Rubrica",
+          required: true
+        },
+        fecha: {
+          type: Date,
+          default: Date.now
+        },
+        calificacionFinal: {
+          type: Number,
+          required: true
+        },
+        temas: [{
+          _id: false,
+          nombre: String,
+          criterios: [{
+            _id: false,
+            criterio: String,
+            peso: Number,
+            calificacion: Number,
+            acumulado: Number,
+            observaciones: String
+          }]
+        }]
+      }]
     }
   ],
   docente: {
@@ -80,7 +112,34 @@ const grupo = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Rubrica",
     }
-  ]
+  ],
+  notas: [{
+    numero: {
+      type: Number,
+      required: true
+    },
+    rubrica: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rubrica",
+      required: true
+    },
+    fecha: {
+      type: Date,
+      default: Date.now
+    },
+    temas: [{
+      _id: false,
+      nombre: String,
+      criterios: [{
+        _id: false,
+        criterio: String,
+        peso: Number,
+        calificacion: Number,
+        acumulado: Number,
+        observaciones: String
+      }]
+    }]
+  }]
 },
 { versionKey: false },
 );
