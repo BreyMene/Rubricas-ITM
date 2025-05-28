@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const config = useRuntimeConfig();
+
     // Define the type for the OtpInput component ref
     interface OtpInputInstance {
         resetOtp: () => void;
@@ -23,11 +25,18 @@
     const otpRef = ref<OtpInputInstance | null>(null);
 
     // Función para verificar el código OTP
-    const verifyOTP = () => {
+    const verifyOTP = async () => {
         try {
             if (otpRef.value) {
                 const code = otpRef.value.getOtpValue();
                 if (code.length === props.otpLength) {
+                    const response = await $fetch(`${config.public.apiUrl}/validate`, {
+                        method: "POST",
+                        body: {
+                            correo: props.email,
+                            codigo: code,
+                        },
+                    });
                     emit('showResetPassword');
                     console.log('OTP:', code);
                 } else {
@@ -45,9 +54,15 @@
         emit('backToForgotPassword');
     }
 
-    const resendCode = () => {
+    const resendCode = async () => {
         // Reset the OTP fields
         if (otpRef.value) {
+            const response = await $fetch(`${config.public.apiUrl}/recover`, {
+                method: "POST",
+                body: {
+                    correo: props.email,
+                },
+            });
             otpRef.value.resetOtp();
         }
         // Code to resend OTP
@@ -57,8 +72,8 @@
 
 <template>
     <div :class="[
-        props.isMobile 
-            ? 'px-6 py-8 min-h-[450px] flex flex-col justify-center' 
+        props.isMobile
+            ? 'px-6 py-8 min-h-[450px] flex flex-col justify-center'
             : 'form-container w-full px-48 py-8 mt-[12.5%] absolute left-0 right-0'
     ]">
         <h2 :class="[
@@ -67,41 +82,41 @@
         ]">
             INGRESA EL CÓDIGO DE VERIFICACIÓN
         </h2>
-        
+
         <p class="text-sm text-gray-600 dark:text-gray-300 mb-8">
-            Se ha enviado un código a tu correo electrónico 
+            Se ha enviado un código a tu correo electrónico
             <span class="font-bold">{{ props.email }}</span>
         </p>
-        
+
         <div class="mb-6">
             <div class="flex flex-col gap-3">
-                <UtilitiesOTP 
+                <UtilitiesOTP
                     ref="otpRef"
                     :isMobile="props.isMobile"
                     :length="props.otpLength"
                 />
 
-                <UButton 
-                    @click="verifyOTP" 
+                <UButton
+                    @click="verifyOTP"
                     class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium"
                 >
                     Verificar Código
                 </UButton>
             </div>
         </div>
-        
+
         <div class="mt-5 flex flex-col items-center justify-center">
-            <p class="text-sm text-center">¿No recibiste el código? 
-                <UButton 
-                    variant="link" 
+            <p class="text-sm text-center">¿No recibiste el código?
+                <UButton
+                    variant="link"
                     @click="resendCode"
                     class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
                 >
                     Reenviar código
                 </UButton>
             </p>
-            <UButton 
-                variant="link" 
+            <UButton
+                variant="link"
                 @click="backToForgotPassword"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >

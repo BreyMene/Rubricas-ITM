@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { Docente } = require("../utils/types");
+const redis = require("../utils/cache");
+const { sendCodeEmail } = require("../utils/mailer");
 
 // Create Account
 router.post("/register", async (req, res) => {
@@ -33,6 +35,67 @@ router.post("/login", async (req, res) => {
     res.status(200).json(docente);
   } catch {
     res.status(500).json({ error: "failed to login" });
+  }
+});
+
+// Send OTP
+router.post("/recover", async (req, res) => {
+  try {
+    const { correo } = req.body;
+
+    const docente = await Docente.findOne({ correo });
+    if (!docente) return res.status(404).json({ error: "failed to get user" });
+
+    let code = await redis.get(`recover:${correo}`);
+    if (!code) {
+      code = Math.floor(100000 + Math.random() * 900000).toString();
+
+      await redis.setex(`recover:${correo}`, 600, code);
+    }
+
+    await sendCodeEmail(correo, code);
+
+    res.status(200).json({ message: "code sent correctly" });
+  } catch(error) {
+    console.log("Error en /recover:", error);
+    res.status(500).json({ error: "failed to create code" });
+  }
+});
+
+// Validate OTP
+router.post("/validate", async (req, res) => {
+  try {
+    const { correo, codigo } = req.body;
+
+    const docente = await Docente.findOne({ correo });
+    if (!docente) return res.status(404).json({ error: "failed to get user" });
+
+    const storedCode = await redis.get(`recover:${correo}`);
+    if (!storedCode || storedCode !== codigo) {
+      return res.status(400).json({ error: "invalid code or expired code" });
+    }
+    await redis.del(`recover:${correo}`);
+
+    res.status(200).json({ message: "valid code" });
+  } catch {
+    res.status(500).json({ error: "failed to create code" });
+  }
+});
+
+// Chage password
+router.put("/change-password", async (req, res) => {
+  try{
+    const { correo, contraseña } = req.body;
+
+    const docente = await Docente.findOne({ correo });
+    if (!docente) return res.status(404).json({ error: "failed to get user" });
+
+    docente.contraseña = contraseña;
+    await docente.save();
+
+    res.status(200).json({ message: "password changed" });
+  } catch {
+    res.status(500).json({ error: "failed to change password" });
   }
 });
 

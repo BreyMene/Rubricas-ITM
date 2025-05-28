@@ -1,9 +1,12 @@
 <script setup lang="ts">
+    const config = useRuntimeConfig();
+
     const props = defineProps({
         isMobile: {
             type: Boolean,
             default: false
-        }
+        },
+        email: String,
     });
 
     const emit = defineEmits(['backToLogin']);
@@ -21,9 +24,16 @@
         minPasswordLength: 6
     });
 
-    const handleSignIn = async () => {
+    const handleChangePassword = async () => {
         try {
             if(state.password && state.secPasword){
+                const response = await $fetch(`${config.public.apiUrl}/change-password`, {
+                    method: "PUT",
+                    body: {
+                        correo: props.email,
+                        contraseña: state.password,
+                    },
+                });
                 emit('backToLogin', true);
             }
             else{
@@ -54,7 +64,7 @@
             RESTABLECE TU CONTRASEÑA
         </h2>
         <div class="mb-6">
-            <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleSignIn">
+            <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleChangePassword">
                 <UFormGroup label="Nueva Contraseña" name="password" :hint="passwordError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
@@ -72,7 +82,7 @@
                             }
                         }"
                         color="gray"
-                    >   
+                    >
                         <template #trailing>
                             <UButton
                                 color="gray"
@@ -130,8 +140,8 @@
             'mt-5 flex items-center justify-center',
             isMobile ? 'flex-wrap' : ''
         ]">
-            <UButton 
-                variant="link" 
+            <UButton
+                variant="link"
                 @click="backToLogin"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >
