@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import type { Estudiante } from '~/utils/types'
+import type { Estudiante, Nota } from '~/utils/types'
+import { useRoute } from 'vue-router'
 
+const route = useRoute();
 const props = defineProps<{
-    estudiantes: Estudiante[]
+    estudiantes: Estudiante[],
+    notas: Nota[]
 }>();
 
 const showSlideover = ref(false);
 const emailSubject = ref('');
 const emailBody = ref('');
 const selectedStudents = ref<Estudiante[]>([]);
+const selectedNota = ref<Nota | undefined>(undefined);
 const isSending = ref(false);
 
 // Format students for USelectMenu
@@ -21,6 +25,16 @@ const studentOptions = computed(() =>
     }))
 );
 
+// Format notas for USelectMenu
+const notaOptions = computed(() => 
+    props.notas.map(nota => ({
+        value: nota,
+        label: `Nota ${nota.numero}`,
+        description: new Date(nota.fecha).toLocaleDateString(),
+        icon: 'fluent:document-24-filled'
+    }))
+);
+
 const openSlideover = () => {
     showSlideover.value = true;
 };
@@ -30,12 +44,32 @@ const closeSlideover = () => {
     emailSubject.value = '';
     emailBody.value = '';
     selectedStudents.value = [];
+    selectedNota.value = undefined;
 };
 
 const sendEmails = async () => {
     try {
         isSending.value = true;
-        // Here you would implement the actual email sending logic
+        
+        // For each selected student, generate their rubric PDF
+        for (const student of selectedStudents.value) {
+            // Navigate to the grading page to generate PDF
+            const url = `/CalificarRubrica?clone=${selectedNota.value?.rubrica}&nota=${selectedNota.value?.numero}&estudiante=${student.correo}&curso=${route.params.id}&grupo=${route.params.groupId}`;
+            
+            // Open in a new tab to generate PDF
+            const newWindow = window.open(url, '_blank');
+            if (!newWindow) {
+                throw new Error('Could not open grading page');
+            }
+
+            // Wait for PDF generation
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Give time for PDF to generate
+            
+            // Close the window
+            newWindow.close();
+        }
+
+        // Here you would implement the actual email sending logic with the generated PDFs
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
         
         closeSlideover();
@@ -209,6 +243,50 @@ const sendEmails = async () => {
                             </USelectMenu>
                         </div>
 
+                        <!-- Nota Selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
+                                Seleccionar Nota
+                            </label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                <div v-for="nota in props.notas" :key="nota._id"
+                                    class="relative cursor-pointer"
+                                    @click="selectedNota = selectedNota?._id === nota._id ? undefined : nota"
+                                >
+                                    <div class="bg-Warm-White dark:bg-Warm-Dark rounded-lg p-3 border transition-all duration-200"
+                                        :class="[
+                                            selectedNota?._id === nota._id 
+                                                ? 'border-Purple-P dark:border-Muted-Brown shadow-md' 
+                                                : 'border-gray-200 dark:border-Light-Gray/45 hover:border-Purple-P/50 dark:hover:border-Muted-Brown/50'
+                                        ]"
+                                    >
+                                        <div class="flex items-center gap-2">
+                                            <UIcon 
+                                                name="fluent:document-24-filled" 
+                                                class="text-Purple-P dark:text-Muted-Brown"
+                                            />
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-medium text-Pure-Black dark:text-White-w truncate">
+                                                    Nota {{ nota.numero }}
+                                                </p>
+                                                <p class="text-xs text-Light-Gray dark:text-MLight-White/50">
+                                                    {{ new Date(nota.fecha).toLocaleDateString() }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div v-if="selectedNota?._id === nota._id" 
+                                            class="absolute -top-1 -right-1 w-5 h-5 bg-Purple-P dark:bg-Muted-Brown rounded-full flex items-center justify-center"
+                                        >
+                                            <UIcon 
+                                                name="fluent:checkmark-16-filled" 
+                                                class="text-white w-3 h-3"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Email Subject -->
                         <div>
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
@@ -275,7 +353,7 @@ const sendEmails = async () => {
                         </UButton>
                         <UButton
                             class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
-                            :disabled="!selectedStudents.length || !emailSubject || !emailBody || isSending"
+                            :disabled="!selectedStudents.length || !emailSubject || !emailBody || !selectedNota || isSending"
                             :loading="isSending"
                             @click="sendEmails"
                         >

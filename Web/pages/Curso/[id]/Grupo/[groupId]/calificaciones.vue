@@ -2,12 +2,6 @@
     import { useCursoStore } from '~/utils/store'
     import type { Estudiante, Rubrica, Nota, Grupo } from '~/utils/types'
 
-    // Add this at the top of the script section
-    definePageMeta({
-        middleware: ['grades']
-    });
-
-    // Get the route object
     const route = useRoute();
     const config = useRuntimeConfig();
     const toast = useToast()
@@ -397,7 +391,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold dark:text-white">Notas del Grupo</h2>
                     <div class="flex gap-2">
-                        <UtilitiesEmailNotas :estudiantes="estudiantesGrupo" />
+                        <UtilitiesEmailNotas :estudiantes="estudiantesGrupo" :notas="notas" />
                         <UButton
                             icon="fluent:add-24-filled"
                             class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
