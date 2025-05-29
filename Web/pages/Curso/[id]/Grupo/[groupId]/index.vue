@@ -235,10 +235,10 @@
                             <UButton
                                 v-if="isModerator"
                                 size="lg"
+                                icon="fluent:document-edit-16-filled"
                                 class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                                 @click="navigateTo(`/Curso/${courseId}/Grupo/${groupId}/Calificaciones`)"
                             >
-                                <UIcon name="fluent:document-edit-16-filled"/>
                                 Calificaciones
                             </UButton>
                             <CreateStudent v-if="isModerator" class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
