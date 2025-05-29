@@ -101,4 +101,37 @@ async function sendPasswordChangeCode(to, code) {
   });
 }
 
-module.exports = { sendCodeEmail, sendPasswordChangeCode };
+async function sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, body) {
+  await transporter.sendMail({
+    from: "Soporte Rubricas <rubritm@gmail.com>",
+    to,
+    subject: subject,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #fafafa; border: 1px solid #d3d3d3; border-radius: 10px; overflow: hidden;">
+        <!-- Header -->
+        <div style="background-color: #2a3465; padding: 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">${subject || 'Rúbrica de Calificación'}</h1>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 30px; color: #2a3465;">
+          ${body}
+        </div>
+
+        <hr style="margin: 30px 0; border-color: #d3d3d3;">
+
+        <p style="font-size: 13px; color: #545250; text-align: center; padding-bottom: 20px;">
+          Este es un mensaje automático, por favor no respondas a este correo.
+        </p>
+      </div>
+    `,
+    attachments: [
+      {
+        filename: `${rubricName}-${studentName}.pdf`,
+        content: pdfBuffer
+      }
+    ]
+  });
+}
+
+module.exports = { sendCodeEmail, sendPasswordChangeCode, sendRubricPDF };

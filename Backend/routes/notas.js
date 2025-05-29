@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Grupo } = require('../utils/types');
+const { sendRubricPDF } = require('../utils/mailer');
 
 // Add a new nota to a group
 router.post('/:groupId/notas', async (req, res) => {
@@ -116,7 +117,7 @@ router.delete('/:groupId/notas/:notaNumero', async (req, res) => {
 router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
     try {
         const { groupId, notaNumero } = req.params;
-        const { temas, estudiante } = req.body;
+        const { temas, estudiante, observaciones } = req.body;
 
         // Find the group
         const group = await Grupo.findById(groupId);
@@ -143,7 +144,7 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
 
         // Find if there's an existing grade for this student in the nota
         const existingGradeIndex = nota.calificaciones.findIndex(c => c.estudiante === estudiante);
-        
+
         if (existingGradeIndex !== -1) {
             // Update existing grade in nota
             nota.calificaciones[existingGradeIndex].temas = temas;
@@ -157,7 +158,7 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
 
         // Calculate final grade
         const calificacionFinal = temas.reduce((sum, tema) => {
-            return sum + tema.criterios.reduce((temaSum, criterio) => 
+            return sum + tema.criterios.reduce((temaSum, criterio) =>
                 temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
         }, 0);
 
@@ -172,7 +173,8 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
                 rubrica: nota.rubrica,
                 fecha: new Date(),
                 calificacionFinal,
-                temas
+                temas,
+                observaciones
             };
         } else {
             // Add new grade
@@ -180,7 +182,8 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
                 rubrica: nota.rubrica,
                 fecha: new Date(),
                 calificacionFinal,
-                temas
+                temas,
+                observaciones
             });
         }
 
@@ -232,12 +235,31 @@ router.get('/:groupId/notas/:notaNumero/estudiante/:estudiante', async (req, res
             }
         }
 
-        // If no grade found anywhere, return empty response
-        return res.json({ temas: [] });
+        // If no grade found anywhere, return empty response with observaciones
+        return res.json({ temas: [], observaciones: '' });
     } catch (error) {
         console.error('Error getting student grade:', error);
         res.status(500).json({ message: 'Error getting student grade' });
     }
 });
 
-module.exports = router; 
+// Send email with rubric PDF
+router.post('/:groupId/notas/:notaNumero/send-email', async (req, res) => {
+    try {
+        const { groupId, notaNumero } = req.params;
+        const { to, studentName, rubricName, subject, body, pdfBase64 } = req.body;
+
+        // Convert base64 to buffer
+        const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+
+        // Send email with PDF
+        await sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, body);
+
+        res.json({ message: 'Email sent successfully' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ message: 'Error sending email' });
+    }
+});
+
+module.exports = router;

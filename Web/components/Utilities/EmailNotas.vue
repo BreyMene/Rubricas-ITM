@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Estudiante, Nota } from '~/utils/types'
 import { useRoute } from 'vue-router'
+import html2pdf from 'html2pdf.js'
 
 const route = useRoute();
 const props = defineProps<{
@@ -16,7 +17,7 @@ const selectedNota = ref<Nota | undefined>(undefined);
 const isSending = ref(false);
 
 // Format students for USelectMenu
-const studentOptions = computed(() => 
+const studentOptions = computed(() =>
     props.estudiantes.map(student => ({
         value: student,
         label: student.nombre,
@@ -26,7 +27,7 @@ const studentOptions = computed(() =>
 );
 
 // Format notas for USelectMenu
-const notaOptions = computed(() => 
+const notaOptions = computed(() =>
     props.notas.map(nota => ({
         value: nota,
         label: `Nota ${nota.numero}`,
@@ -50,30 +51,147 @@ const closeSlideover = () => {
 const sendEmails = async () => {
     try {
         isSending.value = true;
-        
-        // For each selected student, generate their rubric PDF
-        for (const student of selectedStudents.value) {
-            // Navigate to the grading page to generate PDF
-            const url = `/CalificarRubrica?clone=${selectedNota.value?.rubrica}&nota=${selectedNota.value?.numero}&estudiante=${student.correo}&curso=${route.params.id}&grupo=${route.params.groupId}`;
-            
-            // Open in a new tab to generate PDF
-            const newWindow = window.open(url, '_blank');
-            if (!newWindow) {
-                throw new Error('Could not open grading page');
-            }
+        const config = useRuntimeConfig();
 
-            // Wait for PDF generation
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Give time for PDF to generate
-            
-            // Close the window
-            newWindow.close();
+        if (!selectedNota.value?.numero) {
+            throw new Error('No se ha seleccionado una nota');
         }
 
-        // Here you would implement the actual email sending logic with the generated PDFs
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-        
+        // Store nota number and name for later use
+        const notaNumero = selectedNota.value.numero;
+        const notaNombre = selectedNota.value.nombre;
+
+        // For each selected student, generate their rubric PDF
+        const emailPromises = []; // Array to hold email sending promises
+
+        for (const student of selectedStudents.value) {
+            try {
+                // First, get the rubric data
+                const rubricData = await $fetch(
+                    `${config.public.apiUrl}/grades/${route.params.groupId}/notas/${notaNumero}/estudiante/${student.value.correo}`
+                );
+
+                // Generate PDF using html2pdf
+                const element = document.createElement('div');
+                element.innerHTML = `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #ffffff;">
+
+                        <!-- Header with student info -->
+                        <div style="background-color: #f8f9fa; padding: 16px; border-radius: 8px 8px 0 0; margin-bottom: 20px; border: 1px solid #ddd; border-bottom: none;">
+                            <h2 style="font-size: 20px; font-weight: bold; color: #2a3465; margin-bottom: 8px;">${notaNombre || 'Rúbrica'}</h2>
+                            <p style="font-size: 14px; color: #6b7280;">Estudiante: ${student.value.nombre}</p>
+                        </div>
+
+                        <!-- Rubric table -->
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 0 0 8px 8px; overflow: hidden;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa;">
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 20%;">Tema</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 25%;">Criterio</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%;">Peso</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%;">Calificación</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%;">Acumulado</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 25%;">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rubricData.temas.map(tema => `
+                                    ${tema.criterios.map((criterio, index) => `
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            ${index === 0 ? `
+                                                <td rowspan="${tema.criterios.length}" style="padding: 12px; border-right: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">
+                                                    ${tema.nombre || ''}
+                                                </td>
+                                            ` : ''}
+                                            <td style="padding: 12px; border-right: 1px solid #eee;">${criterio.criterio || ''}</td>
+                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee;">${criterio.peso || 0}</td>
+                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee;">${criterio.calificacion || 0}</td>
+                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee;">${((criterio.peso || 0) * (criterio.calificacion || 0)).toFixed(2)}</td>
+                                            <td style="padding: 12px;">${criterio.observaciones || ''}</td>
+                                        </tr>
+                                    `).join('')}
+                                `).join('')}
+                                <!-- Totals row -->
+                                <tr style="background-color: #f8f9fa; font-weight: bold;">
+                                    <td style="padding: 12px;">Total</td>
+                                    <td style="padding: 12px;"></td>
+                                    <td style="padding: 12px; text-align: center;">${rubricData.temas.reduce((sum, tema) =>
+                                        sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.peso || 0), 0), 0).toFixed(1)}</td>
+                                    <td style="padding: 12px; text-align: center;">${rubricData.temas.reduce((sum, tema) =>
+                                        sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.calificacion || 0), 0), 0).toFixed(1)}</td>
+                                    <td style="padding: 12px; text-align: center;">${rubricData.temas.reduce((sum, tema) =>
+                                        sum + tema.criterios.reduce((temaSum, criterio) => temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0), 0).toFixed(1)}</td>
+                                    <td style="padding: 12px;"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                // Generate PDF with optimized settings for smaller file size
+                const opt = {
+                    margin: [10, 10, 10, 10],
+                    filename: `${notaNombre || 'Rubrica'}-${student.value.nombre}.pdf`,
+                    image: { type: 'jpeg', quality: 0.7 },
+                    html2canvas: {
+                        scale: 1.5,
+                        useCORS: true,
+                        logging: false,
+                        letterRendering: false,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff'
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape',
+                        compress: true
+                    }
+                };
+
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+
+                // Return a new Promise that resolves when the email is sent
+                emailPromises.push(new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(pdfBlob);
+                    reader.onloadend = async () => {
+                        try {
+                            const base64data = reader.result.split(',')[1];
+
+                            // Send email with PDF
+                            await $fetch(`${config.public.apiUrl}/grades/${route.params.groupId}/notas/${notaNumero}/send-email`, {
+                                method: 'POST',
+                                body: {
+                                    to: student.value.correo,
+                                    studentName: student.value.nombre,
+                                    rubricName: notaNombre || 'Rubrica',
+                                    subject: emailSubject.value,
+                                    body: emailBody.value,
+                                    pdfBase64: base64data
+                                }
+                            });
+                            resolve(); // Resolve the promise when email is sent successfully
+                        } catch (error) {
+                            console.error(`Error sending email for ${student.value.nombre}:`, error);
+                            reject(error); // Reject the promise if there's an error
+                        }
+                    };
+                    reader.onerror = reject; // Reject the promise if FileReader encounters an error
+                }));
+
+            } catch (error) {
+                console.error(`Error processing student ${student.value.nombre}:`, error);
+                // Continue with other students even if one fails
+                // If you want to stop on error, you could re-throw here
+            }
+        }
+
+        // Wait for all email sending promises to resolve
+        await Promise.all(emailPromises);
+
         closeSlideover();
-        
+
         // Show success toast
         const toast = useToast();
         toast.add({
@@ -104,11 +222,12 @@ const sendEmails = async () => {
         });
     } catch (error) {
         console.error("Error sending emails:", error);
-        
+
         // Show error toast
         const toast = useToast();
         toast.add({
             title: 'Error al enviar los emails',
+            description: error.message || 'Ha ocurrido un error al enviar los emails',
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
             ui: {
@@ -255,14 +374,14 @@ const sendEmails = async () => {
                                 >
                                     <div class="bg-Warm-White dark:bg-Warm-Dark rounded-lg p-3 border transition-all duration-200"
                                         :class="[
-                                            selectedNota?._id === nota._id 
-                                                ? 'border-Purple-P dark:border-Muted-Brown shadow-md' 
+                                            selectedNota?._id === nota._id
+                                                ? 'border-Purple-P dark:border-Muted-Brown shadow-md'
                                                 : 'border-gray-200 dark:border-Light-Gray/45 hover:border-Purple-P/50 dark:hover:border-Muted-Brown/50'
                                         ]"
                                     >
                                         <div class="flex items-center gap-2">
-                                            <UIcon 
-                                                name="fluent:document-24-filled" 
+                                            <UIcon
+                                                name="fluent:document-24-filled"
                                                 class="text-Purple-P dark:text-Muted-Brown"
                                             />
                                             <div class="flex-1 min-w-0">
@@ -274,11 +393,11 @@ const sendEmails = async () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div v-if="selectedNota?._id === nota._id" 
+                                        <div v-if="selectedNota?._id === nota._id"
                                             class="absolute -top-1 -right-1 w-5 h-5 bg-Purple-P dark:bg-Muted-Brown rounded-full flex items-center justify-center"
                                         >
-                                            <UIcon 
-                                                name="fluent:checkmark-16-filled" 
+                                            <UIcon
+                                                name="fluent:checkmark-16-filled"
                                                 class="text-white w-3 h-3"
                                             />
                                         </div>
@@ -364,4 +483,4 @@ const sendEmails = async () => {
             </UCard>
         </USlideover>
     </div>
-</template> 
+</template>
