@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useCursoStore } from '~/utils/store'
+    import { useCursoStore } from '~/utils/store'
     import type { Estudiante, Rubrica, Nota, Grupo } from '~/utils/types'
 
-// Add this at the top of the script section
-definePageMeta({
-    middleware: ['grades']
-});
+    // Add this at the top of the script section
+    definePageMeta({
+        middleware: ['grades']
+    });
 
-// Get the route object
-const route = useRoute();
-const config = useRuntimeConfig();
+    // Get the route object
+    const route = useRoute();
+    const config = useRuntimeConfig();
     const toast = useToast()
 
     // Load screen state
@@ -17,14 +17,14 @@ const config = useRuntimeConfig();
     const canLoadScreen = ref(false)
     const LoadingNotas = ref(false)
 
-// Get the course ID from the route parameters
-const courseId = computed(() => route.params.id);
-const groupId = computed(() => route.params.groupId);
+    // Get the course ID from the route parameters
+    const courseId = computed(() => route.params.id);
+    const groupId = computed(() => route.params.groupId);
 
-const curso = computed(() => useCursoStore().cursoActivo)
-const grupo = computed(() => useCursoStore().grupoActivo)
+    const curso = computed(() => useCursoStore().cursoActivo)
+    const grupo = computed(() => useCursoStore().grupoActivo)
 
-const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
+    const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
     const rubrics = ref<Rubrica[]>([]);
     const notas = ref<Nota[]>([]);
 
@@ -36,32 +36,33 @@ const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes |
     const showStudentNotasModal = ref(false);
     const selectedStudent = ref<Estudiante | null>(null);
 
-    // Add these refs for delete modal
+    // Delete modal
     const isDeleteModalOpen = ref(false);
     const selectedNota = ref<Nota | null>(null);
 
-// Navigation items
-const items = computed(() => [
-    {
-        label: 'Inicio',
-        icon: 'fluent:home-12-filled',
-        to: '/'
-    },
-    {
-        label: `Curso ${curso.value?.nombre}` || 'Curso',
-        icon: curso.value?.icono || 'fluent:book-32-filled',
-        to: `/Curso/${courseId.value}`
-    },
-    {
-        label: `Grupo ${grupo.value?.nombre}`,
-        icon: 'fluent:book-32-filled',
-        to: `/Curso/${courseId.value}/Grupo/${groupId.value}`
-    },
-    {
-        label: 'Calificaciones',
-            icon: 'fluent:document-edit-16-filled',
-            to: `/Curso/${courseId.value}/Grupo/${groupId.value}/calificaciones`
-        }
+
+    // Navigation items
+    const items = computed(() => [
+        {
+            label: 'Inicio',
+            icon: 'fluent:home-12-filled',
+            to: '/'
+        },
+        {
+            label: `Curso ${curso.value?.nombre}` || 'Curso',
+            icon: curso.value?.icono || 'fluent:book-32-filled',
+            to: `/Curso/${courseId.value}`
+        },
+        {
+            label: `Grupo ${grupo.value?.nombre}`,
+            icon: 'fluent:book-32-filled',
+            to: `/Curso/${courseId.value}/Grupo/${groupId.value}`
+        },
+        {
+            label: 'Calificaciones',
+                icon: 'fluent:document-edit-16-filled',
+                to: `/Curso/${courseId.value}/Grupo/${groupId.value}/calificaciones`
+            }
     ]);
 
     // Function to open new nota modal
@@ -395,13 +396,16 @@ const items = computed(() => [
             <div class="mb-2 relative min-h-[200px]">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold dark:text-white">Notas del Grupo</h2>
-                    <UButton
-                        icon="fluent:add-24-filled"
-                        class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
-                        @click="openNewNotaModal"
-                    >
-                        Nueva Nota
-                    </UButton>
+                    <div class="flex gap-2">
+                        <UtilitiesEmailNotas :estudiantes="estudiantesGrupo" />
+                        <UButton
+                            icon="fluent:add-24-filled"
+                            class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
+                            @click="openNewNotaModal"
+                        >
+                            Nueva Nota
+                        </UButton>
+                    </div>
                 </div>
                 
                 <ClientOnly>
