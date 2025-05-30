@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Estudiante, Nota } from '~/utils/types'
+import type { Estudiante, Nota, Rubrica } from '~/utils/types'
 import { useRoute } from 'vue-router'
 import html2pdf from 'html2pdf.js'
 
@@ -59,7 +59,6 @@ const sendEmails = async () => {
 
         // Store nota number and name for later use
         const notaNumero = selectedNota.value.numero;
-        const notaNombre = selectedNota.value.nombre;
 
         // For each selected student, generate their rubric PDF
         const emailPromises = []; // Array to hold email sending promises
@@ -67,7 +66,7 @@ const sendEmails = async () => {
         for (const student of selectedStudents.value) {
             try {
                 // First, get the rubric data
-                const rubricData = await $fetch(
+                const rubricData = await $fetch<Rubrica>(
                     `${config.public.apiUrl}/grades/${route.params.groupId}/notas/${notaNumero}/estudiante/${student.value.correo}`
                 );
 
@@ -78,7 +77,7 @@ const sendEmails = async () => {
 
                         <!-- Header with student info -->
                         <div style="background-color: #f8f9fa; padding: 16px; border-radius: 8px 8px 0 0; margin-bottom: 20px; border: 1px solid #ddd; border-bottom: none;">
-                            <h2 style="font-size: 20px; font-weight: bold; color: #2a3465; margin-bottom: 8px;">${notaNombre || 'Rúbrica'}</h2>
+                            <h2 style="font-size: 20px; font-weight: bold; color: #2a3465; margin-bottom: 8px;">Rúbrica</h2>
                             <p style="font-size: 14px; color: #6b7280;">Estudiante: ${student.value.nombre}</p>
                         </div>
 
@@ -131,7 +130,7 @@ const sendEmails = async () => {
                 // Generate PDF with optimized settings for smaller file size
                 const opt = {
                     margin: [10, 10, 10, 10],
-                    filename: `${notaNombre || 'Rubrica'}-${student.value.nombre}.pdf`,
+                    filename: `Rubrica-${student.value.nombre}.pdf`,
                     image: { type: 'jpeg', quality: 0.7 },
                     html2canvas: {
                         scale: 1.5,
@@ -157,6 +156,9 @@ const sendEmails = async () => {
                     reader.readAsDataURL(pdfBlob);
                     reader.onloadend = async () => {
                         try {
+                            if (!reader.result || typeof reader.result !== 'string') {
+                                throw new Error('Failed to read PDF data');
+                            }
                             const base64data = reader.result.split(',')[1];
 
                             // Send email with PDF
@@ -165,13 +167,13 @@ const sendEmails = async () => {
                                 body: {
                                     to: student.value.correo,
                                     studentName: student.value.nombre,
-                                    rubricName: notaNombre || 'Rubrica',
+                                    rubricName: 'Rubrica',
                                     subject: emailSubject.value,
                                     body: emailBody.value,
                                     pdfBase64: base64data
                                 }
                             });
-                            resolve(); // Resolve the promise when email is sent successfully
+                            resolve(undefined); // Resolve the promise when email is sent successfully
                         } catch (error) {
                             console.error(`Error sending email for ${student.value.nombre}:`, error);
                             reject(error); // Reject the promise if there's an error
@@ -227,7 +229,6 @@ const sendEmails = async () => {
         const toast = useToast();
         toast.add({
             title: 'Error al enviar los emails',
-            description: error.message || 'Ha ocurrido un error al enviar los emails',
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
             ui: {
