@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { useCursoStore } from '~/utils/store'
-    import type { Estudiante, Rubrica, Nota, Grupo } from '~/utils/types'
+    import type { Estudiante, Rubrica, Nota, Grupo, Curso } from '~/utils/types'
 
     const route = useRoute();
     const config = useRuntimeConfig();
@@ -21,6 +21,86 @@
     const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
     const rubrics = ref<Rubrica[]>([]);
     const notas = ref<Nota[]>([]);
+
+    // Only call the api if Pinia doesn't have any course saved
+    const fetchCourses = async () => {
+        if (!curso.value || curso.value._id !== courseId.value) {
+            try {
+                const cursoApi = await $fetch<Curso>(
+                    `${config.public.apiUrl}/courses/${courseId.value}`
+                );
+                useCursoStore().setCurso(cursoApi);
+            } catch (error) {
+                console.error("No se pudo obtener el curso:", error);
+                toast.add({
+                    title: 'Error al cargar el curso',
+                    icon: "fluent:alert-urgent-16-filled",
+                    timeout: 3000,
+                    ui: {
+                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                        'rounded': 'rounded-lg',
+                        'shadow': 'shadow-lg',
+                        'ring': 'ring-0',
+                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                        'icon': {
+                            'base': 'flex-shrink-0 w-5 h-5',
+                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                        },
+                        'progress': {
+                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                        },
+                        'closeButton': {
+                            'base': 'absolute top-2 right-2',
+                            'icon': 'fluent:add-16-filled',
+                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    // Only call the api if Pinia doesn't have any group saved or if has another group saved
+    const fetchGroup = async () => {
+        if (!useCursoStore().grupoActivo || useCursoStore().grupoActivo?._id !== groupId.value) {
+            try {
+                const grupoApi = await $fetch<Grupo>(
+                    `${config.public.apiUrl}/groups/${groupId.value}`
+                );
+                useCursoStore().setGrupo(grupoApi);
+            } catch (error) {
+                console.error("No se pudo obtener el grupo:", error);
+                toast.add({
+                    title: 'Error al cargar el grupo',
+                    icon: "fluent:alert-urgent-16-filled",
+                    timeout: 3000,
+                    ui: {
+                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                        'rounded': 'rounded-lg',
+                        'shadow': 'shadow-lg',
+                        'ring': 'ring-0',
+                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                        'icon': {
+                            'base': 'flex-shrink-0 w-5 h-5',
+                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                        },
+                        'progress': {
+                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                        },
+                        'closeButton': {
+                            'base': 'absolute top-2 right-2',
+                            'icon': 'fluent:add-16-filled',
+                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                        }
+                    }
+                });
+            }
+        }
+    }
 
     // Get the active rubric (first one that is active)
     const activeRubric = computed(() => rubrics.value.find(r => r.estado === 'activo') || null);
@@ -54,9 +134,9 @@
         },
         {
             label: 'Calificaciones',
-                icon: 'fluent:document-edit-16-filled',
-                to: `/Curso/${courseId.value}/Grupo/${groupId.value}/calificaciones`
-            }
+            icon: 'fluent:document-edit-16-filled',
+            to: `/Curso/${courseId.value}/Grupo/${groupId.value}/Calificaciones`
+        }
     ]);
 
     // Function to open new nota modal
@@ -136,7 +216,7 @@
                     }
                 }
             });
-    } catch (error) {
+        } catch (error) {
             console.error("Error creating nota:", error);
             loadScreen('', false);
             // Add error toast
@@ -196,7 +276,7 @@
             });
             closeStudentNotasModal();
             loadScreen('', false);
-    } catch (error) {
+        } catch (error) {
             console.error("Error grading nota:", error);
             loadScreen('', false);
             toast.add({
@@ -365,8 +445,17 @@
         isDeleteModalOpen.value = true;
     };
 
-    onMounted(() => {
-        fetchRubrics();
+    onMounted(async () => {
+        try {
+            LoadingNotas.value = true;
+            await fetchCourses();
+            await fetchGroup();
+            await fetchRubrics();
+        } catch (error) {
+            console.error("Error loading initial data:", error);
+        } finally {
+            LoadingNotas.value = false;
+        }
     });
 </script>
 
@@ -391,7 +480,19 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold dark:text-white">Notas del Grupo</h2>
                     <div class="flex gap-2">
-                        <UtilitiesEmailNotas :estudiantes="estudiantesGrupo" :notas="notas" />
+                        <ClientOnly>
+                            <UtilitiesEmailNotas :estudiantes="estudiantesGrupo" :notas="notas" />
+                            <template #fallback>
+                                <USkeleton
+                                    class="w-[120px] h-[40px]"
+                                    :ui="{
+                                        base: 'animate-pulse',
+                                        rounded: 'rounded-lg',
+                                        background: 'bg-gray-200 dark:bg-gray-700',
+                                    }"
+                                />
+                            </template>
+                        </ClientOnly>
                         <UButton
                             icon="fluent:add-24-filled"
                             class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
@@ -486,27 +587,65 @@
             <!-- Students List -->
             <div class="mb-6">
                 <h2 class="text-xl font-semibold mb-4 dark:text-white">Estudiantes</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div v-for="student in estudiantesGrupo" :key="student.correo"
-                        class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-150 hover:-translate-y-1">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-Purple-P/10 dark:bg-Muted-Brown/10 flex items-center justify-center">
-                            <UIcon name="fluent:person-24-filled" class="text-2xl text-Purple-P dark:text-Muted-Brown" />
+                <ClientOnly>
+                    <!-- Show students when loaded and not loading -->
+                    <div v-if="!LoadingNotas && estudiantesGrupo.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div v-for="student in estudiantesGrupo" :key="student.correo"
+                            class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-150 hover:-translate-y-1">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-Purple-P/10 dark:bg-Muted-Brown/10 flex items-center justify-center">
+                                    <UIcon name="fluent:person-24-filled" class="text-2xl text-Purple-P dark:text-Muted-Brown" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium text-Pure-Black dark:text-White-w truncate">{{ student.nombre }}</h3>
+                                    <p class="text-sm text-Light-Gray dark:text-MLight-White/50 truncate">{{ student.correo }}</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <UButton
+                                        icon="fluent:document-edit-16-filled"
+                                        color="gray"
+                                        variant="ghost"
+                                        class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
+                                        @click="openStudentNotasModal(student)"
+                                    />
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <h3 class="font-medium text-Pure-Black dark:text-White-w">{{ student.nombre }}</h3>
-                                <p class="text-sm text-Light-Gray dark:text-MLight-White/50">{{ student.correo }}</p>
-                            </div>
-                            <UButton
-                                icon="fluent:document-edit-16-filled"
-                                color="gray"
-                                variant="ghost"
-                                class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
-                                @click="openStudentNotasModal(student)"
-                            />
                         </div>
                     </div>
-                </div>
+
+                    <!-- Show empty state when no students and not loading -->
+                    <div v-else-if="!LoadingNotas && !estudiantesGrupo.length" class="text-center p-8">
+                        <div class="relative w-80 h-52 flex flex-col items-center justify-center mx-auto">
+                            <!-- Corner decorations -->
+                            <div class="absolute top-0 -left-2 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
+                            <div class="absolute top-0 -right-2 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
+                            <div class="absolute bottom-0 -left-2 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
+                            <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+
+                            <UIcon name="fluent:person-24-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY ESTUDIANTES</p>
+                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
+                                Agrega estudiantes al grupo para poder calificarlos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Skeleton Loader when loading -->
+                    <template #fallback>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <USkeleton
+                                v-for="i in 6" 
+                                :key="i" 
+                                class="w-full h-[80px]"
+                                :ui="{
+                                    base: 'animate-pulse',
+                                    rounded: 'rounded-xl',
+                                    background: 'bg-gray-200 dark:bg-gray-700',
+                                }"
+                            />
+                        </div>
+                    </template>
+                </ClientOnly>
             </div>
         </div>
 

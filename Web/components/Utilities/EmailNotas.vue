@@ -12,7 +12,7 @@ const props = defineProps<{
 const showSlideover = ref(false);
 const emailSubject = ref('');
 const emailBody = ref('');
-const selectedStudents = ref<Estudiante[]>([]);
+const selectedStudents = ref<{ value: Estudiante }[]>([]);
 const selectedNota = ref<Nota | undefined>(undefined);
 const isSending = ref(false);
 
@@ -23,16 +23,6 @@ const studentOptions = computed(() =>
         label: student.nombre,
         description: student.correo,
         icon: 'fluent:person-24-filled'
-    }))
-);
-
-// Format notas for USelectMenu
-const notaOptions = computed(() =>
-    props.notas.map(nota => ({
-        value: nota,
-        label: `Nota ${nota.numero}`,
-        description: new Date(nota.fecha).toLocaleDateString(),
-        icon: 'fluent:document-24-filled'
     }))
 );
 
@@ -63,11 +53,17 @@ const sendEmails = async () => {
         // For each selected student, generate their rubric PDF
         const emailPromises = []; // Array to hold email sending promises
 
-        for (const student of selectedStudents.value) {
+        for (const studentOption of selectedStudents.value) {
             try {
+                const student = studentOption.value;
+                if (!student || !student.correo) {
+                    console.error('Invalid student data:', studentOption);
+                    continue;
+                }
+
                 // First, get the rubric data
                 const rubricData = await $fetch<Rubrica>(
-                    `${config.public.apiUrl}/grades/${route.params.groupId}/notas/${notaNumero}/estudiante/${student.value.correo}`
+                    `${config.public.apiUrl}/grades/${route.params.groupId}/notas/${notaNumero}/estudiante/${student.correo}`
                 );
 
                 // Generate PDF using html2pdf
@@ -78,19 +74,19 @@ const sendEmails = async () => {
                         <!-- Header with student info -->
                         <div style="background-color: #f8f9fa; padding: 16px; border-radius: 8px 8px 0 0; margin-bottom: 20px; border: 1px solid #ddd; border-bottom: none;">
                             <h2 style="font-size: 20px; font-weight: bold; color: #2a3465; margin-bottom: 8px;">Rúbrica</h2>
-                            <p style="font-size: 14px; color: #6b7280;">Estudiante: ${student.value.nombre}</p>
+                            <p style="font-size: 14px; color: #6b7280;">Estudiante: ${student.nombre}</p>
                         </div>
 
                         <!-- Rubric table -->
                         <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 0 0 8px 8px; overflow: hidden;">
                             <thead>
                                 <tr style="background-color: #f8f9fa;">
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 20%;">Tema</th>
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 25%;">Criterio</th>
-                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%;">Peso</th>
-                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%;">Calificación</th>
-                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%;">Acumulado</th>
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 25%;">Observaciones</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 20%; color: #000000;">Tema</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 25%; color: #000000;">Criterio</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%; color: #000000;">Peso</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%; color: #000000;">Calificación</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 1px solid #ddd; width: 10%; color: #000000;">Acumulado</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 25%; color: #000000;">Observaciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -98,29 +94,29 @@ const sendEmails = async () => {
                                     ${tema.criterios.map((criterio, index) => `
                                         <tr style="border-bottom: 1px solid #eee;">
                                             ${index === 0 ? `
-                                                <td rowspan="${tema.criterios.length}" style="padding: 12px; border-right: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold;">
+                                                <td rowspan="${tema.criterios.length}" style="padding: 12px; border-right: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold; color: #000000;">
                                                     ${tema.nombre || ''}
                                                 </td>
                                             ` : ''}
-                                            <td style="padding: 12px; border-right: 1px solid #eee;">${criterio.criterio || ''}</td>
-                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee;">${criterio.peso || 0}</td>
-                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee;">${criterio.calificacion || 0}</td>
-                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee;">${((criterio.peso || 0) * (criterio.calificacion || 0)).toFixed(2)}</td>
-                                            <td style="padding: 12px;">${criterio.observaciones || ''}</td>
+                                            <td style="padding: 12px; border-right: 1px solid #eee; color: #000000;">${criterio.criterio || ''}</td>
+                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee; color: #000000;">${criterio.peso || 0}</td>
+                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee; color: #000000;">${criterio.calificacion || 0}</td>
+                                            <td style="padding: 12px; text-align: center; border-right: 1px solid #eee; color: #000000;">${((criterio.peso || 0) * (criterio.calificacion || 0)).toFixed(2)}</td>
+                                            <td style="padding: 12px; color: #000000;">${criterio.observaciones || ''}</td>
                                         </tr>
                                     `).join('')}
                                 `).join('')}
                                 <!-- Totals row -->
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                    <td style="padding: 12px;">Total</td>
-                                    <td style="padding: 12px;"></td>
-                                    <td style="padding: 12px; text-align: center;">${rubricData.temas.reduce((sum, tema) =>
+                                    <td style="padding: 12px; color: #000000;">Total</td>
+                                    <td style="padding: 12px; color: #000000;"></td>
+                                    <td style="padding: 12px; text-align: center; color: #000000;">${rubricData.temas.reduce((sum, tema) =>
                                         sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.peso || 0), 0), 0).toFixed(1)}</td>
-                                    <td style="padding: 12px; text-align: center;">${rubricData.temas.reduce((sum, tema) =>
+                                    <td style="padding: 12px; text-align: center; color: #000000;">${rubricData.temas.reduce((sum, tema) =>
                                         sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.calificacion || 0), 0), 0).toFixed(1)}</td>
-                                    <td style="padding: 12px; text-align: center;">${rubricData.temas.reduce((sum, tema) =>
+                                    <td style="padding: 12px; text-align: center; color: #000000;">${rubricData.temas.reduce((sum, tema) =>
                                         sum + tema.criterios.reduce((temaSum, criterio) => temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0), 0).toFixed(1)}</td>
-                                    <td style="padding: 12px;"></td>
+                                    <td style="padding: 12px; color: #000000;"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -130,7 +126,7 @@ const sendEmails = async () => {
                 // Generate PDF with optimized settings for smaller file size
                 const opt = {
                     margin: [10, 10, 10, 10],
-                    filename: `Rubrica-${student.value.nombre}.pdf`,
+                    filename: `Rubrica-${student.nombre}.pdf`,
                     image: { type: 'jpeg', quality: 0.7 },
                     html2canvas: {
                         scale: 1.5,
@@ -165,8 +161,8 @@ const sendEmails = async () => {
                             await $fetch(`${config.public.apiUrl}/grades/${route.params.groupId}/notas/${notaNumero}/send-email`, {
                                 method: 'POST',
                                 body: {
-                                    to: student.value.correo,
-                                    studentName: student.value.nombre,
+                                    to: student.correo,
+                                    studentName: student.nombre,
                                     rubricName: 'Rubrica',
                                     subject: emailSubject.value,
                                     body: emailBody.value,
@@ -175,7 +171,7 @@ const sendEmails = async () => {
                             });
                             resolve(undefined); // Resolve the promise when email is sent successfully
                         } catch (error) {
-                            console.error(`Error sending email for ${student.value.nombre}:`, error);
+                            console.error(`Error sending email for ${student.nombre}:`, error);
                             reject(error); // Reject the promise if there's an error
                         }
                     };
@@ -183,9 +179,8 @@ const sendEmails = async () => {
                 }));
 
             } catch (error) {
-                console.error(`Error processing student ${student.value.nombre}:`, error);
+                console.error(`Error processing student ${studentOption.value.nombre}:`, error);
                 // Continue with other students even if one fails
-                // If you want to stop on error, you could re-throw here
             }
         }
 
@@ -271,7 +266,7 @@ const sendEmails = async () => {
         </UButton>
 
         <!-- Slideover -->
-        <USlideover prevent-close
+        <USlideover :prevent-close="isSending"
             v-model="showSlideover"
             :ui="{
                 width: 'w-full sm:max-w-2xl',
@@ -437,6 +432,8 @@ const sendEmails = async () => {
                                 v-model="emailBody"
                                 placeholder="Escribe tu mensaje aquí..."
                                 class="w-full min-h-[200px]"
+                                :rows="8"
+                                autoresize
                                 :ui="{
                                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                                     color: {
@@ -447,16 +444,6 @@ const sendEmails = async () => {
                                 }"
                                 color="gray"
                             />
-                        </div>
-
-                        <!-- Preview Section -->
-                        <div class="bg-White-w dark:bg-Warm-Dark rounded-lg p-4 border border-Purple-P/20 dark:border-Muted-Brown/20">
-                            <h4 class="text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
-                                Vista Previa
-                            </h4>
-                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50">
-                                Se adjuntarán las notas de los estudiantes seleccionados como PDF.
-                            </p>
                         </div>
                     </div>
                 </div>
