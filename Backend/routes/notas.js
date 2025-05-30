@@ -201,42 +201,24 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
 router.get('/:groupId/notas/:notaNumero/estudiante/:estudiante', async (req, res) => {
     try {
         const { groupId, notaNumero, estudiante } = req.params;
-        console.log('Getting grade for:', { groupId, notaNumero, estudiante });
 
         const group = await Grupo.findById(groupId);
         if (!group) {
             console.log('Group not found:', groupId);
             return res.status(404).json({ message: 'Group not found' });
         }
-        console.log('Group found:', { 
-            id: group._id,
-            notasCount: group.notas.length,
-            estudiantesCount: group.estudiantes.length
-        });
 
         const nota = group.notas.find(n => n.numero === parseInt(notaNumero));
         if (!nota) {
             console.log('Nota not found:', { notaNumero, groupNotas: group.notas });
             return res.status(404).json({ message: 'Nota not found' });
         }
-        console.log('Nota found:', { 
-            id: nota._id,
-            numero: nota.numero,
-            rubrica: nota.rubrica,
-            calificacionesCount: nota.calificaciones?.length || 0
-        });
 
         // Find the student in the group
         const student = group.estudiantes.find(e => e.correo === estudiante);
         if (!student) {
-            console.log('Student not found:', { estudiante, groupEstudiantes: group.estudiantes });
             return res.status(404).json({ message: 'Student not found in group' });
         }
-        console.log('Student found:', { 
-            nombre: student.nombre,
-            correo: student.correo,
-            calificacionesCount: student.calificaciones?.length || 0
-        });
 
         // First check student's calificaciones
         const studentGrade = student.calificaciones.find(
@@ -244,7 +226,6 @@ router.get('/:groupId/notas/:notaNumero/estudiante/:estudiante', async (req, res
         );
 
         if (studentGrade) {
-            console.log('Found grade in student calificaciones:', studentGrade);
             return res.json(studentGrade);
         }
 
@@ -252,12 +233,10 @@ router.get('/:groupId/notas/:notaNumero/estudiante/:estudiante', async (req, res
         if (nota.calificaciones) {
             const notaGrade = nota.calificaciones.find(c => c.estudiante === estudiante);
             if (notaGrade) {
-                console.log('Found grade in nota calificaciones:', notaGrade);
                 return res.json(notaGrade);
             }
         }
 
-        console.log('No grade found for student in nota');
         // If no grade found anywhere, return empty response with observaciones
         return res.json({ temas: [], observaciones: '' });
     } catch (error) {
