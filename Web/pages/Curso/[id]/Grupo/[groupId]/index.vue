@@ -231,7 +231,7 @@
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
                         <UtilitiesSearchBar placeholderText="Buscar Estudiante..." @search="handleSearch"/>
                         <div class="flex items-center gap-2">
-                            <UtilitiesGroupSettings v-if="isModerator" @load-screen="loadScreen"/>
+                            <SettingsGroupSettings v-if="isModerator" @load-screen="loadScreen"/>
                             <UButton
                                 v-if="isModerator"
                                 size="lg"

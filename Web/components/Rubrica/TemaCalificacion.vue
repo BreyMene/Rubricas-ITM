@@ -8,7 +8,7 @@
 </script>
 
 <template>
-    <div class="flex">
+    <div class="flex mb-4">
         <div class="w-[20%] p-3 flex items-center bg-MLight-White/50 rounded-lg dark:bg-Warm-Dark/30">
             <UTextarea
                 v-model="tema.nombre"

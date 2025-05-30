@@ -264,11 +264,11 @@ const sendEmails = async () => {
     }
 };
 
-// Function to handle drag start
-const handleDragStart = (event: DragEvent) => {
+// Function to handle drag over
+const handleDragOver = (event: DragEvent) => {
+    event.preventDefault();
     if (event.dataTransfer) {
-        event.dataTransfer.setData('text/plain', '{studentName}');
-        event.dataTransfer.effectAllowed = 'copy';
+        event.dataTransfer.dropEffect = 'copy';
     }
 };
 
@@ -288,8 +288,11 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
     // Get the current text
     const text = field === 'subject' ? emailSubject.value : emailBody.value;
     
+    // Get the dragged placeholder
+    const placeholder = event.dataTransfer?.getData('text/plain') || '';
+    
     // Insert the placeholder at the cursor position
-    const newValue = text.substring(0, cursorPosition) + '{studentName}' + text.substring(cursorPosition);
+    const newValue = text.substring(0, cursorPosition) + placeholder + text.substring(cursorPosition);
     
     if (field === 'subject') {
         emailSubject.value = newValue;
@@ -300,16 +303,8 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
     // Set cursor position after the inserted text
     nextTick(() => {
         input.focus();
-        input.setSelectionRange(cursorPosition + '{studentName}'.length, cursorPosition + '{studentName}'.length);
+        input.setSelectionRange(cursorPosition + placeholder.length, cursorPosition + placeholder.length);
     });
-};
-
-// Function to handle drag over
-const handleDragOver = (event: DragEvent) => {
-    event.preventDefault();
-    if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = 'copy';
-    }
 };
 </script>
 
@@ -513,17 +508,31 @@ const handleDragOver = (event: DragEvent) => {
 
                         <!-- Placeholder Buttons -->
                         <div class="flex flex-wrap gap-2 mt-4">
-                            <UButton
-                                size="sm"
-                                color="gray"
-                                variant="ghost"
+                            <GradesDraggablePlaceholder
                                 icon="fluent:person-24-filled"
-                                draggable="true"
-                                @dragstart="handleDragStart"
-                                class="text-Purple-P dark:text-Muted-Brown cursor-move hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10"
-                            >
-                                Arrastrar nombre del estudiante
-                            </UButton>
+                                label="Nombre del estudiante"
+                                placeholder="{studentName}"
+                            />
+                            <GradesDraggablePlaceholder
+                                icon="fluent:book-32-filled"
+                                label="Nombre del curso"
+                                placeholder="{courseName}"
+                            />
+                            <GradesDraggablePlaceholder
+                                icon="fluent:people-24-filled"
+                                label="Nombre del grupo"
+                                placeholder="{groupName}"
+                            />
+                            <GradesDraggablePlaceholder
+                                icon="fluent:person-24-filled"
+                                label="Nombre del docente"
+                                placeholder="{teacherName}"
+                            />
+                            <GradesDraggablePlaceholder
+                                icon="fluent:document-24-filled"
+                                label="Nombre de la rúbrica"
+                                placeholder="{rubricName}"
+                            />
                         </div>
                     </div>
                 </div>

@@ -341,7 +341,7 @@
 
             <div class="flex items-center gap-4">
               <transition name="scale" mode="out-in">
-                <UtilitiesCourseSettings v-if="showGroups && isModerator" @load-screen="loadScreen"/>
+                <SettingsCourseSettings v-if="showGroups && isModerator" @load-screen="loadScreen"/>
               </transition>
 
               <!-- Transition para el icono -->

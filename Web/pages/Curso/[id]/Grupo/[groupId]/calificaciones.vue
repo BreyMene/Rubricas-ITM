@@ -508,7 +508,7 @@
                     <h2 class="text-xl font-semibold dark:text-white">Notas del Grupo</h2>
                     <div class="flex gap-2">
                         <ClientOnly>
-                            <UtilitiesEmailNotas :estudiantes="estudiantesGrupo" :notas="notas" />
+                            <GradesEmailNotas :estudiantes="estudiantesGrupo" :notas="notas" />
                             <template #fallback>
                                 <USkeleton
                                     class="w-[120px] h-[40px]"
