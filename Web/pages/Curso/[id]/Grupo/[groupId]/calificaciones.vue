@@ -21,6 +21,10 @@
     const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
     const rubrics = ref<Rubrica[]>([]);
     const notas = ref<Nota[]>([]);
+    const deletedRubrics = ref<Set<string>>(new Set());
+
+    // Add modal state for deleted rubric
+    const showDeletedRubricModal = ref(false);
 
     // Only call the api if Pinia doesn't have any course saved
     const fetchCourses = async () => {
@@ -316,23 +320,37 @@
 
     const fetchRubrics = async () => {
         try {
-            LoadingNotas.value = true
+            LoadingNotas.value = true;
             const groupData = await $fetch<Grupo>(
                 `${config.public.apiUrl}/groups/${groupId.value}`
             );
+            
             // Get the full rubric data for each rubric ID
-            const rubricPromises = groupData.rubricas.map(rubric => 
-                $fetch<Rubrica>(`${config.public.apiUrl}/rubrics/${rubric._id}`)
-            );
-            const rubricData = await Promise.all(rubricPromises);
-            rubrics.value = rubricData;
+            const rubricPromises = groupData.rubricas.map(async rubric => {
+                try {
+                    const rubricData = await $fetch<Rubrica>(`${config.public.apiUrl}/rubrics/${rubric._id}`);
+                    return rubricData;
+                } catch (error) {
+                    return null;
+                }
+            });
+            const rubricResults = await Promise.all(rubricPromises);
+            rubrics.value = rubricResults.filter(r => r !== null) as Rubrica[];
 
             // Also fetch the notas for this group
             if (groupData.notas) {
                 notas.value = groupData.notas;
+                
+                // Check which rubrics in notas are not in the available rubrics
+                const availableRubricIds = new Set(rubrics.value.map(r => r._id));
+                deletedRubrics.value = new Set(
+                    notas.value
+                        .map(nota => nota.rubrica)
+                        .filter(rubricId => !availableRubricIds.has(rubricId))
+                );
             }
 
-            LoadingNotas.value = false
+            LoadingNotas.value = false;
         } catch (error) {
             console.error("Error fetching rubrics:", error);
             toast.add({
@@ -361,6 +379,15 @@
                     }
                 }
             });
+        }
+    };
+
+    // Function to handle rubric view click
+    const handleRubricView = (rubricId: string) => {
+        if (deletedRubrics.value.has(rubricId)) {
+            showDeletedRubricModal.value = true;
+        } else {
+            navigateTo(`/Rubrica/${rubricId}`);
         }
     };
 
@@ -516,9 +543,16 @@
                                     <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-1">
                                         {{ new Date(nota.fecha).toLocaleDateString() }}
                                     </p>
-                                    <p class="text-sm text-Pure-Black dark:text-White-w mt-2">
-                                        Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
-                                    </p>
+                                    <div class="flex items-center gap-2 mt-2">
+                                        <p class="text-sm text-Pure-Black dark:text-White-w">
+                                            Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
+                                        </p>
+                                        <UIcon
+                                            v-if="deletedRubrics.has(nota.rubrica)"
+                                            name="fluent:warning-24-filled"
+                                            class="w-5 h-5 text-red-500 animate-warning"
+                                        />
+                                    </div>
                                 </div>
                                 <div class="flex gap-2">
                                     <UButton
@@ -526,7 +560,7 @@
                                         color="gray"
                                         variant="ghost"
                                         class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
-                                        @click="navigateTo(`/Rubrica/${nota.rubrica}`)"
+                                        @click="handleRubricView(nota.rubrica)"
                                     />
                                     <UButton
                                         icon="fluent:delete-12-regular"
@@ -856,10 +890,64 @@
             </UCard>
         </UModal>
 
+        <!-- Add Deleted Rubric Modal -->
+        <UModal
+            v-model="showDeletedRubricModal"
+            :ui="{
+                width: 'w-full sm:max-w-md',
+                height: 'max-h-[700px]',
+                container: 'flex items-center justify-center',
+                overlay: { background: 'dark:bg-Light-Gray/15' },
+            }"
+        >
+            <UCard :ui="{
+                background: 'dark:bg-Medium-Dark',
+                ring: '',
+                divide: '',
+                base: 'w-full',
+            }">
+                <div class="p-4">
+                    <div class="flex items-center mb-4">
+                        <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
+                        <h3 class="text-lg font-semibold dark:text-white">Rúbrica Eliminada</h3>
+                    </div>
+                    
+                    <p class="mb-6 text-gray-700 dark:text-gray-300">
+                        La rúbrica asociada a esta nota ha sido eliminada. No es posible ver su contenido.
+                    </p>
+                    
+                    <div class="flex justify-end">
+                        <UButton 
+                            variant="link" 
+                            color="gray"
+                            @click="showDeletedRubricModal = false"
+                        >
+                            Cerrar
+                        </UButton>
+                    </div>
+                </div>
+            </UCard>
+        </UModal>
+
         <UtilitiesLoadingScreen 
             v-if="!LoadingNotas"
             :isLoading="canLoadScreen"
             :message="loadMg"
         />
     </div>
-</template> 
+</template>
+
+<style scoped>
+@keyframes warning {
+    0%, 85%, 100% { transform: scale(1); }
+    87.5% { transform: scale(1.2); }
+    90% { transform: scale(1.2) rotate(-5deg); }
+    92.5% { transform: scale(1.2) rotate(5deg); }
+    95% { transform: scale(1.2) rotate(-5deg); }
+    97.5% { transform: scale(1.2) rotate(5deg); }
+}
+
+.animate-warning {
+    animation: warning 5s ease-in-out infinite;
+}
+</style> 

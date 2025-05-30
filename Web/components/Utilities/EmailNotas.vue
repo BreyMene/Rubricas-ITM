@@ -16,6 +16,10 @@ const selectedStudents = ref<{ value: Estudiante }[]>([]);
 const selectedNota = ref<Nota | undefined>(undefined);
 const isSending = ref(false);
 
+// Add refs for input elements
+const subjectInput = ref<any>(null);
+const bodyTextarea = ref<any>(null);
+
 // Format students for USelectMenu
 const studentOptions = computed(() =>
     props.estudiantes.map(student => ({
@@ -26,11 +30,14 @@ const studentOptions = computed(() =>
     }))
 );
 
+
 const openSlideover = () => {
     showSlideover.value = true;
 };
 
 const closeSlideover = () => {
+    if(isSending.value) return
+    
     showSlideover.value = false;
     emailSubject.value = '';
     emailBody.value = '';
@@ -60,6 +67,10 @@ const sendEmails = async () => {
                     console.error('Invalid student data:', studentOption);
                     continue;
                 }
+
+                // Replace placeholders with actual student name
+                const personalizedSubject = emailSubject.value.replace(/{studentName}/g, student.nombre);
+                const personalizedBody = emailBody.value.replace(/{studentName}/g, student.nombre);
 
                 // First, get the rubric data
                 const rubricData = await $fetch<Rubrica>(
@@ -164,8 +175,8 @@ const sendEmails = async () => {
                                     to: student.correo,
                                     studentName: student.nombre,
                                     rubricName: 'Rubrica',
-                                    subject: emailSubject.value,
-                                    body: emailBody.value,
+                                    subject: personalizedSubject,
+                                    body: personalizedBody,
                                     pdfBase64: base64data
                                 }
                             });
@@ -177,7 +188,6 @@ const sendEmails = async () => {
                     };
                     reader.onerror = reject; // Reject the promise if FileReader encounters an error
                 }));
-
             } catch (error) {
                 console.error(`Error processing student ${studentOption.value.nombre}:`, error);
                 // Continue with other students even if one fails
@@ -187,6 +197,7 @@ const sendEmails = async () => {
         // Wait for all email sending promises to resolve
         await Promise.all(emailPromises);
 
+        isSending.value = false;
         closeSlideover();
 
         // Show success toast
@@ -252,6 +263,54 @@ const sendEmails = async () => {
         isSending.value = false;
     }
 };
+
+// Function to handle drag start
+const handleDragStart = (event: DragEvent) => {
+    if (event.dataTransfer) {
+        event.dataTransfer.setData('text/plain', '{studentName}');
+        event.dataTransfer.effectAllowed = 'copy';
+    }
+};
+
+// Function to handle drop
+const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
+    event.preventDefault();
+    const element = field === 'subject' ? subjectInput.value?.$el : bodyTextarea.value?.$el;
+    if (!element) return;
+    
+    const input = element.querySelector('input, textarea');
+    if (!input) return;
+    
+    // Get the current cursor position
+    const cursorPosition = input.selectionStart;
+    if (cursorPosition === null) return;
+    
+    // Get the current text
+    const text = field === 'subject' ? emailSubject.value : emailBody.value;
+    
+    // Insert the placeholder at the cursor position
+    const newValue = text.substring(0, cursorPosition) + '{studentName}' + text.substring(cursorPosition);
+    
+    if (field === 'subject') {
+        emailSubject.value = newValue;
+    } else {
+        emailBody.value = newValue;
+    }
+    
+    // Set cursor position after the inserted text
+    nextTick(() => {
+        input.focus();
+        input.setSelectionRange(cursorPosition + '{studentName}'.length, cursorPosition + '{studentName}'.length);
+    });
+};
+
+// Function to handle drag over
+const handleDragOver = (event: DragEvent) => {
+    event.preventDefault();
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy';
+    }
+};
 </script>
 
 <template>
@@ -266,7 +325,7 @@ const sendEmails = async () => {
         </UButton>
 
         <!-- Slideover -->
-        <USlideover :prevent-close="isSending"
+        <USlideover prevent-close
             v-model="showSlideover"
             :ui="{
                 width: 'w-full sm:max-w-2xl',
@@ -408,9 +467,12 @@ const sendEmails = async () => {
                                 Asunto
                             </label>
                             <UInput
+                                ref="subjectInput"
                                 v-model="emailSubject"
                                 placeholder="Asunto del email"
                                 class="w-full"
+                                @dragover="handleDragOver"
+                                @drop="(e: DragEvent) => handleDrop(e, 'subject')"
                                 :ui="{
                                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                                     color: {
@@ -429,11 +491,14 @@ const sendEmails = async () => {
                                 Mensaje
                             </label>
                             <UTextarea
+                                ref="bodyTextarea"
                                 v-model="emailBody"
                                 placeholder="Escribe tu mensaje aquí..."
                                 class="w-full min-h-[200px]"
                                 :rows="8"
                                 autoresize
+                                @dragover="handleDragOver"
+                                @drop="(e: DragEvent) => handleDrop(e, 'body')"
                                 :ui="{
                                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                                     color: {
@@ -444,6 +509,21 @@ const sendEmails = async () => {
                                 }"
                                 color="gray"
                             />
+                        </div>
+
+                        <!-- Placeholder Buttons -->
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <UButton
+                                size="sm"
+                                color="gray"
+                                variant="ghost"
+                                icon="fluent:person-24-filled"
+                                draggable="true"
+                                @dragstart="handleDragStart"
+                                class="text-Purple-P dark:text-Muted-Brown cursor-move hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10"
+                            >
+                                Arrastrar nombre del estudiante
+                            </UButton>
                         </div>
                     </div>
                 </div>

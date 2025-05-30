@@ -38,8 +38,9 @@
       const nota = route.query.nota;
       const estudiante = route.query.estudiante;
       const grupo = route.query.grupo;
+      const curso = route.query.curso;
 
-      if (!cloneId || !nota || !estudiante || !grupo) {
+      if (!cloneId || !nota || !estudiante || !grupo || !curso) {
         throw new Error('Missing required parameters');
       }
 
@@ -47,58 +48,44 @@
       studentName.value = estudiante as string;
 
       // First fetch the rubric template
-      const data = await $fetch<Rubrica>(
-        `${config.public.apiUrl}/rubrics/${cloneId}`,
-      );
-
-      // Then fetch the saved grade data for this student
       try {
-        const savedGrade = await $fetch<{ temas: Tema[] }>(
-          `${config.public.apiUrl}/grades/${grupo}/notas/${nota}/estudiante/${estudiante}`,
+        const data = await $fetch<Rubrica>(
+          `${config.public.apiUrl}/rubrics/${cloneId}`,
         );
 
-        // If we have saved data with temas, use it
-        if (savedGrade && savedGrade.temas && savedGrade.temas.length > 0) {
-          temas.value = savedGrade.temas;
-        } else {
-          // Otherwise use the template
+        // Then fetch the saved grade data for this student
+        try {
+          const savedGrade = await $fetch<{ temas: Tema[] }>(
+            `${config.public.apiUrl}/grades/${grupo}/notas/${nota}/estudiante/${estudiante}`,
+          );
+
+          // If we have saved data with temas, use it
+          if (savedGrade && savedGrade.temas && savedGrade.temas.length > 0) {
+            temas.value = savedGrade.temas;
+          } else {
+            // Otherwise use the template
+            temas.value = data.temas;
+          }
+        } catch (error) {
+          // If there's an error (like 404), use the template
+          console.log('Using template for new grade');
           temas.value = data.temas;
         }
-      } catch (error) {
-        // If there's an error (like 404), use the template
-        console.log('Using template for new grade');
-        temas.value = data.temas;
-      }
 
-      rubricName.value = data.nombre;
+        rubricName.value = data.nombre;
+      } catch (error) {
+        // If the rubric is not found, throw an error to trigger the error page
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'Rúbrica no encontrada',
+          message: 'La rúbrica ha sido eliminada o no está disponible.',
+          fatal: true
+        });
+      }
     } catch (error) {
       console.error("Error in fetchRubrica:", error);
-      toast.add({
-        title: 'Error al cargar la rúbrica',
-        icon: "fluent:alert-urgent-16-filled",
-        timeout: 3000,
-        ui: {
-          'background': 'bg-Warm-White dark:bg-Medium-Dark',
-          'rounded': 'rounded-lg',
-          'shadow': 'shadow-lg',
-          'ring': 'ring-0',
-          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-          'icon': {
-            'base': 'flex-shrink-0 w-5 h-5',
-            'color': 'text-Purple-P dark:text-Muted-Brown'
-          },
-          'progress': {
-            'base': 'absolute bottom-0 end-0 start-0 h-1',
-            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-          },
-          'closeButton': {
-            'base': 'absolute top-2 right-2',
-            'icon': 'fluent:add-16-filled',
-            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-          }
-        }
-      });
+      // Let the error page handle the display
+      throw error;
     } finally {
       loadScreen('', false);
     }

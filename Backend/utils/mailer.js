@@ -102,6 +102,9 @@ async function sendPasswordChangeCode(to, code) {
 }
 
 async function sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, body) {
+  // Format the body to make student name bold
+  const formattedBody = body.replace(new RegExp(studentName, 'g'), `<strong style="color: #523a72;">${studentName}</strong>`);
+
   await transporter.sendMail({
     from: "Soporte Rubricas <rubritm@gmail.com>",
     to,
@@ -115,7 +118,7 @@ async function sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, bo
 
         <!-- Body -->
         <div style="padding: 30px; color: #2a3465;">
-          ${body}
+          ${formattedBody}
         </div>
 
         <hr style="margin: 30px 0; border-color: #d3d3d3;">

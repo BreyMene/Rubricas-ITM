@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useDocenteStore } from "~/utils/store";
   const config = useRuntimeConfig();
+  const toast = useToast();
 
   const rubricas = ref<Rubrica[]>([]);
   const docenteID = useDocenteStore().getID;
@@ -52,7 +53,6 @@
       selectedRubricaName.value = rubricaNomb;
       selectedRubricaState.value = estado;
       
-      // Find course and group info
       const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId));
       const group = courses.value.flatMap(c => c.grupos || []).find(g => g.rubricas?.some(r => r._id === rubricaId));
       
@@ -143,8 +143,25 @@
         `${config.public.apiUrl}/courses/${docenteID}`,
       );
       courses.value = data;
+      // After fetching courses, fetch groups for each course
+      await fetchGroups();
     } catch (error) {
       console.error("Error fetching courses:", error);
+    }
+  };
+
+  const fetchGroups = async () => {
+    try {
+      for (const course of courses.value) {
+        if (course.grupos && course.grupos.length > 0) {
+          const grupoApi = await $fetch<Grupo>(
+            `${config.public.apiUrl}/groups/${course.grupos[0]}`
+          );
+          course.grupos = [grupoApi];
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching groups:", error);
     }
   };
 
@@ -179,8 +196,63 @@
       await fetchRubrics();
       isOpen.value = false;
       isDeleteModalOpen.value = false;
+      
+      // Add success toast
+      toast.add({
+        title: 'Rúbrica eliminada exitosamente',
+        icon: "fluent:checkmark-circle-16-filled",
+        timeout: 3000,
+        ui: {
+          'background': 'bg-Warm-White dark:bg-Medium-Dark',
+          'rounded': 'rounded-lg',
+          'shadow': 'shadow-lg',
+          'ring': 'ring-0',
+          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+          'icon': {
+            'base': 'flex-shrink-0 w-5 h-5',
+            'color': 'text-Purple-P dark:text-Muted-Brown'
+          },
+          'progress': {
+            'base': 'absolute bottom-0 end-0 start-0 h-1',
+            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+          },
+          'closeButton': {
+            'base': 'absolute top-2 right-2',
+            'icon': 'fluent:add-16-filled',
+            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+          }
+        }
+      });
     } catch (error) {
       console.error("Error deleting rubric:", error);
+      // Add error toast
+      toast.add({
+        title: 'Error al eliminar la rúbrica',
+        icon: "fluent:alert-urgent-16-filled",
+        timeout: 3000,
+        ui: {
+          'background': 'bg-Warm-White dark:bg-Medium-Dark',
+          'rounded': 'rounded-lg',
+          'shadow': 'shadow-lg',
+          'ring': 'ring-0',
+          'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+          'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+          'icon': {
+            'base': 'flex-shrink-0 w-5 h-5',
+            'color': 'text-Purple-P dark:text-Muted-Brown'
+          },
+          'progress': {
+            'base': 'absolute bottom-0 end-0 start-0 h-1',
+            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+          },
+          'closeButton': {
+            'base': 'absolute top-2 right-2',
+            'icon': 'fluent:add-16-filled',
+            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+          }
+        }
+      });
     }
   };
 
