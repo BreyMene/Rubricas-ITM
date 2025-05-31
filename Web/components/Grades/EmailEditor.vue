@@ -128,13 +128,49 @@
         .run()
   }
 
+  // Function to insert badge at specific position
+  const insertBadgeAtPosition = (type: string, position: number) => {
+    if (!editor.value) return
+    
+    editor.value.chain()
+        .setTextSelection(position)
+        .insertContent({
+        type: 'badge',
+        attrs: { type },
+        content: [
+            { type: 'text', text: badgeLabels[type] || type }
+        ]
+        })
+        .run()
+  }
+
   // Handle drop event for badges
   const handleDrop = (event: DragEvent) => {
     event.preventDefault();
     const badgeType = event.dataTransfer?.getData('application/x-badge');
-    if (badgeType) {
-        insertBadge(badgeType);
+    
+    if (badgeType && editor.value) {
+        // Get the editor view from the editor instance
+        const view = editor.value.view;
+        
+        // Calculate the position from the drop coordinates
+        const coords = { left: event.clientX, top: event.clientY };
+        const pos = view.posAtCoords(coords);
+        
+        if (pos) {
+            // Insert the badge at the calculated position
+            insertBadgeAtPosition(badgeType, pos.pos);
+        } else {
+            // Fallback to regular insert if position calculation fails
+            insertBadge(badgeType);
+        }
     }
+  };
+
+  // Handle dragover to allow dropping
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'copy';
   };
 
   // Expose the insertBadge method to parent components
@@ -287,6 +323,7 @@
         type === 'body' ? 'rounded-t-none min-h-[200px] max-h-[200px]' : 'min-h-[40px] max-h-[60px]'
       ]"
       @drop="handleDrop"
+      @dragover="handleDragOver"
     />
   </div>
 </template>
@@ -321,5 +358,4 @@
 .ProseMirror .text-right {
   text-align: right;
 }
-
-</style> 
+</style>

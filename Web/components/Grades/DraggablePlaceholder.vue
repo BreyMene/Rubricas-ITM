@@ -31,7 +31,8 @@
         dragEl.style.top = '-1000px';
         dragEl.style.left = '-1000px';
         document.body.appendChild(dragEl);
-        event.dataTransfer.setDragImage(dragEl, dragEl.offsetWidth / 2, dragEl.offsetHeight / 2);
+        // Position the drag image below the cursor
+        event.dataTransfer.setDragImage(dragEl, 0, 30);
         setTimeout(() => document.body.removeChild(dragEl), 0);
     }
     };

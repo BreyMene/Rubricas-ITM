@@ -31,7 +31,7 @@
         if (!curso.value || curso.value._id !== courseId.value) {
             try {
                 const cursoApi = await $fetch<Curso>(
-                    `${config.public.apiUrl}/courses/${courseId.value}`
+                    `${config.public.apiUrl}/courses/get/${courseId.value}`
                 );
                 useCursoStore().setCurso(cursoApi);
             } catch (error) {
@@ -472,17 +472,10 @@
         isDeleteModalOpen.value = true;
     };
 
-    onMounted(async () => {
-        try {
-            LoadingNotas.value = true;
-            await fetchCourses();
-            await fetchGroup();
-            await fetchRubrics();
-        } catch (error) {
-            console.error("Error loading initial data:", error);
-        } finally {
-            LoadingNotas.value = false;
-        }
+    onMounted(() => {
+        fetchCourses();
+        fetchGroup();
+        fetchRubrics();
     });
 </script>
 
