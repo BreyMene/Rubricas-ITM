@@ -110,7 +110,7 @@ function addCourse(c: Curso) {
                 <UButton
                   @click="navigateToCourse(course)"
                   variant="ghost"
-                  class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1"
+                  class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 shadow-lg aspect-square flex flex-col justify-center items-center gap-3 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1 outline-none"
                 >
                   <UIcon
                     :name="course.icono"

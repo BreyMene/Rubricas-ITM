@@ -532,64 +532,76 @@
                 
                 <ClientOnly>
                     <!-- Show notas when loaded and not loading -->
-                    <div v-if="!LoadingNotas && notas.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="nota in notas" :key="nota._id"
-                            class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-150 hover:-translate-y-1">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-medium text-Pure-Black dark:text-White-w">
-                                        Nota {{ nota.numero }}
-                                    </h3>
-                                    <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-1">
-                                        {{ new Date(nota.fecha).toLocaleDateString() }}
-                                    </p>
-                                    <div class="flex items-center gap-2 mt-2">
-                                        <p class="text-sm text-Pure-Black dark:text-White-w">
-                                            Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
+                    <div 
+                        v-if="!LoadingNotas && notas.length" 
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-150 ease-out"
+                    >
+                        <Transition
+                            v-for="nota in notas" 
+                            :key="nota._id"
+                            name="nota-item"
+                            appear
+                            mode="out-in"
+                        >
+                            <div class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md hover:shadow-lg transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-medium text-Pure-Black dark:text-White-w">
+                                            Nota {{ nota.numero }}
+                                        </h3>
+                                        <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-1">
+                                            {{ new Date(nota.fecha).toLocaleDateString() }}
                                         </p>
-                                        <UIcon
-                                            v-if="deletedRubrics.has(nota.rubrica)"
-                                            name="fluent:warning-24-filled"
-                                            class="w-5 h-5 text-red-500 animate-warning"
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <p class="text-sm text-Pure-Black dark:text-White-w">
+                                                Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
+                                            </p>
+                                            <UIcon
+                                                v-if="deletedRubrics.has(nota.rubrica)"
+                                                name="fluent:warning-24-filled"
+                                                class="w-5 h-5 text-red-500 animate-warning"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <UButton
+                                            icon="fluent:eye-24-filled"
+                                            color="gray"
+                                            variant="ghost"
+                                            class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
+                                            @click="handleRubricView(nota.rubrica)"
+                                        />
+                                        <UButton
+                                            icon="fluent:delete-12-regular"
+                                            color="red"
+                                            variant="soft"
+                                            class="transition-colors duration-200"
+                                            @click="openDeleteModal(nota)"
                                         />
                                     </div>
                                 </div>
-                                <div class="flex gap-2">
-                                    <UButton
-                                        icon="fluent:eye-24-filled"
-                                        color="gray"
-                                        variant="ghost"
-                                        class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
-                                        @click="handleRubricView(nota.rubrica)"
-                                    />
-                                    <UButton
-                                        icon="fluent:delete-12-regular"
-                                        color="red"
-                                        variant="soft"
-                                        class="transition-colors duration-200"
-                                        @click="openDeleteModal(nota)"
-                                    />
-                                </div>
                             </div>
-                        </div>
+                        </Transition>
                     </div>
                     
                     <!-- Show empty state when no notas and not loading -->
-                    <div v-else-if="!LoadingNotas && !notas.length" class="text-center p-8">
-                        <div class="relative w-80 h-52 flex flex-col items-center justify-center mx-auto">
-                            <!-- Corner decorations -->
-                            <div class="absolute top-0 -left-2 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                            <div class="absolute top-0 -right-2 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                            <div class="absolute bottom-0 -left-2 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                            <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                    <Transition name="fade-minimal" appear>
+                        <div v-if="!LoadingNotas && !notas.length" class="text-center p-8">
+                            <div class="relative w-80 h-52 flex flex-col items-center justify-center mx-auto">
+                                <!-- Corner decorations -->
+                                <div class="absolute top-0 -left-2 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg transition-colors duration-150"></div>
+                                <div class="absolute top-0 -right-2 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg transition-colors duration-150"></div>
+                                <div class="absolute bottom-0 -left-2 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg transition-colors duration-150"></div>
+                                <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"></div>
 
-                            <UIcon name="fluent:document-edit-16-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY NOTAS</p>
-                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
-                                Crea una nueva nota para comenzar a calificar a los estudiantes.
-                            </p>
+                                <UIcon name="fluent:document-edit-16-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY NOTAS</p>
+                                <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
+                                    Crea una nueva nota para comenzar a calificar a los estudiantes.
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    </Transition>
 
                     <!-- Skeleton Loader when loading -->
                     <template #fallback>
@@ -623,46 +635,58 @@
                 <h2 class="text-xl font-semibold mb-4 dark:text-white">Estudiantes</h2>
                 <ClientOnly>
                     <!-- Show students when loaded and not loading -->
-                    <div v-if="!LoadingNotas && estudiantesGrupo.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="student in estudiantesGrupo" :key="student.correo"
-                            class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-150 hover:-translate-y-1">
-                            <div class="flex items-center gap-3">
-                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-Purple-P/10 dark:bg-Muted-Brown/10 flex items-center justify-center">
-                                    <UIcon name="fluent:person-24-filled" class="text-2xl text-Purple-P dark:text-Muted-Brown" />
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="font-medium text-Pure-Black dark:text-White-w truncate">{{ student.nombre }}</h3>
-                                    <p class="text-sm text-Light-Gray dark:text-MLight-White/50 truncate">{{ student.correo }}</p>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <UButton
-                                        icon="fluent:document-edit-16-filled"
-                                        color="gray"
-                                        variant="ghost"
-                                        class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
-                                        @click="openStudentNotasModal(student)"
-                                    />
+                    <div 
+                        v-if="!LoadingNotas && estudiantesGrupo.length" 
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-150 ease-out"
+                    >
+                        <Transition
+                            v-for="student in estudiantesGrupo" 
+                            :key="student.correo"
+                            name="student-item"
+                            appear
+                            mode="out-in"
+                        >
+                            <div class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-md hover:shadow-lg transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-Purple-P/10 dark:bg-Muted-Brown/10 flex items-center justify-center">
+                                        <UIcon name="fluent:person-24-filled" class="text-2xl text-Purple-P dark:text-Muted-Brown" />
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-medium text-Pure-Black dark:text-White-w truncate">{{ student.nombre }}</h3>
+                                        <p class="text-sm text-Light-Gray dark:text-MLight-White/50 truncate">{{ student.correo }}</p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <UButton
+                                            icon="fluent:document-edit-16-filled"
+                                            color="gray"
+                                            variant="ghost"
+                                            class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
+                                            @click="openStudentNotasModal(student)"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Transition>
                     </div>
 
                     <!-- Show empty state when no students and not loading -->
-                    <div v-else-if="!LoadingNotas && !estudiantesGrupo.length" class="text-center p-8">
-                        <div class="relative w-80 h-52 flex flex-col items-center justify-center mx-auto">
-                            <!-- Corner decorations -->
-                            <div class="absolute top-0 -left-2 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                            <div class="absolute top-0 -right-2 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                            <div class="absolute bottom-0 -left-2 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                            <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
+                    <Transition name="fade-minimal" appear>
+                        <div v-if="!LoadingNotas && !estudiantesGrupo.length" class="text-center p-8">
+                            <div class="relative w-80 h-52 flex flex-col items-center justify-center mx-auto">
+                                <!-- Corner decorations -->
+                                <div class="absolute top-0 -left-2 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg transition-colors duration-150"></div>
+                                <div class="absolute top-0 -right-2 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg transition-colors duration-150"></div>
+                                <div class="absolute bottom-0 -left-2 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg transition-colors duration-150"></div>
+                                <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"></div>
 
-                            <UIcon name="fluent:person-24-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY ESTUDIANTES</p>
-                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
-                                Agrega estudiantes al grupo para poder calificarlos.
-                            </p>
+                                <UIcon name="fluent:person-24-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
+                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY ESTUDIANTES</p>
+                                <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
+                                    Agrega estudiantes al grupo para poder calificarlos.
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    </Transition>
 
                     <!-- Skeleton Loader when loading -->
                     <template #fallback>
@@ -938,16 +962,59 @@
 </template>
 
 <style scoped>
-@keyframes warning {
-    0%, 85%, 100% { transform: scale(1); }
-    87.5% { transform: scale(1.2); }
-    90% { transform: scale(1.2) rotate(-5deg); }
-    92.5% { transform: scale(1.2) rotate(5deg); }
-    95% { transform: scale(1.2) rotate(-5deg); }
-    97.5% { transform: scale(1.2) rotate(5deg); }
-}
+    @keyframes warning {
+        0%, 85%, 100% { transform: scale(1); }
+        87.5% { transform: scale(1.2); }
+        90% { transform: scale(1.2) rotate(-5deg); }
+        92.5% { transform: scale(1.2) rotate(5deg); }
+        95% { transform: scale(1.2) rotate(-5deg); }
+        97.5% { transform: scale(1.2) rotate(5deg); }
+    }
 
-.animate-warning {
-    animation: warning 5s ease-in-out infinite;
-}
+    .animate-warning {
+        animation: warning 5s ease-in-out infinite;
+    }
+
+    /* Nota item transitions */
+    .nota-item-enter-active {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .nota-item-leave-active {
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
+    }
+
+    .nota-item-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    }
+
+    .nota-item-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    }
+
+    /* Student item transitions */
+    .student-item-enter-active {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .student-item-leave-active {
+    transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
+    }
+
+    .student-item-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    }
+
+    .student-item-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    }
+
+    /* Grid container smooth transitions */
+    .grid {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
 </style> 

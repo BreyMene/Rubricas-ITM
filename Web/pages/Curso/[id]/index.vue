@@ -420,7 +420,7 @@
                   >
                     <UButton
                       variant="ghost"
-                      class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1"
+                      class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-6 md:p-2 shadow-lg aspect-square flex flex-col justify-center items-center gap-2 hover:bg-MLight-White dark:hover:bg-Dark-Grey transition-[transform,box-shadow,colors] duration-200 hover:-translate-y-1 outline-none"
                       @click="$router.push(`/Curso/${courseId}/Grupo/${group._id}`)"
                     >
                       <h3
