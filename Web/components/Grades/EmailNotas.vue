@@ -5,8 +5,11 @@ import html2pdf from 'html2pdf.js'
 
 const route = useRoute();
 const props = defineProps<{
-    estudiantes: Estudiante[],
-    notas: Nota[]
+  estudiantes: Estudiante[],
+  notas: Nota[],
+  curso?: Curso,
+  grupo?: Grupo,
+  teacher: string,
 }>();
 
 const showSlideover = ref(false);
@@ -16,9 +19,10 @@ const selectedStudents = ref<{ value: Estudiante }[]>([]);
 const selectedNota = ref<Nota | undefined>(undefined);
 const isSending = ref(false);
 
-// Add refs for input elements
-const subjectInput = ref<any>(null);
-const bodyTextarea = ref<any>(null);
+
+// Add refs for editors
+const subjectEditor = ref<any>(null);
+const bodyEditor = ref<any>(null);
 
 // Format students for USelectMenu
 const studentOptions = computed(() =>
@@ -45,6 +49,13 @@ const closeSlideover = () => {
     selectedNota.value = undefined;
 };
 
+function replaceBadgesWithValues(html: string, values: Record<string, string>): string {
+  // Replace all badge spans with the actual value wrapped in a span with data-type
+  return html.replace(/<span[^>]*data-type="([^"]+)"[^>]*>.*?<\/span>/g, (match, type) => {
+    return `<span data-type="${type}">${values[type] || ''}</span>`;
+  });
+}
+
 const sendEmails = async () => {
     try {
         isSending.value = true;
@@ -68,9 +79,16 @@ const sendEmails = async () => {
                     continue;
                 }
 
-                // Replace placeholders with actual student name
-                const personalizedSubject = emailSubject.value.replace(/{studentName}/g, student.nombre);
-                const personalizedBody = emailBody.value.replace(/{studentName}/g, student.nombre);
+                const values: Record<string, string> = {
+                    studentName: student.nombre,
+                    courseName: props.curso?.nombre || '',
+                    groupName: props.grupo?.nombre || '',
+                    teacherName: props.teacher || '',
+                    rubricName: props.grupo?.rubricas.find(r => r._id === selectedNota.value?.rubrica)?.nombre || '',
+                };
+
+                const personalizedSubject = replaceBadgesWithValues(emailSubject.value, values);
+                const personalizedBody = replaceBadgesWithValues(emailBody.value, values);
 
                 // First, get the rubric data
                 const rubricData = await $fetch<Rubrica>(
@@ -275,36 +293,7 @@ const handleDragOver = (event: DragEvent) => {
 // Function to handle drop
 const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
     event.preventDefault();
-    const element = field === 'subject' ? subjectInput.value?.$el : bodyTextarea.value?.$el;
-    if (!element) return;
-    
-    const input = element.querySelector('input, textarea');
-    if (!input) return;
-    
-    // Get the current cursor position
-    const cursorPosition = input.selectionStart;
-    if (cursorPosition === null) return;
-    
-    // Get the current text
-    const text = field === 'subject' ? emailSubject.value : emailBody.value;
-    
-    // Get the dragged placeholder
-    const placeholder = event.dataTransfer?.getData('text/plain') || '';
-    
-    // Insert the placeholder at the cursor position
-    const newValue = text.substring(0, cursorPosition) + placeholder + text.substring(cursorPosition);
-    
-    if (field === 'subject') {
-        emailSubject.value = newValue;
-    } else {
-        emailBody.value = newValue;
-    }
-    
-    // Set cursor position after the inserted text
-    nextTick(() => {
-        input.focus();
-        input.setSelectionRange(cursorPosition + placeholder.length, cursorPosition + placeholder.length);
-    });
+    // The drop logic will now be handled inside EmailEditor.vue
 };
 </script>
 
@@ -461,22 +450,12 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
                                 Asunto
                             </label>
-                            <UInput
-                                ref="subjectInput"
+                            <GradesEmailEditor
+                                ref="subjectEditor"
                                 v-model="emailSubject"
                                 placeholder="Asunto del email"
+                                type="subject"
                                 class="w-full"
-                                @dragover="handleDragOver"
-                                @drop="(e: DragEvent) => handleDrop(e, 'subject')"
-                                :ui="{
-                                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                    color: {
-                                        gray: {
-                                            outline: 'shadow-lg bg-White-w dark:bg-Warm-Dark text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                        }
-                                    }
-                                }"
-                                color="gray"
                             />
                         </div>
 
@@ -485,53 +464,41 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
                                 Mensaje
                             </label>
-                            <UTextarea
-                                ref="bodyTextarea"
+                            <GradesEmailEditor
+                                ref="bodyEditor"
                                 v-model="emailBody"
                                 placeholder="Escribe tu mensaje aquí..."
-                                class="w-full min-h-[200px]"
-                                :rows="8"
-                                autoresize
-                                @dragover="handleDragOver"
-                                @drop="(e: DragEvent) => handleDrop(e, 'body')"
-                                :ui="{
-                                    ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
-                                    color: {
-                                        gray: {
-                                            outline: 'shadow-lg bg-White-w dark:bg-Warm-Dark text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
-                                        }
-                                    }
-                                }"
-                                color="gray"
+                                type="body"
+                                class="w-full"
                             />
                         </div>
 
                         <!-- Placeholder Buttons -->
-                        <div class="flex flex-wrap gap-2 mt-4">
+                        <div class="flex flex-wrap gap-2">
                             <GradesDraggablePlaceholder
                                 icon="fluent:person-24-filled"
                                 label="Nombre del estudiante"
-                                placeholder="{studentName}"
+                                type="studentName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:book-32-filled"
                                 label="Nombre del curso"
-                                placeholder="{courseName}"
+                                type="courseName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:people-24-filled"
                                 label="Nombre del grupo"
-                                placeholder="{groupName}"
+                                type="groupName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:person-24-filled"
                                 label="Nombre del docente"
-                                placeholder="{teacherName}"
+                                type="teacherName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:document-24-filled"
                                 label="Nombre de la rúbrica"
-                                placeholder="{rubricName}"
+                                type="rubricName"
                             />
                         </div>
                     </div>

@@ -508,7 +508,14 @@
                     <h2 class="text-xl font-semibold dark:text-white">Notas del Grupo</h2>
                     <div class="flex gap-2">
                         <ClientOnly>
-                            <GradesEmailNotas :estudiantes="estudiantesGrupo" :notas="notas" />
+                            <GradesEmailNotas
+                                v-if="curso && grupo"
+                                :estudiantes="estudiantesGrupo"
+                                :notas="notas"
+                                :curso="curso"
+                                :grupo="grupo"
+                                :teacher="curso.docentes?.[0]?.correo || ''"
+                            />
                             <template #fallback>
                                 <USkeleton
                                     class="w-[120px] h-[40px]"

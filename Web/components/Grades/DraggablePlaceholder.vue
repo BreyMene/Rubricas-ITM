@@ -1,19 +1,40 @@
 <script setup lang="ts">
-interface Props {
-    icon: string;
-    label: string;
-    placeholder: string;
-}
-
-const props = defineProps<Props>();
-
-// Function to handle drag start
-const handleDragStart = (event: DragEvent) => {
-    if (event.dataTransfer) {
-        event.dataTransfer.setData('text/plain', props.placeholder);
-        event.dataTransfer.effectAllowed = 'copy';
+    interface Props {
+        icon: string;
+        label: string;
+        type: string;
     }
-};
+
+    const props = defineProps<Props>();
+
+    const handleDragStart = (event: DragEvent) => {
+    if (event.dataTransfer) {
+        event.dataTransfer.setData('application/x-badge', props.type);
+        event.dataTransfer.effectAllowed = 'copy';
+
+        // Detect dark mode
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const bg = isDark ? '#807467' : '#523a72';
+        const color = isDark ? '#fff' : '#fff';
+
+        // Create a styled drag image
+        const dragEl = document.createElement('div');
+        dragEl.innerText = props.label;
+        dragEl.style.padding = '6px 16px';
+        dragEl.style.background = bg;
+        dragEl.style.color = color;
+        dragEl.style.borderRadius = '9999px';
+        dragEl.style.fontWeight = 'bold';
+        dragEl.style.fontSize = '14px';
+        dragEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        dragEl.style.position = 'absolute';
+        dragEl.style.top = '-1000px';
+        dragEl.style.left = '-1000px';
+        document.body.appendChild(dragEl);
+        event.dataTransfer.setDragImage(dragEl, dragEl.offsetWidth / 2, dragEl.offsetHeight / 2);
+        setTimeout(() => document.body.removeChild(dragEl), 0);
+    }
+    };
 </script>
 
 <template>

@@ -101,19 +101,39 @@ async function sendPasswordChangeCode(to, code) {
   });
 }
 
+
+function styleEmailHtml(html) {
+  // Bold all badges
+  let out = html.replace(/<span[^>]*data-type="[^"]*"[^>]*>(.*?)<\/span>/g, '<strong>$1</strong>');
+  // Style <mark> or <mark ...> for highlight, replace with <span>
+  out = out.replace(/<mark[^>]*>(.*?)<\/mark>/g, '<span style="background: #fff3a3; color: #000; padding: 0 2px; border-radius: 2px;">$1</span>');
+  // Style <code> for code
+  out = out.replace(/<code>(.*?)<\/code>/g, '<code style="background: #22223b; color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace;">$1</code>');
+  return out;
+}
+
+function subjectToPlainText(html) {
+  // Replace badge spans with their text content
+  let out = html.replace(/<span[^>]*data-type="[^"]*"[^>]*>(.*?)<\/span>/g, '$1');
+  // Remove all other HTML tags
+  out = out.replace(/<[^>]+>/g, '');
+  // Optionally, decode HTML entities if needed
+  return out.trim();
+}
+
 async function sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, body) {
-  // Format the body to make student name bold
-  const formattedBody = body.replace(new RegExp(studentName, 'g'), `<strong style="color: #523a72;">${studentName}</strong>`);
+  const formattedBody = styleEmailHtml(body);
+  const formattedSubject = subjectToPlainText(subject);
 
   await transporter.sendMail({
     from: "Soporte Rubricas <rubritm@gmail.com>",
     to,
-    subject: subject,
+    subject: formattedSubject,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #fafafa; border: 1px solid #d3d3d3; border-radius: 10px; overflow: hidden;">
         <!-- Header -->
         <div style="background-color: #2a3465; padding: 20px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">${subject || 'Rúbrica de Calificación'}</h1>
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">${formattedSubject || 'Rúbrica de Calificación'}</h1>
         </div>
 
         <!-- Body -->
