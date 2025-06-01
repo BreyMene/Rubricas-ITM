@@ -41,7 +41,7 @@ const openSlideover = () => {
 
 const closeSlideover = () => {
     if(isSending.value) return
-    
+
     showSlideover.value = false;
     emailSubject.value = '';
     emailBody.value = '';
@@ -212,8 +212,12 @@ const sendEmails = async () => {
             }
         }
 
-        // Wait for all email sending promises to resolve
-        await Promise.all(emailPromises);
+        // Wait for all email sending promises to resolve, but send emails in batches of 10
+        for (let i = 0; i < emailPromises.length; i += 10) {
+            await Promise.all(emailPromises.slice(i, i + 10));
+        }
+        // await Promise.all(emailPromises);
+
 
         isSending.value = false;
         closeSlideover();
