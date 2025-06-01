@@ -23,6 +23,7 @@
 
     // Specify the correct type for the ref
     const otpRef = ref<OtpInputInstance | null>(null);
+    const formError = ref('');
 
     // Función para verificar el código OTP
     const verifyOTP = async () => {
@@ -39,13 +40,17 @@
                     });
                     emit('showResetPassword');
                 } else {
-                    console.log('Código incompleto');
+                    formError.value = 'Código incompleto';
                 }
             } else {
-                console.log('No hay codigo');
+                formError.value = 'Error al obtener el código';
             }
         } catch(error) {
-            console.error('Error:', error);
+            formError.value = 'Código inválido o expirado';
+            // Reset the OTP fields on error
+            if (otpRef.value) {
+                otpRef.value.resetOtp();
+            }
         }
     }
 
@@ -54,18 +59,21 @@
     }
 
     const resendCode = async () => {
-        // Reset the OTP fields
-        if (otpRef.value) {
-            const response = await $fetch(`${config.public.apiUrl}/recover`, {
-                method: "POST",
-                body: {
-                    correo: props.email,
-                },
-            });
-            otpRef.value.resetOtp();
+        try {
+            // Reset the OTP fields
+            if (otpRef.value) {
+                const response = await $fetch(`${config.public.apiUrl}/recover`, {
+                    method: "POST",
+                    body: {
+                        correo: props.email,
+                    },
+                });
+                otpRef.value.resetOtp();
+                formError.value = '';
+            }
+        } catch (error) {
+            formError.value = 'Error al reenviar el código';
         }
-        // Code to resend OTP
-        console.log('Reenviando código...');
     }
 </script>
 
@@ -94,6 +102,11 @@
                     :isMobile="props.isMobile"
                     :length="props.otpLength"
                 />
+
+                <!-- Display error message -->
+                <div v-if="formError" class="mt-2 mb-0">
+                    <p class="text-red-500 text-sm text-center">{{ formError }}</p>
+                </div>
 
                 <UButton
                     @click="verifyOTP"

@@ -18,6 +18,29 @@ export interface ValidationErrors {
   secPasswordError?: string;
 }
 
+// Password validation utility function
+export function validatePasswordStrength(password: string): {
+  isValid: boolean;
+  validCount: number;
+  totalRules: number;
+} {
+  const rules = [
+    password.length >= 8, // At least 8 characters
+    /[A-Z]/.test(password), // Uppercase letter
+    /[a-z]/.test(password), // Lowercase letter
+    /\d/.test(password), // Number
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) // Special character
+  ];
+
+  const validCount = rules.filter(rule => rule).length;
+  
+  return {
+    isValid: validCount >= 4, // At least 4 out of 5 rules must be valid
+    validCount,
+    totalRules: rules.length
+  };
+}
+
 export function validateEmail(
   email: string, 
   errors: FormError[],
@@ -59,18 +82,35 @@ export function validatePassword(
   password: string, 
   errors: FormError[],
   passwordError: Ref<string>,
-  options: ValidationOptions
+  options: ValidationOptions,
+  checkStrength: boolean = false
 ): void {
   if (!password) {
     errors.push({ path: 'password', message: ' ' });
     return;
   }
   
-  // Password length validation (optional)
-  if (options.minPasswordLength && options.minPasswordLength > 0) {
+  // Password length validation (only if not checking strength)
+  if (!checkStrength && options.minPasswordLength && options.minPasswordLength > 0) {
     const minLength = options.minPasswordLength;
     if (password.length < minLength) {
       const message = `Minimo ${minLength} caracteres`;
+      if (!options.isMobile) {
+        errors.push({ path: 'password', message: ' ' });
+        passwordError.value = message;
+      } else {
+        errors.push({ path: 'password', message });
+        passwordError.value = '';
+      }
+      return;
+    }
+  }
+
+  // Password strength validation (for registration and password change)
+  if (checkStrength) {
+    const validation = validatePasswordStrength(password);
+    if (!validation.isValid) {
+      const message = 'La contraseña no cumple con los requisitos mínimos';
       if (!options.isMobile) {
         errors.push({ path: 'password', message: ' ' });
         passwordError.value = message;
@@ -110,7 +150,8 @@ export function createFormValidator(
   emailError?: Ref<string>,
   passwordError?: Ref<string>,
   secPasswordError?: Ref<string>,
-  options: ValidationOptions = { isMobile: false }
+  options: ValidationOptions = { isMobile: false },
+  checkPasswordStrength: boolean = false
 ) {
   return (state: FormState): FormError[] => {
     const errors: FormError[] = [];
@@ -121,12 +162,14 @@ export function createFormValidator(
     if (secPasswordError) secPasswordError.value = '';
     
     // Validate email
-    if ('email' in state && state.email !== undefined)
-    validateEmail(state.email, errors, emailError, options);
+    if ('email' in state && state.email !== undefined && emailError) {
+      validateEmail(state.email, errors, emailError, options);
+    }
     
     // Validate password
-    if ('password' in state && state.password !== undefined && passwordError)
-      validatePassword(state.password, errors, passwordError, options);
+    if ('password' in state && state.password !== undefined && passwordError) {
+      validatePassword(state.password, errors, passwordError, options, checkPasswordStrength);
+    }
     
     // Validate second password if it exists
     if (secPasswordError && state.secPasword !== undefined) {

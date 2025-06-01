@@ -11,6 +11,7 @@ const currentPasswordError = ref('');
 const passwordError = ref('');
 const secPasswordError = ref('');
 const formError = ref('');
+const showPasswordValidator = ref(false);
 
 // Define the type for the OtpInput component ref
 interface OtpInputInstance {
@@ -41,7 +42,40 @@ watch(isOpen, (newValue) => {
             passwordError.value = '';
             secPasswordError.value = '';
             formError.value = '';
+            showPasswordValidator.value = false;
         }, 300);
+    }
+});
+
+// Watch password field to show/hide validator
+watch(() => state.password, (newPassword) => {
+    showPasswordValidator.value = newPassword.length > 0;
+    // Clear password error when user starts typing
+    if (newPassword.length > 0) {
+        passwordError.value = '';
+        if (formError.value.includes('contraseña') || formError.value.includes('requisitos')) {
+            formError.value = '';
+        }
+    }
+});
+
+// Watch confirm password for matching
+watch(() => state.secPasword, (newConfirmPassword) => {
+    // Clear errors when user starts typing
+    if (newConfirmPassword.length > 0) {
+        secPasswordError.value = '';
+        if (formError.value.includes('contraseñas no coinciden')) {
+            formError.value = '';
+        }
+    }
+    
+    // Show real-time validation only if both fields have content
+    if (state.password.length > 0 && newConfirmPassword.length > 0) {
+        if (state.password !== newConfirmPassword) {
+            secPasswordError.value = "Las contraseñas no coinciden";
+        } else {
+            secPasswordError.value = '';
+        }
     }
 });
 
@@ -62,7 +96,8 @@ const validateNewPasswordForm = createFormValidator(
     undefined,
     passwordError,
     secPasswordError,
-    { isMobile: false, minPasswordLength: 6 }
+    { isMobile: false, minPasswordLength: 8 },
+    true // Enable password strength validation
 );
 
 const sendOTP = async () => {
@@ -155,6 +190,30 @@ const resendOTP = async () => {
 };
 
 const updatePassword = async () => {
+    // Reset errors
+    formError.value = "";
+    passwordError.value = '';
+    secPasswordError.value = '';
+
+    // Manual validation before submission
+    if (!state.password || !state.secPasword) {
+        formError.value = "Todos los campos son requeridos";
+        return;
+    }
+
+    // Check if passwords match
+    if (state.password !== state.secPasword) {
+        secPasswordError.value = "Las contraseñas no coinciden";
+        return;
+    }
+
+    // Check password strength
+    const passwordValidation = validatePasswordStrength(state.password);
+    if (!passwordValidation.isValid) {
+        passwordError.value = "La contraseña no cumple con los requisitos mínimos";
+        return;
+    }
+
     try {
         const docenteStore = useDocenteStore();
         if (!docenteStore.docente) {
@@ -293,6 +352,11 @@ const showConfirm = ref(false);
                             ref="otpRef"
                             :length="6"
                         />
+
+                        <!-- Display general form error -->
+                        <div v-if="formError" class="mt-2 mb-0">
+                            <p class="text-red-500 text-sm text-center">{{ formError }}</p>
+                        </div>
                         
                         <div class="flex justify-end gap-3 mt-6">
                             <UButton 
@@ -329,18 +393,20 @@ const showConfirm = ref(false);
                             <UIcon name="fluent:key-reset-24-filled" class="text-2xl mr-2 text-Purple-P dark:text-Muted-Brown" />
                             <h3 class="text-lg font-semibold dark:text-white">Nueva Contraseña</h3>
                         </div>
-                        
+
                         <UForm :state="state" :validate="validateNewPasswordForm" class="flex flex-col gap-3" @submit="updatePassword">
-                            <UFormGroup label="Contraseña" name="password" :hint="passwordError"
-                                :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
+                            <UFormGroup label="Contraseña" name="password" :hint="''"
+                                :ui="{  
+                                    hint: 'hidden',
                                     error: 'hidden'
-                                }">
+                                }"
+                                class="relative">
                                 <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
                                     :ui="{
                                         icon: {
                                             trailing: { pointer: '' }
                                         },
-                                        ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                                        ring: passwordError ? 'ring-2 ring-red-500 focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                                         color: {
                                             gray: {
                                                 outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
@@ -362,6 +428,11 @@ const showConfirm = ref(false);
                                         />
                                     </template>
                                 </UInput>
+
+                                <SettingsPasswordValidator
+                                    :password="state.password"
+                                    v-model:show="showPasswordValidator"
+                                />
                             </UFormGroup>
 
                             <UFormGroup label="Verifica Contraseña" name="secPasword" :hint="secPasswordError"
@@ -373,7 +444,7 @@ const showConfirm = ref(false);
                                         icon: {
                                             trailing: { pointer: '' }
                                         },
-                                        ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
+                                        ring: secPasswordError ? 'ring-2 ring-red-500 focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                                         color: {
                                             gray: {
                                                 outline: 'shadow-lg bg-Warm-White dark:bg-Pure-Black text-gray-900 dark:text-white ring-0 focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown'
@@ -415,4 +486,4 @@ const showConfirm = ref(false);
             </UCard>
         </UModal>
     </div>
-</template> 
+</template>

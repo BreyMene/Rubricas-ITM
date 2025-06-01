@@ -1,6 +1,5 @@
 <script setup lang="ts">
     const config = useRuntimeConfig();
-    import type { FormSubmitEvent } from '#ui/types';
 
     const props = defineProps({
         isMobile: {
@@ -24,14 +23,45 @@
     const secPasswordError = ref('');
 
     const formError = ref("");
+    const showPasswordValidator = ref(false);
 
-    const validate = createFormValidator(emailError, passwordError, secPasswordError, {
-        isMobile: props.isMobile,
-        minPasswordLength: 6
-    });
+    const validate = createFormValidator(
+        emailError, 
+        passwordError, 
+        secPasswordError, 
+        {
+            isMobile: props.isMobile,
+            minPasswordLength: 8
+        },
+        true // Enable password strength validation
+    );
 
     const handleSignIn = async () => {
         formError.value = "";
+        
+        // Reset individual error messages
+        emailError.value = '';
+        passwordError.value = '';
+        secPasswordError.value = '';
+
+        // Check if passwords match first
+        if (state.password !== state.secPasword) {
+            secPasswordError.value = props.isMobile ? "" : "Las contraseñas no coinciden";
+            if (props.isMobile) {
+                formError.value = "Las contraseñas no coinciden";
+            }
+            return;
+        }
+
+        // Check password strength using the utility function
+        const passwordValidation = validatePasswordStrength(state.password);
+        if (!passwordValidation.isValid) {
+            passwordError.value = props.isMobile ? "" : "La contraseña no cumple con los requisitos mínimos";
+            if (props.isMobile) {
+                formError.value = "La contraseña no cumple con los requisitos mínimos";
+            }
+            return;
+        }
 
         try {
             loadScreen.value = true;
@@ -67,6 +97,37 @@
     const show = ref(false)
     const show2 = ref(false)
 
+    // Watch password field to show/hide validator
+    watch(() => state.password, (newPassword) => {
+        showPasswordValidator.value = newPassword.length > 0;
+        // Clear password error when user starts typing
+        if (newPassword.length > 0) {
+            passwordError.value = '';
+            if (formError.value.includes('contraseña') || formError.value.includes('requisitos')) {
+                formError.value = '';
+            }
+        }
+    });
+
+    // Watch confirm password for matching
+    watch(() => state.secPasword, (newConfirmPassword) => {
+        // Clear errors when user starts typing
+        if (newConfirmPassword.length > 0) {
+            secPasswordError.value = '';
+            if (formError.value.includes('contraseñas no coinciden')) {
+                formError.value = '';
+            }
+        }
+        
+        // Show real-time validation only if both fields have content
+        if (state.password.length > 0 && newConfirmPassword.length > 0) {
+            if (state.password !== newConfirmPassword) {
+                secPasswordError.value = props.isMobile ? "" : "Las contraseñas no coinciden";
+            } else {
+                secPasswordError.value = '';
+            }
+        }
+    });
 </script>
 
 <template>
@@ -101,10 +162,11 @@
                     />
                 </UFormGroup>
 
-                <UFormGroup label="Contraseña" name="password" :hint="passwordError"
-                    :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
-                        error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
-                    }">
+                <UFormGroup label="Contraseña" name="password" :hint="''"
+                    :ui="{  hint: 'hidden',
+                        error: 'hidden'
+                    }"
+                    class="relative">
                     <UInput size="sm" v-model="state.password" :type="show ? 'text' : 'password'" class="w-full"
                         :ui="{
                             icon: {
@@ -132,6 +194,11 @@
                             />
                         </template>
                     </UInput>
+
+                    <SettingsPasswordValidator
+                        :password="state.password"
+                        v-model:show="showPasswordValidator"
+                    />
                 </UFormGroup>
 
                 <UFormGroup label="Verifica Contraseña" name="secPasword" :hint="secPasswordError"
