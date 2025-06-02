@@ -4,7 +4,8 @@
 
     const props = defineProps<{
         row: Criterio,
-        rowIndex: number
+        rowIndex: number,
+        isModerator?: boolean
     }>();
 
     const emit = defineEmits(['deleteRow']);
@@ -57,6 +58,7 @@
         placeholder="Criterio"
         class="flex-none w-[37%] p-3"
         color="gray"
+        :disabled="!isModerator"
         :ui="{
             ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
             color: {
@@ -75,6 +77,7 @@
         placeholder="Peso"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
+        :disabled="!isModerator"
         @input="handlePesoInput"
         :ui="{
             ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
@@ -124,7 +127,7 @@
           placeholder="Observaciones"
           class="flex-grow mr-2"
           color="gray"
-          disabled
+          :disabled="!isModerator"
           :ui="{
               ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
               color: {
@@ -135,6 +138,7 @@
           }"
         />
         <UButton
+          v-if="isModerator"
           icon="fluent:delete-12-regular"
           variant="ghost"
           color="red"

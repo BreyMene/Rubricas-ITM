@@ -12,6 +12,9 @@
   const isMobile = ref(false);
   const toast = useToast();
 
+  // Change isModerator from computed to ref
+  const isModerator = ref(route.query.isModerator === 'true');
+
   const temas = ref<Tema[]>([])
 
   // Add computed properties for totals
@@ -82,7 +85,6 @@
   const selectedCourseId = ref<string>('');
   const selectedCourseName = ref<string>('');
   const showGroups = ref(false);
-  const isModerator = ref(false);
 
   const checkIfMobile = () => {
     isMobile.value = window.innerWidth <= 768;
@@ -362,6 +364,19 @@
 <!-- pages/rubricas.vue -->
 <template>
   <div class="container mx-auto p-0 md:p-4 transition-colors duration-150">
+    <!-- Add back button -->
+    <div class="mb-4">
+      <UButton
+        icon="fluent:arrow-left-12-filled"
+        variant="ghost"
+        color="gray"
+        class="dark:text-White-w hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+        @click="$router.back()"
+      >
+        Volver
+      </UButton>
+    </div>
+
     <div class="overflow-x-auto lg:overflow-x-clip">
       <div class="min-w-[1200px] lg:min-w-0 bg-White-w dark:bg-Dark-Grey shadow-lg rounded-xl overflow-visible transition-all duration-150">
         <div class="sticky top-0 flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 z-10 text-xs lg:text-sm xl:text-base rounded-lg transition-all duration-150">
@@ -382,6 +397,7 @@
           :key="index"
           :tema="tema"
           :temaIndex="index"
+          :isModerator="isModerator"
           @deleteTema="deleteTema"
           @addRow="addRow"
           @deleteRow="deleteRow"
@@ -401,6 +417,7 @@
 
     <div class="flex justify-end p-4">
       <UButton
+        v-if="isModerator"
         icon="fluent:add-16-filled"
         size="lg"
         class="rounded-xl shadow-lg bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-200"
@@ -413,6 +430,7 @@
     <!-- Finish Rubric Button -->
     <div class="flex justify-end p-4 gap-4">
       <UButton
+        v-if="isModerator"
         size="xl"
         class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition-colors duration-200"
         @click="saveRubric"
@@ -421,7 +439,7 @@
         <span class="text-white">Guardar</span>
       </UButton>
       <UButton
-        v-if="rubricEstado === 'borrador'"
+        v-if="isModerator && rubricEstado === 'borrador'"
         size="xl"
         @click="isOpen = true"
         class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition-colors duration-150"

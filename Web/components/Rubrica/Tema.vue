@@ -3,7 +3,8 @@
 
     const props = defineProps<{ 
         tema: Tema, 
-        temaIndex: number 
+        temaIndex: number,
+        isModerator?: boolean
     }>();
 
     const emit = defineEmits(['deleteTema', 'addRow', 'deleteRow']);
@@ -23,6 +24,7 @@
                 autoresize
                 class="mr-2 flex-grow h-fit"
                 color="gray"
+                :disabled="!isModerator"
                 :ui="{
                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
                     color: {
@@ -34,6 +36,7 @@
             />
             <div class="flex space-x-2">
                 <UButton 
+                v-if="isModerator"
                 icon="fluent:delete-12-regular" 
                 variant="ghost" 
                 color="red"
@@ -48,6 +51,7 @@
                 :key="index"
                 :row="row"
                 :rowIndex="index"
+                :isModerator="isModerator"
                 @deleteRow="deleteRow"
             />
         </div>
@@ -57,6 +61,7 @@
         <div class="w-[20%] p-3"></div> <!-- Espacio vacío para alinear con 'Tema' -->
         <div class="w-[80%] p-3">
             <UButton 
+                v-if="isModerator"
                 icon="fluent:add-16-filled" 
                 variant="ghost" 
                 @click="addRow()"

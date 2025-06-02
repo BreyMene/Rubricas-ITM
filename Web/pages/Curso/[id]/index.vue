@@ -522,9 +522,9 @@
             v-if="rubrics.length > 0"
             size="lg"
             class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
-            @click="$router.push(`/Rubrica/${displayRubric?._id}`)"
+            @click="$router.push(`/Rubrica/${displayRubric?._id}?isModerator=${isModerator}`)"
           >
-            Modificar
+            {{ isModerator ? 'Modificar' : 'Ver' }}
           </UButton>
           <UButton
             v-if="rubrics.length > 1"

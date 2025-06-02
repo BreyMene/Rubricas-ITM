@@ -423,6 +423,19 @@
 <!-- pages/rubricas.vue -->
 <template>
   <div class="container mx-auto p-0 md:p-4 transition-colors duration-150">
+    <!-- Add back button -->
+    <div class="mb-4">
+      <UButton
+        icon="fluent:arrow-left-12-filled"
+        variant="ghost"
+        color="gray"
+        class="dark:text-White-w hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
+        @click="$router.back()"
+      >
+        Volver
+      </UButton>
+    </div>
+
     <div class="overflow-x-auto lg:overflow-x-clip">
       <div class="min-w-[1200px] lg:min-w-0 bg-White-w dark:bg-Dark-Grey shadow-lg rounded-xl overflow-visible transition-all duration-150">
         <div class="sticky top-0 flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 z-10 text-xs lg:text-sm xl:text-base rounded-lg transition-colors duration-150">
