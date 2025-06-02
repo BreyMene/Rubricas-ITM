@@ -255,7 +255,7 @@ router.post('/:groupId/notas/:notaNumero/send-email', async (req, res) => {
         const pdfBuffer = Buffer.from(pdfBase64, 'base64');
 
         // Send email with PDF
-        await sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, body);
+        sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, body);
 
         res.json({ message: 'Email sent successfully' });
     } catch (error) {
