@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { useCursoStore } from "~/utils/store";
+  import { useCoursePermissions } from "~/composables/useCoursePermissions";
 
   const config = useRuntimeConfig();
   // Get the route object
@@ -15,7 +16,7 @@
 
   const docentesCurso = computed<DocenteEnCurso[]>(() => curso.value?.docentes || []);
   const docenteID = useDocenteStore().getID;
-  const isModerator = computed(() => curso.value?.docentes.some((d) => d._id == docenteID && d.moderador == true));
+  const isModerator = ref(false);
 
   // Controls the Views
   const showGroups = ref(true);
@@ -34,6 +35,8 @@
   ]);
 
   const loading = ref(true);
+
+  const { validateCourseAccess } = useCoursePermissions();
 
   const fetchGroups = async () => {
     try {
@@ -54,14 +57,29 @@
     if (!useCursoStore().cursoActivo) {
       try {
         loading.value = true;
-        const cursoApi = await $fetch<Curso>(
-          `${config.public.apiUrl}/courses/get/${courseId.value}`,
-        );
-        useCursoStore().setCurso(cursoApi);
-      } catch (error) {
-        console.error("No se pudo obtener el curso:", error);
+        const { course, isModerator: mod } = await validateCourseAccess(courseId.value, docenteID);
+        isModerator.value = mod;
+        useCursoStore().setCurso(course);
+      } catch (error: any) {
+        showError({
+          statusCode: error.statusCode || 500,
+          statusMessage: error.statusMessage || 'Error',
+          message: error.message || 'Ha ocurrido un error al cargar el curso.'
+        });
       } finally {
         loading.value = false;
+      }
+    } else {
+      // If we already have the course in Pinia, validate access
+      try {
+        const { isModerator: mod } = await validateCourseAccess(courseId.value, docenteID);
+        isModerator.value = mod;
+      } catch (error: any) {
+        showError({
+          statusCode: error.statusCode || 500,
+          statusMessage: error.statusMessage || 'Error',
+          message: error.message || 'Ha ocurrido un error al validar el acceso al curso.'
+        });
       }
     }
   };

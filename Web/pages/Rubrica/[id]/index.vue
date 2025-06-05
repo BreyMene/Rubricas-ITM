@@ -2,9 +2,13 @@
   import { ref, onMounted, computed } from 'vue'
   import type {Criterio, Tema, Rubrica} from '~/utils/types'
   import { useDocenteStore } from "~/utils/store";
+  import { useRubricPermissions } from "~/composables/useRubricPermissions";
 
   const route = useRoute();
-  const rubricaId = computed(() => route.params.id);
+  const rubricaId = computed(() => {
+    const id = route.params.id;
+    return Array.isArray(id) ? id[0] : id;
+  });
   const rubricEstado = ref('borrador'); // Default state
   
   const config = useRuntimeConfig();
@@ -13,7 +17,7 @@
   const toast = useToast();
 
   // Change isModerator from computed to ref
-  const isModerator = ref(route.query.isModerator === 'true');
+  const isModerator = ref(false);
 
   const temas = ref<Tema[]>([])
 
@@ -86,6 +90,8 @@
   const selectedCourseName = ref<string>('');
   const showGroups = ref(false);
 
+  const { validateRubricAccess } = useRubricPermissions();
+
   const checkIfMobile = () => {
     isMobile.value = window.innerWidth <= 768;
   };
@@ -101,33 +107,25 @@
     }
   };
 
-  const fetchGroups = async () => {
-    try {
-      const data = await $fetch<{_id: string, nombre: string}[]>(
-        `${config.public.apiUrl}/groups/course/${selectedCourseId.value}/user/${docenteID}`,
-      );
-      groups.value = data;
-    } catch (error) {
-      console.error("Error fetching groups:", error);
-      groups.value = [];
-    }
-  };
-
   const fetchRubrica = async () => {
     try {
-      const data = await $fetch<Rubrica>(
-        `${config.public.apiUrl}/rubrics/${rubricaId.value}`,
-      );
-      temas.value = data.temas;
-      rubricEstado.value = data.estado;
-    } catch (error) {
-      console.error("Error fetching rubric:", error);
+      const { canModerate, rubrica } = await validateRubricAccess(rubricaId.value, docenteID);
+      
+      isModerator.value = canModerate;
+      temas.value = rubrica.temas;
+      rubricEstado.value = rubrica.estado;
+    } catch (error: any) {
+      showError({
+        statusCode: error.statusCode || 500,
+        statusMessage: error.statusMessage || 'Error',
+        message: error.message || 'Ha ocurrido un error al cargar la rúbrica.'
+      });
     }
   };
 
-  onMounted(() => {
-    fetchCourses();
-    fetchRubrica();
+  onMounted(async () => {
+    await fetchCourses();
+    await fetchRubrica();
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
   });
@@ -192,7 +190,10 @@
     selectedCourseId.value = course._id;
     selectedCourseName.value = course.nombre;
     isModerator.value = course.docentes.some((d)=> d._id == docenteID && d.moderador == true);
-    fetchGroups();
+    groups.value = course.grupos?.map(g => ({
+      _id: g._id,
+      nombre: g.nombre
+    })) || [];
     showGroups.value = true;
   }
 

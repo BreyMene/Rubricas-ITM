@@ -180,7 +180,7 @@
   }
 
   const openRubric = () => {
-    navigateTo(`/Rubrica/${selectedRubrica.value}`)
+    navigateTo(`/Rubrica/${selectedRubrica.value}`);
     isOpen.value = false;
   }
 

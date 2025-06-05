@@ -1,16 +1,18 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import type { Tema, Rubrica } from '~/utils/types'
+  import { useDocenteStore } from "~/utils/store";
+  import { useRubricPermissions } from "~/composables/useRubricPermissions";
 
   const route = useRoute();
   const config = useRuntimeConfig();
   const toast = useToast();
+  const docenteID = useDocenteStore().getID;
 
   const temas = ref<Tema[]>([])
   const rubricName = ref('')
   const studentName = ref('')
   const notaId = ref('')
-
 
   // Add computed properties for totals
   const totalPeso = computed(() => {
@@ -31,9 +33,10 @@
     }, 0);
   });
 
+  const { validateGradingAccess } = useRubricPermissions();
+
   const fetchRubrica = async () => {
     try {
-      loadScreen('Cargando rúbrica...', true);
       const cloneId = route.query.clone;
       const nota = route.query.nota;
       const estudiante = route.query.estudiante;
@@ -41,53 +44,50 @@
       const curso = route.query.curso;
 
       if (!cloneId || !nota || !estudiante || !grupo || !curso) {
-        throw new Error('Missing required parameters');
+        showError({
+          statusCode: 400,
+          statusMessage: 'Parámetros faltantes',
+          message: 'Faltan parámetros necesarios para cargar la rúbrica.'
+        });
+        return;
       }
 
       notaId.value = nota as string;
       studentName.value = estudiante as string;
 
-      // First fetch the rubric template
+      // Validate access first
+      await validateGradingAccess(grupo as string, curso as string, docenteID);
+
+      // Fetch the rubric template
+      const data = await $fetch<Rubrica>(
+        `${config.public.apiUrl}/rubrics/${cloneId}`,
+      );
+
+      // Then fetch the saved grade data for this student
       try {
-        const data = await $fetch<Rubrica>(
-          `${config.public.apiUrl}/rubrics/${cloneId}`,
+        const savedGrade = await $fetch<{ temas: Tema[] }>(
+          `${config.public.apiUrl}/grades/${grupo}/notas/${nota}/estudiante/${estudiante}`,
         );
 
-        // Then fetch the saved grade data for this student
-        try {
-          const savedGrade = await $fetch<{ temas: Tema[] }>(
-            `${config.public.apiUrl}/grades/${grupo}/notas/${nota}/estudiante/${estudiante}`,
-          );
-
-          // If we have saved data with temas, use it
-          if (savedGrade && savedGrade.temas && savedGrade.temas.length > 0) {
-            temas.value = savedGrade.temas;
-          } else {
-            // Otherwise use the template
-            temas.value = data.temas;
-          }
-        } catch (error) {
-          // If there's an error (like 404), use the template
-          console.log('Using template for new grade');
+        // If we have saved data with temas, use it
+        if (savedGrade && savedGrade.temas && savedGrade.temas.length > 0) {
+          temas.value = savedGrade.temas;
+        } else {
+          // Otherwise use the template
           temas.value = data.temas;
         }
-
-        rubricName.value = data.nombre;
       } catch (error) {
-        // If the rubric is not found, throw an error to trigger the error page
-        throw createError({
-          statusCode: 404,
-          statusMessage: 'Rúbrica no encontrada',
-          message: 'La rúbrica ha sido eliminada o no está disponible.',
-          fatal: true
-        });
+        // If there's an error (like 404), use the template
+        temas.value = data.temas;
       }
-    } catch (error) {
-      console.error("Error in fetchRubrica:", error);
-      // Let the error page handle the display
-      throw error;
-    } finally {
-      loadScreen('', false);
+
+      rubricName.value = data.nombre;
+    } catch (error: any) {
+      showError({
+        statusCode: error.statusCode || 500,
+        statusMessage: error.statusMessage || 'Error',
+        message: error.message || 'Ha ocurrido un error al cargar la rúbrica.'
+      });
     }
   };
 
@@ -163,7 +163,6 @@
       loadScreen('', false);
     }
   };
-
 
   // Load screen state
   const loadMg = ref('')

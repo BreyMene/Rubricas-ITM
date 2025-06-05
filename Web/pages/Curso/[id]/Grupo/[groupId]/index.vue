@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import { useCursoStore } from '~/utils/store'
+    import { useCoursePermissions } from '~/composables/useCoursePermissions'
 
     // Get the route object
     const route = useRoute();
@@ -12,7 +13,7 @@
     const curso = computed(() => useCursoStore().cursoActivo)
     const grupo = computed(() => useCursoStore().grupoActivo)
     const docenteID = useDocenteStore().getID;
-    const isModerator = computed(() => grupo.value?.docente._id === docenteID);
+    const isModerator = ref(false);
 
     const estudiantesGrupo = computed<Estudiante[]>(() => grupo.value?.estudiantes || []);
     
@@ -34,16 +35,35 @@
         }
     ])
 
+    const { validateGroupAccess } = useCoursePermissions();
+
     // Only call the api if Pinia doesn't have any course saved
     const fetchCourses = async () => {
         if (!curso.value || curso.value._id !== courseId.value) {
             try {
-                const cursoApi = await $fetch<Curso>(
-                    `${config.public.apiUrl}/courses/get/${courseId.value}`
-                );
-                useCursoStore().setCurso(cursoApi);
-            } catch (error) {
-                console.error("No se pudo obtener el curso:", error);
+                const { course, isGroupTeacher } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+                isModerator.value = isGroupTeacher;
+                useCursoStore().setCurso(course);
+            } catch (error: any) {
+                console.error("Error al cargar el curso:", error);
+                showError({
+                    statusCode: error.statusCode || 500,
+                    statusMessage: error.statusMessage || 'Error',
+                    message: error.message || 'Ha ocurrido un error al cargar el curso.'
+                });
+            }
+        } else {
+            // If we already have the course in Pinia, validate access
+            try {
+                const { isGroupTeacher } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+                isModerator.value = isGroupTeacher;
+            } catch (error: any) {
+                console.error("Error al validar acceso:", error);
+                showError({
+                    statusCode: error.statusCode || 500,
+                    statusMessage: error.statusMessage || 'Error',
+                    message: error.message || 'Ha ocurrido un error al validar el acceso al grupo.'
+                });
             }
         }
     }
@@ -52,12 +72,15 @@
     const fetchGroup = async () => {
         if (!useCursoStore().grupoActivo || useCursoStore().grupoActivo?._id !== groupId.value) {
             try {
-                const grupoApi  = await $fetch<Grupo>(
-                    `${config.public.apiUrl}/groups/${groupId.value}`
-                );
-                useCursoStore().setGrupo(grupoApi);
-            } catch (error) {
-                console.error("No se pudo obtener el curso:", error);
+                const { group } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+                useCursoStore().setGrupo(group);
+            } catch (error: any) {
+                console.error("Error al cargar el grupo:", error);
+                showError({
+                    statusCode: error.statusCode || 500,
+                    statusMessage: error.statusMessage || 'Error',
+                    message: error.message || 'Ha ocurrido un error al cargar el grupo.'
+                });
             }
         }
     }
@@ -376,7 +399,7 @@
                         >
                             <div class="flex items-center justify-between">
                                 <h4 class="text-sm font-medium text-Pure-Black dark:text-White-w truncate">{{ rubric.nombre }}</h4>
-                                <UToggle
+                                <UToggle v-if="isModerator"
                                     v-model="getRubricState(rubric).value"
                                     on-icon="fluent:checkmark-circle-24-filled"
                                     off-icon="fluent:dismiss-circle-24-filled"

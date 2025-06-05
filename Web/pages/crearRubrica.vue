@@ -456,6 +456,7 @@
           :key="index"
           :tema="tema"
           :temaIndex="index"
+          :isModerator="true"
           @deleteTema="deleteTema"
           @addRow="addRow"
           @deleteRow="deleteRow"

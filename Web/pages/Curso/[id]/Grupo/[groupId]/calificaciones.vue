@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { useCursoStore } from '~/utils/store'
     import type { Estudiante, Rubrica, Nota, Grupo, Curso } from '~/utils/types'
+    import { useCoursePermissions } from '~/composables/useCoursePermissions'
 
     const route = useRoute();
     const config = useRuntimeConfig();
@@ -26,41 +27,57 @@
     // Add modal state for deleted rubric
     const showDeletedRubricModal = ref(false);
 
+    const { validateGroupAccess } = useCoursePermissions();
+    const docenteID = useDocenteStore().getID;
+    const isGroupTeacher = ref(false);
+
     // Only call the api if Pinia doesn't have any course saved
     const fetchCourses = async () => {
         if (!curso.value || curso.value._id !== courseId.value) {
             try {
-                const cursoApi = await $fetch<Curso>(
-                    `${config.public.apiUrl}/courses/get/${courseId.value}`
-                );
-                useCursoStore().setCurso(cursoApi);
-            } catch (error) {
-                console.error("No se pudo obtener el curso:", error);
-                toast.add({
-                    title: 'Error al cargar el curso',
-                    icon: "fluent:alert-urgent-16-filled",
-                    timeout: 3000,
-                    ui: {
-                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                        'rounded': 'rounded-lg',
-                        'shadow': 'shadow-lg',
-                        'ring': 'ring-0',
-                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                        'icon': {
-                            'base': 'flex-shrink-0 w-5 h-5',
-                            'color': 'text-Purple-P dark:text-Muted-Brown'
-                        },
-                        'progress': {
-                            'base': 'absolute bottom-0 end-0 start-0 h-1',
-                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                        },
-                        'closeButton': {
-                            'base': 'absolute top-2 right-2',
-                            'icon': 'fluent:add-16-filled',
-                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                        }
-                    }
+                const { course, isGroupTeacher: teacher } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+                
+                // Check if user has permission to access calificaciones
+                if (!teacher) {
+                    showError({
+                        statusCode: 403,
+                        statusMessage: 'Acceso denegado',
+                        message: 'Solo el profesor del grupo puede acceder a las calificaciones.'
+                    });
+                    return;
+                }
+
+                isGroupTeacher.value = teacher;
+                useCursoStore().setCurso(course);
+            } catch (error: any) {
+                showError({
+                    statusCode: error.statusCode || 500,
+                    statusMessage: error.statusMessage || 'Error',
+                    message: error.message || 'Ha ocurrido un error al cargar el curso.'
+                });
+            }
+        } else {
+            // If we already have the course in Pinia, validate access
+            try {
+                const { isGroupTeacher: teacher } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+                
+                // Check if user has permission to access calificaciones
+                if (!teacher) {
+                    showError({
+                        statusCode: 403,
+                        statusMessage: 'Acceso denegado',
+                        message: 'Solo el profesor del grupo puede acceder a las calificaciones.'
+                    });
+                    return;
+                }
+
+                isGroupTeacher.value = teacher;
+            } catch (error: any) {
+                console.error("Error al validar acceso:", error);
+                showError({
+                    statusCode: error.statusCode || 500,
+                    statusMessage: error.statusMessage || 'Error',
+                    message: error.message || 'Ha ocurrido un error al validar el acceso al grupo.'
                 });
             }
         }
@@ -70,12 +87,10 @@
     const fetchGroup = async () => {
         if (!useCursoStore().grupoActivo || useCursoStore().grupoActivo?._id !== groupId.value) {
             try {
-                const grupoApi = await $fetch<Grupo>(
-                    `${config.public.apiUrl}/groups/${groupId.value}`
-                );
-                useCursoStore().setGrupo(grupoApi);
-            } catch (error) {
-                console.error("No se pudo obtener el grupo:", error);
+                const { group } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+                useCursoStore().setGrupo(group);
+            } catch (error: any) {
+                console.error("Error al cargar el grupo:", error);
                 toast.add({
                     title: 'Error al cargar el grupo',
                     icon: "fluent:alert-urgent-16-filled",
