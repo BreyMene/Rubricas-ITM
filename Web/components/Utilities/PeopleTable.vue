@@ -260,21 +260,36 @@
 
     // Filtered people with proper type checking
     const filteredPeople = computed(() => {
-        if (!props.searchTerm) return props.data;
+        const processPerson = (person: DocenteEnCurso | Estudiante) => {
+            if (props.view === "estudiantes") {
+                const student = person as Estudiante;
+                return {
+                    ...student,
+                    promedio: student.promedio ? Number(student.promedio).toFixed(2) : '0.00'
+                };
+            }
+            return person;
+        };
+
+        if (!props.searchTerm) {
+            return props.data.map(processPerson);
+        }
         
         const searchLower = props.searchTerm.toLowerCase();
-        return props.data.filter(person => {
-            if (props.view === "docentes") {
-                return (person as DocenteEnCurso).correo.toLowerCase().includes(searchLower);
-            } else {
-                // Type guard to ensure we're working with a Student
-                const studentPerson = person as Estudiante;
-                return (
-                    studentPerson.nombre.toLowerCase().includes(searchLower) ||
-                    studentPerson.correo.toLowerCase().includes(searchLower)
-                );
-            }
-        });
+        return props.data
+            .filter(person => {
+                if (props.view === "docentes") {
+                    return (person as DocenteEnCurso).correo.toLowerCase().includes(searchLower);
+                } else {
+                    // Type guard to ensure we're working with a Student
+                    const studentPerson = person as Estudiante;
+                    return (
+                        studentPerson.nombre.toLowerCase().includes(searchLower) ||
+                        studentPerson.correo.toLowerCase().includes(searchLower)
+                    );
+                }
+            })
+            .map(processPerson);
     });
 
     const page = ref(1)

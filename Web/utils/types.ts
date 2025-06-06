@@ -44,8 +44,16 @@ export interface Grupo {
 export interface Estudiante {
   nombre: string;
   correo: string;
-  promedio?: number;
-  notas?: Nota[];
+  promedio: number;
+  calificaciones: Calificacion[];
+}
+
+export interface Calificacion {
+  rubrica: string;
+  fecha: string;
+  calificacionFinal: number;
+  temas: Tema[];
+  observaciones?: string;
 }
 
 export interface Docente {
@@ -58,17 +66,4 @@ export interface Nota {
   numero: number;
   rubrica: string;
   fecha: string;
-  temas?: TemaCalificacion[];
-}
-
-export interface TemaCalificacion {
-  nombre: string;
-  criterios: CriterioCalificacion[];
-}
-
-export interface CriterioCalificacion {
-  nombre: string;
-  peso: number;
-  calificacion: number;
-  observaciones?: string;
 }

@@ -137,30 +137,11 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
             return res.status(404).json({ message: 'Student not found in group' });
         }
 
-        // Initialize calificaciones array if it doesn't exist
-        if (!nota.calificaciones) {
-            nota.calificaciones = [];
-        }
-
-        // Find if there's an existing grade for this student in the nota
-        const existingGradeIndex = nota.calificaciones.findIndex(c => c.estudiante === estudiante);
-
-        if (existingGradeIndex !== -1) {
-            // Update existing grade in nota
-            nota.calificaciones[existingGradeIndex].temas = temas;
-        } else {
-            // Add new grade to nota
-            nota.calificaciones.push({
-                estudiante,
-                temas
-            });
-        }
-
         // Calculate final grade
-        const calificacionFinal = temas.reduce((sum, tema) => {
+        const calificacionFinal = Number(temas.reduce((sum, tema) => {
             return sum + tema.criterios.reduce((temaSum, criterio) =>
                 temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
-        }, 0);
+        }, 0).toFixed(2));
 
         // Update or add grade in student's calificaciones
         const existingStudentGradeIndex = student.calificaciones.findIndex(
@@ -187,6 +168,11 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
             });
         }
 
+        // Calculate new promedio based on all calificacionFinal values
+        const totalNotas = student.calificaciones.length;
+        const sumaNotas = student.calificaciones.reduce((sum, cal) => sum + cal.calificacionFinal, 0);
+        student.promedio = Number((totalNotas > 0 ? sumaNotas / totalNotas : 0).toFixed(2));
+        
         // Save the updated group
         await group.save();
 

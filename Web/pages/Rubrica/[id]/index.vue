@@ -23,21 +23,21 @@
 
   // Add computed properties for totals
   const totalPeso = computed(() => {
-    return temas.value.reduce((sum, tema) => {
+    return Number(temas.value.reduce((sum, tema) => {
       return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.peso || 0), 0);
-    }, 0);
+    }, 0).toFixed(2));
   });
 
   const totalCalificacion = computed(() => {
-    return temas.value.reduce((sum, tema) => {
+    return Number(temas.value.reduce((sum, tema) => {
       return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + (criterio.calificacion || 0), 0);
-    }, 0);
+    }, 0).toFixed(2));
   });
 
   const totalAcumulado = computed(() => {
-    return temas.value.reduce((sum, tema) => {
+    return Number(temas.value.reduce((sum, tema) => {
       return sum + tema.criterios.reduce((temaSum, criterio) => temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
-    }, 0);
+    }, 0).toFixed(2));
   });
 
   // Add validation for peso and acumulado
@@ -408,9 +408,9 @@
         <div v-if="temas.length > 0" class="flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 text-xs lg:text-sm xl:text-base rounded-lg mt-2 transition-all duration-150">
           <div class="flex-none w-[20%] px-3">Total</div>
           <div class="flex-none w-[30%] px-3"></div>
-          <div class="flex-none w-[10%] px-3 text-center">{{ totalPeso.toFixed(1) }}</div>
-          <div class="flex-none w-[10%] px-3 text-center">{{ totalCalificacion.toFixed(1) }}</div>
-          <div class="flex-none w-[10%] px-3 text-center">{{ totalAcumulado.toFixed(1) }}</div>
+          <div class="flex-none w-[10%] px-3 text-center">{{ totalPeso }}</div>
+          <div class="flex-none w-[10%] px-3 text-center">{{ totalCalificacion }}</div>
+          <div class="flex-none w-[10%] px-3 text-center">{{ totalAcumulado }}</div>
           <div class="flex-none w-[20%] px-3"></div>
         </div>
       </div>

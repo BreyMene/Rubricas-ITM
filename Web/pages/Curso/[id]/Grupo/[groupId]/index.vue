@@ -45,7 +45,6 @@
                 isModerator.value = isGroupTeacher;
                 useCursoStore().setCurso(course);
             } catch (error: any) {
-                console.error("Error al cargar el curso:", error);
                 showError({
                     statusCode: error.statusCode || 500,
                     statusMessage: error.statusMessage || 'Error',
@@ -58,7 +57,6 @@
                 const { isGroupTeacher } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
                 isModerator.value = isGroupTeacher;
             } catch (error: any) {
-                console.error("Error al validar acceso:", error);
                 showError({
                     statusCode: error.statusCode || 500,
                     statusMessage: error.statusMessage || 'Error',
@@ -75,7 +73,6 @@
                 const { group } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
                 useCursoStore().setGrupo(group);
             } catch (error: any) {
-                console.error("Error al cargar el grupo:", error);
                 showError({
                     statusCode: error.statusCode || 500,
                     statusMessage: error.statusMessage || 'Error',

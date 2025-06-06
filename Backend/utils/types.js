@@ -126,19 +126,7 @@ const grupo = mongoose.Schema({
     fecha: {
       type: Date,
       default: Date.now
-    },
-    temas: [{
-      _id: false,
-      nombre: String,
-      criterios: [{
-        _id: false,
-        criterio: String,
-        peso: Number,
-        calificacion: Number,
-        acumulado: Number,
-        observaciones: String
-      }]
-    }]
+    }
   }]
 },
 { versionKey: false },
