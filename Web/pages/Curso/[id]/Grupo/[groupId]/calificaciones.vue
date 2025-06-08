@@ -13,8 +13,8 @@
     const LoadingNotas = ref(false)
 
     // Get the course ID from the route parameters
-    const courseId = computed(() => route.params.id);
-    const groupId = computed(() => route.params.groupId);
+    const courseId = computed(() => route.params.id as string);
+    const groupId = computed(() => route.params.groupId as string);
 
     const curso = computed(() => useCursoStore().cursoActivo)
     const grupo = computed(() => useCursoStore().grupoActivo)
@@ -125,14 +125,12 @@
     const activeRubric = computed(() => rubrics.value.find(r => r.estado === 'activo') || null);
 
     // Modal states
-    const showNewNotaModal = ref(false);
     const showStudentNotasModal = ref(false);
     const selectedStudent = ref<Estudiante | null>(null);
 
     // Delete modal
     const isDeleteModalOpen = ref(false);
     const selectedNota = ref<Nota | null>(null);
-
 
     // Navigation items
     const items = computed(() => [
@@ -158,16 +156,6 @@
         }
     ]);
 
-    // Function to open new nota modal
-    const openNewNotaModal = () => {
-        showNewNotaModal.value = true;
-    };
-
-    // Function to close new nota modal
-    const closeNewNotaModal = () => {
-        showNewNotaModal.value = false;
-    };
-
     // Function to open student notas modal
     const openStudentNotasModal = (student: Estudiante) => {
         selectedStudent.value = student;
@@ -178,94 +166,6 @@
     const closeStudentNotasModal = () => {
         showStudentNotasModal.value = false;
         selectedStudent.value = null;
-    };
-
-    // Function to create a new nota
-    const createNota = async (rubrica: Rubrica) => {
-        try {
-            loadScreen('Creando nota...', true);
-            const newNota: Nota = {
-                _id: '', // Will be set by the backend
-                numero: notas.value.length + 1,
-                rubrica: rubrica._id,
-                fecha: new Date().toISOString()
-            };
-            
-            // Save to backend
-            const updatedGroup = await $fetch<Grupo>(
-                `${config.public.apiUrl}/grades/${groupId.value}/notas`,
-                {
-                    method: 'POST',
-                    body: newNota
-                }
-            );
-
-            // Update local state
-            if (updatedGroup.notas) {
-                notas.value = updatedGroup.notas;
-            }
-            
-            closeNewNotaModal();
-            loadScreen('', false);
-
-            // Add success toast
-            toast.add({
-                title: 'Nota creada exitosamente',
-                icon: "fluent:checkmark-circle-16-filled",
-                timeout: 3000,
-                ui: {
-                    'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                    'rounded': 'rounded-lg',
-                    'shadow': 'shadow-lg',
-                    'ring': 'ring-0',
-                    'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                    'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                    'icon': {
-                        'base': 'flex-shrink-0 w-5 h-5',
-                        'color': 'text-Purple-P dark:text-Muted-Brown'
-                    },
-                    'progress': {
-                        'base': 'absolute bottom-0 end-0 start-0 h-1',
-                        'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                    },
-                    'closeButton': {
-                        'base': 'absolute top-2 right-2',
-                        'icon': 'fluent:add-16-filled',
-                        'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                    }
-                }
-            });
-        } catch (error) {
-            console.error("Error creating nota:", error);
-            loadScreen('', false);
-            // Add error toast
-            toast.add({
-                title: 'Error al crear la nota',
-                icon: "fluent:alert-urgent-16-filled",
-                timeout: 3000,
-                ui: {
-                    'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                    'rounded': 'rounded-lg',
-                    'shadow': 'shadow-lg',
-                    'ring': 'ring-0',
-                    'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                    'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                    'icon': {
-                        'base': 'flex-shrink-0 w-5 h-5',
-                        'color': 'text-Purple-P dark:text-Muted-Brown'
-                    },
-                    'progress': {
-                        'base': 'absolute bottom-0 end-0 start-0 h-1',
-                        'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                    },
-                    'closeButton': {
-                        'base': 'absolute top-2 right-2',
-                        'icon': 'fluent:add-16-filled',
-                        'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                    }
-                }
-            });
-        }
     };
 
     // Function to grade a nota for a student
@@ -407,21 +307,24 @@
     };
 
     // Add delete function
-    const deleteNota = async () => {
+    const handleDeleteNota = async (nota: Nota) => {
         try {
             loadScreen('Eliminando nota...', true);
-            await $fetch(`${config.public.apiUrl}/grades/${groupId.value}/notas/${selectedNota.value?.numero}`, {
-                method: 'DELETE'
+            await $fetch(`${config.public.apiUrl}/grades/${groupId.value}/notas/${nota.numero}`, {
+                method: "DELETE"
             });
             
-            // Update local state
-            notas.value = notas.value.filter(n => n.numero !== selectedNota.value?.numero);
+            // Remove the nota from the local state
+            notas.value = notas.value.filter(n => n._id !== nota._id);
             
             isDeleteModalOpen.value = false;
             selectedNota.value = null;
             loadScreen('', false);
-
-            // Add success toast
+            
+            // Refresh the group data to update student averages
+            const { group } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+            useCursoStore().setGrupo(group);
+            
             toast.add({
                 title: 'Nota eliminada exitosamente',
                 icon: "fluent:checkmark-circle-16-filled",
@@ -449,7 +352,6 @@
                 }
             });
         } catch (error) {
-            console.error("Error deleting nota:", error);
             loadScreen('', false);
             // Add error toast
             toast.add({
@@ -481,10 +383,56 @@
         }
     };
 
+    const handleSavePercentage = async (nota: Nota, newPercentage: number) => {
+        await $fetch(`${config.public.apiUrl}/grades/${groupId.value}/notas/${nota.numero}`, {
+            method: 'PATCH',
+            body: {
+                porcentaje: newPercentage
+            }
+        });
+
+        const notaIndex = notas.value.findIndex(n => n._id === nota._id);
+        if (notaIndex !== -1) {
+            notas.value[notaIndex].porcentaje = newPercentage;
+        }
+
+        toast.add({
+            title: 'Porcentaje actualizado',
+            icon: "fluent:checkmark-circle-16-filled",
+            timeout: 3000,
+            ui: {
+                'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                'rounded': 'rounded-lg',
+                'shadow': 'shadow-lg',
+                'ring': 'ring-0',
+                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                'icon': {
+                    'base': 'flex-shrink-0 w-5 h-5',
+                    'color': 'text-Purple-P dark:text-Muted-Brown'
+                },
+                'progress': {
+                    'base': 'absolute bottom-0 end-0 start-0 h-1',
+                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                },
+                'closeButton': {
+                    'base': 'absolute top-2 right-2',
+                    'icon': 'fluent:add-16-filled',
+                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                }
+            }
+        });
+    };
+
     // Add function to open delete modal
     const openDeleteModal = (nota: Nota) => {
         selectedNota.value = nota;
         isDeleteModalOpen.value = true;
+    };
+
+    // Handle nota creation
+    const handleNotaCreated = (newNota: Nota) => {
+        notas.value.push(newNota);
     };
 
     onMounted(() => {
@@ -535,13 +483,42 @@
                                 />
                             </template>
                         </ClientOnly>
-                        <UButton
-                            icon="fluent:add-24-filled"
-                            class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
-                            @click="openNewNotaModal"
-                        >
-                            Nueva Nota
-                        </UButton>
+                        <CreateNota
+                            :activeRubric="activeRubric"
+                            :notas="notas"
+                            :groupId="groupId"
+                            @notaCreated="handleNotaCreated"
+                            @loadingChange="(isLoading, message) => loadScreen(message, isLoading)"
+                            @error="(message) => {
+                                toast.add({
+                                    title: 'Error',
+                                    description: message,
+                                    icon: 'fluent:alert-urgent-16-filled',
+                                    timeout: 3000,
+                                    ui: {
+                                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                                        'rounded': 'rounded-lg',
+                                        'shadow': 'shadow-lg',
+                                        'ring': 'ring-0',
+                                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                                        'icon': {
+                                            'base': 'flex-shrink-0 w-5 h-5',
+                                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                                        },
+                                        'progress': {
+                                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                                        },
+                                        'closeButton': {
+                                            'base': 'absolute top-2 right-2',
+                                            'icon': 'fluent:add-16-filled',
+                                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                                        }
+                                    }
+                                });
+                            }"
+                        />
                     </div>
                 </div>
                 
@@ -578,20 +555,27 @@
                                             />
                                         </div>
                                     </div>
-                                    <div class="flex gap-2">
-                                        <UButton
-                                            icon="fluent:eye-24-filled"
-                                            color="gray"
-                                            variant="ghost"
-                                            class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
-                                            @click="handleRubricView(nota.rubrica)"
-                                        />
-                                        <UButton
-                                            icon="fluent:delete-12-regular"
-                                            color="red"
-                                            variant="soft"
-                                            class="transition-colors duration-200"
-                                            @click="openDeleteModal(nota)"
+                                    <div class="flex flex-col items-end gap-2">
+                                        <div class="flex gap-2">
+                                            <UButton
+                                                icon="fluent:eye-24-filled"
+                                                color="gray"
+                                                variant="ghost"
+                                                class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
+                                                @click="handleRubricView(nota.rubrica)"
+                                            />
+                                            <UButton
+                                                icon="fluent:delete-12-regular"
+                                                color="red"
+                                                variant="soft"
+                                                class="transition-colors duration-200"
+                                                @click="openDeleteModal(nota)"
+                                            />
+                                        </div>
+                                        <NotaPercentage
+                                            :nota="nota"
+                                            :total-percentage="notas.reduce((sum, n) => sum + n.porcentaje, 0)"
+                                            :on-save="handleSavePercentage"
                                         />
                                     </div>
                                 </div>
@@ -722,102 +706,12 @@
             </div>
         </div>
 
-        <!-- New Nota Modal -->
-        <UModal
-            v-model="showNewNotaModal"
-            :ui="{
-                width: 'w-full sm:max-w-3xl',
-                height: 'max-h-[700px]',
-                container: 'flex items-center justify-center',
-                overlay: { background: 'dark:bg-Light-Gray/15' },
-            }"
-        >
-            <UCard
-                :ui="{
-                    background: 'dark:bg-Medium-Dark',
-                    ring: '',
-                    divide: '',
-                    header: { base: 'border-b border-Purple-P dark:border-Dark-Grey' },
-                    base: 'w-full',
-                }"
-            >
-                <template #header>
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-base font-semibold leading-6 dark:text-white">
-                            Nueva Nota
-                        </h3>
-                        <UButton
-                            color="gray"
-                            variant="ghost"
-                            icon="fluent:dismiss-12-filled"
-                            class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
-                            @click="closeNewNotaModal"
-                        />
-                    </div>
-                </template>
-
-                <div class="p-4">
-                    <div v-if="activeRubric" class="space-y-6">
-                        <div class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4">
-                            <h4 class="text-lg font-medium text-Pure-Black dark:text-White-w mb-2">
-                                Nota {{ notas.length + 1 }}
-                            </h4>
-                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50">
-                                Rúbrica: {{ activeRubric.nombre }}
-                            </p>
-                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-2">
-                                Se creará una nueva nota utilizando la rúbrica activa. Esta nota estará disponible para todos los estudiantes del grupo.
-                            </p>
-                        </div>
-
-                        <div class="flex justify-end gap-3">
-                            <UButton
-                                variant="link" color="black"
-                                @click="closeNewNotaModal"
-                            >
-                                Cancelar
-                            </UButton>
-                            <UButton
-                                class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
-                                @click="createNota(activeRubric)"
-                            >
-                                Crear Nota
-                            </UButton>
-                        </div>
-                    </div>
-                    <div v-else class="text-center p-8">
-                        <div class="relative w-80 h-52 flex flex-col items-center justify-center mx-auto">
-                            <!-- Corner decorations -->
-                            <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tl-lg"></div>
-                            <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-Purple-P dark:border-Muted-Brown rounded-tr-lg"></div>
-                            <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-bl-lg"></div>
-                            <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
-
-                            <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                            <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY RÚBRICA ACTIVA</p>
-                            <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
-                                Para crear una nota, primero debes activar una rúbrica en el grupo.
-                            </p>
-                        </div>
-
-                        <div class="flex justify-end mt-6">
-                            <UButton
-                                variant="link" color="black"
-                                @click="closeNewNotaModal"
-                            >
-                                Cerrar
-                            </UButton>
-                        </div>
-                    </div>
-                </div>
-            </UCard>
-        </UModal>
-
         <!-- Student Notas Modal -->
         <UModal
             v-model="showStudentNotasModal"
             :ui="{
                 width: 'w-full sm:max-w-3xl',
+                wrapper: 'z-10',
                 height: 'max-h-[700px]',
                 container: 'flex items-center justify-center',
                 overlay: { background: 'dark:bg-Light-Gray/15' },
@@ -863,13 +757,40 @@
                                         Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
                                     </p>
                                 </div>
-                                <UButton
-                                    icon="fluent:edit-24-filled"
-                                    class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
-                                    @click="gradeNota(nota)"
-                                >
-                                    Calificar
-                                </UButton>
+                                <div class="flex items-center gap-2">
+                                    <NotaRevert
+                                        v-if="selectedStudent"
+                                        :nota="nota"
+                                        :student="selectedStudent"
+                                        :groupId="groupId"
+                                        @loading-change="(isLoading, message) => loadScreen(message, isLoading)"
+                                        @reverted="async () => {
+                                            // Refresh the group data to update student averages
+                                            const { group } = await validateGroupAccess(courseId, groupId, docenteID);
+                                            useCursoStore().setGrupo(group);
+                                            
+                                            // Update the local state
+                                            const updatedStudent = group.estudiantes.find(e => e.correo === selectedStudent?.correo);
+                                            if (updatedStudent && updatedStudent.calificaciones && selectedStudent?.calificaciones) {
+                                                const updatedCalificacion = updatedStudent.calificaciones.find(
+                                                    c => c.rubrica.toString() === nota.rubrica.toString()
+                                                );
+                                                if (updatedCalificacion) {
+                                                    selectedStudent.calificaciones = selectedStudent.calificaciones.map(c => 
+                                                        c.rubrica.toString() === nota.rubrica.toString() ? updatedCalificacion : c
+                                                    );
+                                                }
+                                            }
+                                        }"
+                                    />
+                                    <UButton
+                                        size="lg"
+                                        class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
+                                        @click="gradeNota(nota)"
+                                    >
+                                        Calificar
+                                    </UButton>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -887,7 +808,7 @@
             v-model="isDeleteModalOpen"
             prevent-close
             :ui="{
-                wrapper: 'z-20',
+                wrapper: 'z-10',
                 width: 'w-full sm:max-w-md',
                 height: 'max-h-[700px]',
                 container: 'flex items-center justify-center',
@@ -920,7 +841,7 @@
                         </UButton>
                         <UButton 
                             color="red" 
-                            @click="deleteNota"
+                            @click="selectedNota && handleDeleteNota(selectedNota)"
                         >
                             Eliminar
                         </UButton>

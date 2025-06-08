@@ -38,14 +38,14 @@ export interface Grupo {
   docente: Docente;
   estudiantes: Estudiante[];
   rubricas: Rubrica[];
-  notas: Nota[];
+  notas?: Nota[];
 }
 
 export interface Estudiante {
   nombre: string;
   correo: string;
   promedio: number;
-  calificaciones: Calificacion[];
+  calificaciones?: Calificacion[];
 }
 
 export interface Calificacion {
@@ -66,4 +66,5 @@ export interface Nota {
   numero: number;
   rubrica: string;
   fecha: string;
+  porcentaje: number;
 }

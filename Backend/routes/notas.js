@@ -2,16 +2,22 @@ const express = require('express');
 const router = express.Router();
 const { Grupo } = require('../utils/types');
 const { sendRubricPDF } = require('../utils/mailer');
+const { Rubrica } = require('../utils/types');
 
 // Add a new nota to a group
 router.post('/:groupId/notas', async (req, res) => {
     try {
-        const { numero, rubrica, fecha } = req.body;
+        const { numero, rubrica, fecha, porcentaje } = req.body;
         const groupId = req.params.groupId;
 
         // Validate required fields
-        if (!numero || !rubrica || !fecha) {
+        if (!numero || !rubrica || !fecha || porcentaje === undefined) {
             return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Validate porcentaje
+        if (porcentaje < 0 || porcentaje > 100) {
+            return res.status(400).json({ message: 'Porcentaje must be between 0 and 100' });
         }
 
         // Find the group and add the nota
@@ -24,7 +30,8 @@ router.post('/:groupId/notas', async (req, res) => {
         group.notas.push({
             numero,
             rubrica,
-            fecha: new Date(fecha)
+            fecha: new Date(fecha),
+            porcentaje
         });
 
         // Save the updated group
@@ -96,11 +103,16 @@ router.delete('/:groupId/notas/:notaNumero', async (req, res) => {
         // Remove the nota
         group.notas = group.notas.filter(n => n.numero !== parseInt(notaNumero));
 
-        // Remove corresponding grades from all students' calificaciones
+        // Remove corresponding grades from all students' calificaciones and recalculate promedio
         group.estudiantes.forEach(student => {
+            // Remove the calificación for this nota
             student.calificaciones = student.calificaciones.filter(
                 c => c.rubrica.toString() !== notaToDelete.rubrica.toString()
             );
+            
+            // Recalculate promedio based on remaining calificaciones
+            const sumaNotas = student.calificaciones.reduce((sum, cal) => sum + cal.calificacionFinal, 0);
+            student.promedio = Number(sumaNotas.toFixed(2));
         });
 
         // Save the updated group
@@ -137,11 +149,14 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
             return res.status(404).json({ message: 'Student not found in group' });
         }
 
-        // Calculate final grade
+        // Calculate final grade (now considering the nota's percentage)
         const calificacionFinal = Number(temas.reduce((sum, tema) => {
             return sum + tema.criterios.reduce((temaSum, criterio) =>
                 temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
         }, 0).toFixed(2));
+
+        // Calculate weighted grade based on nota's percentage
+        const weightedGrade = (calificacionFinal * nota.porcentaje) / 100;
 
         // Update or add grade in student's calificaciones
         const existingStudentGradeIndex = student.calificaciones.findIndex(
@@ -153,7 +168,7 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
             student.calificaciones[existingStudentGradeIndex] = {
                 rubrica: nota.rubrica,
                 fecha: new Date(),
-                calificacionFinal,
+                calificacionFinal: weightedGrade,
                 temas,
                 observaciones
             };
@@ -162,16 +177,15 @@ router.put('/:groupId/notas/:notaNumero/grade', async (req, res) => {
             student.calificaciones.push({
                 rubrica: nota.rubrica,
                 fecha: new Date(),
-                calificacionFinal,
+                calificacionFinal: weightedGrade,
                 temas,
                 observaciones
             });
         }
 
-        // Calculate new promedio based on all calificacionFinal values
-        const totalNotas = student.calificaciones.length;
+        // Calculate new promedio based on all weighted calificacionFinal values
         const sumaNotas = student.calificaciones.reduce((sum, cal) => sum + cal.calificacionFinal, 0);
-        student.promedio = Number((totalNotas > 0 ? sumaNotas / totalNotas : 0).toFixed(2));
+        student.promedio = Number(sumaNotas.toFixed(2));
         
         // Save the updated group
         await group.save();
@@ -247,6 +261,94 @@ router.post('/:groupId/notas/:notaNumero/send-email', async (req, res) => {
     } catch (error) {
         console.error('Error sending email:', error);
         res.status(500).json({ message: 'Error sending email' });
+    }
+});
+
+// Update a nota's percentage
+router.patch('/:groupId/notas/:notaNumero', async (req, res) => {
+    try {
+        const { groupId, notaNumero } = req.params;
+        const { porcentaje } = req.body;
+
+        const group = await Grupo.findById(groupId);
+
+        const nota = group.notas.find(n => n.numero === parseInt(notaNumero));
+
+        // Update the nota's percentage
+        nota.porcentaje = porcentaje;
+
+        // Update all student grades that use this nota
+        group.estudiantes.forEach(student => {
+            const grade = student.calificaciones.find(
+                c => c.rubrica.toString() === nota.rubrica.toString()
+            );
+            if (grade) {
+                // Recalculate the weighted grade
+                grade.calificacionFinal = (grade.calificacionFinal * porcentaje) / 100;
+            }
+        });
+
+        // Save the updated group
+        await group.save();
+
+        res.json({ message: 'Nota updated successfully', nota });
+    } catch (error) {
+        console.error('Error updating nota:', error);
+        res.status(500).json({ message: 'Error updating nota' });
+    }
+});
+
+// Revert a student's rubric to its original state
+router.post('/:groupId/notas/:notaNumero/revert/:correo', async (req, res) => {
+    try {
+        const { groupId, notaNumero, correo } = req.params;
+
+        const group = await Grupo.findById(groupId);
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found' });
+        }
+
+        // Find the nota and student
+        const nota = group.notas.find(n => n.numero === parseInt(notaNumero));
+
+        const student = group.estudiantes.find(e => e.correo === correo);
+
+        const calificacion = student.calificaciones.find(c => c.rubrica.toString() === nota.rubrica.toString());
+
+        // Get the original rubric
+        const originalRubric = await Rubrica.findById(nota.rubrica);
+        if (!originalRubric) {
+            return res.status(404).json({ message: 'Original rubric not found' });
+        }
+
+        // Reset the calificación to match the original rubric
+        calificacion.temas = originalRubric.temas.map(tema => ({
+            nombre: tema.nombre,
+            criterios: tema.criterios.map(criterio => ({
+                criterio: criterio.criterio,
+                peso: criterio.peso,
+                calificacion: criterio.calificacion,
+                acumulado: criterio.acumulado,
+                observaciones: criterio.observaciones
+            }))
+        }));
+
+        // Recalculate the final grade
+        const sumaNotas = calificacion.temas.reduce((sum, tema) => {
+            return sum + tema.criterios.reduce((temaSum, criterio) =>
+                temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
+        }, 0);
+        calificacion.calificacionFinal = Number(sumaNotas.toFixed(2));
+
+        // Recalculate student's promedio
+        const sumaNotasTotal = student.calificaciones.reduce((sum, cal) => sum + cal.calificacionFinal, 0);
+        student.promedio = Number(sumaNotasTotal.toFixed(2));
+
+        await group.save();
+
+        res.json({ message: 'Rubric reverted successfully', calificacion });
+    } catch (error) {
+        res.status(500).json({ message: 'Error reverting rubric', error: error.message });
     }
 });
 

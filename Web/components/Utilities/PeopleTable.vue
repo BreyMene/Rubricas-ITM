@@ -326,6 +326,32 @@
                 </div>
             </template>
 
+            <!-- Promedio custom column -->
+            <template #promedio-data="{ row }">
+                <div class="flex items-center gap-2 transition-colors duration-150">
+                    <div class="flex-1">
+                        <UProgress 
+                            :value="(Number(row.promedio) / 5) * 100"
+                            :color="Number(row.promedio) >= 4 ? 'green' :
+                                   Number(row.promedio) >= 3 ? 'amber' :
+                                   'red'"
+                            size="md"
+                            class="transition-all duration-300"
+                        />
+                    </div>
+                    <span 
+                        class="font-medium min-w-[3rem] text-center"
+                        :class="{
+                            'text-red-600': Number(row.promedio) < 3,
+                            'text-yellow-600': Number(row.promedio) >= 3 && Number(row.promedio) < 4,
+                            'text-green-600': Number(row.promedio) >= 4
+                        }"
+                    >
+                        {{ row.promedio }}
+                    </span>
+                </div>
+            </template>
+
             <!-- Moderator custom column -->
             <template #moderador-header>
                 <div class="w-8"></div>
