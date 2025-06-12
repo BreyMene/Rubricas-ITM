@@ -493,12 +493,11 @@
         class="w-full lg:w-[500px] h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col relative z-1"
       >
         <div v-if="rubrics.length > 0" class="w-full h-full rounded-lg overflow-hidden relative">
-          <NuxtImg
-            src="RubricaTest.PNG"
-            class="w-full h-full object-cover"
-            style="filter: blur(1.5px)"
+          <RubricaPreview
+            :temas="displayRubric?.temas || []"
+            :rubricaId="displayRubric?._id"
+            :previewMode="true"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <div class="absolute bottom-4 left-4 right-4">
             <div class="flex items-center justify-between gap-3">
               <div class="flex flex-col items-start gap-2">

@@ -424,10 +424,10 @@
                         class="w-full h-[280px] bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4 shadow-lg flex flex-col hover:shadow-xl transition-[transform,box-shadow] duration-200 cursor-pointer hover:bg-MLight-White dark:hover:bg-Dark-Grey hover:-translate-y-1 outline-none"
                       >
                         <div class="w-full h-full rounded-lg overflow-hidden relative">
-                          <NuxtImg
-                            src="RubricaTest.PNG"
-                            class="w-full h-full object-cover"
-                            style="filter: blur(1.5px);"
+                          <RubricaPreview 
+                            :temas="rubrica.temas || []" 
+                            :previewMode="true"
+                            :rubricaId="rubrica._id"
                           />
                           <!-- State Circle -->
                           <UChip

@@ -283,9 +283,19 @@ router.patch('/:groupId/notas/:notaNumero', async (req, res) => {
                 c => c.rubrica.toString() === nota.rubrica.toString()
             );
             if (grade) {
-                // Recalculate the weighted grade
-                grade.calificacionFinal = (grade.calificacionFinal * porcentaje) / 100;
+                // Calculate the raw grade (without percentage)
+                const rawGrade = grade.temas.reduce((sum, tema) => {
+                    return sum + tema.criterios.reduce((temaSum, criterio) =>
+                        temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
+                }, 0);
+
+                // Apply the new percentage to get the weighted grade
+                grade.calificacionFinal = Number(((rawGrade * porcentaje) / 100).toFixed(2));
             }
+
+            // Recalculate student's promedio based on all weighted grades
+            const sumaNotas = student.calificaciones.reduce((sum, cal) => sum + cal.calificacionFinal, 0);
+            student.promedio = Number(sumaNotas.toFixed(2));
         });
 
         // Save the updated group

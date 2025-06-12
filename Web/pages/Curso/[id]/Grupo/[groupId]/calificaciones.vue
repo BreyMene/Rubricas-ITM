@@ -384,44 +384,79 @@
     };
 
     const handleSavePercentage = async (nota: Nota, newPercentage: number) => {
-        await $fetch(`${config.public.apiUrl}/grades/${groupId.value}/notas/${nota.numero}`, {
-            method: 'PATCH',
-            body: {
-                porcentaje: newPercentage
-            }
-        });
-
-        const notaIndex = notas.value.findIndex(n => n._id === nota._id);
-        if (notaIndex !== -1) {
-            notas.value[notaIndex].porcentaje = newPercentage;
-        }
-
-        toast.add({
-            title: 'Porcentaje actualizado',
-            icon: "fluent:checkmark-circle-16-filled",
-            timeout: 3000,
-            ui: {
-                'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                'rounded': 'rounded-lg',
-                'shadow': 'shadow-lg',
-                'ring': 'ring-0',
-                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                'icon': {
-                    'base': 'flex-shrink-0 w-5 h-5',
-                    'color': 'text-Purple-P dark:text-Muted-Brown'
-                },
-                'progress': {
-                    'base': 'absolute bottom-0 end-0 start-0 h-1',
-                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                },
-                'closeButton': {
-                    'base': 'absolute top-2 right-2',
-                    'icon': 'fluent:add-16-filled',
-                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+        try {
+            await $fetch(`${config.public.apiUrl}/grades/${groupId.value}/notas/${nota.numero}`, {
+                method: 'PATCH',
+                body: {
+                    porcentaje: newPercentage
                 }
+            });
+
+            // Refresh the group data to update student averages
+            const { group } = await validateGroupAccess(courseId.value, groupId.value, docenteID);
+            useCursoStore().setGrupo(group);
+
+            // Update the local state
+            const notaIndex = notas.value.findIndex(n => n._id === nota._id);
+            if (notaIndex !== -1) {
+                notas.value[notaIndex].porcentaje = newPercentage;
             }
-        });
+
+            toast.add({
+                title: 'Porcentaje actualizado',
+                icon: "fluent:checkmark-circle-16-filled",
+                timeout: 3000,
+                ui: {
+                    'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                    'rounded': 'rounded-lg',
+                    'shadow': 'shadow-lg',
+                    'ring': 'ring-0',
+                    'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                    'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                    'icon': {
+                        'base': 'flex-shrink-0 w-5 h-5',
+                        'color': 'text-Purple-P dark:text-Muted-Brown'
+                    },
+                    'progress': {
+                        'base': 'absolute bottom-0 end-0 start-0 h-1',
+                        'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                    },
+                    'closeButton': {
+                        'base': 'absolute top-2 right-2',
+                        'icon': 'fluent:add-16-filled',
+                        'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Error updating percentage:", error);
+            toast.add({
+                title: 'Error al intentar actualizar el porcentaje',
+                icon: "fluent:alert-urgent-16-filled",
+                timeout: 3000,
+                ui: {
+                    'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                    'rounded': 'rounded-lg',
+                    'shadow': 'shadow-lg',
+                    'ring': 'ring-0',
+                    'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                    'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                    'icon': {
+                        'base': 'flex-shrink-0 w-5 h-5',
+                        'color': 'text-Purple-P dark:text-Muted-Brown'
+                    },
+                    'progress': {
+                        'base': 'absolute bottom-0 end-0 start-0 h-1',
+                        'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                    },
+                    'closeButton': {
+                        'base': 'absolute top-2 right-2',
+                        'icon': 'fluent:add-16-filled',
+                        'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                    }
+                }
+            });
+        }
     };
 
     // Add function to open delete modal
