@@ -186,14 +186,20 @@
     validateTotals(true);
   });
 
-  const selectCourse = (course: Curso) => {
+  const selectCourse = async (course: Curso) => {
     selectedCourseId.value = course._id;
     selectedCourseName.value = course.nombre;
     isModerator.value = course.docentes.some((d)=> d._id == docenteID && d.moderador == true);
-    groups.value = course.grupos?.map(g => ({
-      _id: g._id,
-      nombre: g.nombre
-    })) || [];
+    
+    try {
+      const data = await $fetch<{_id: string, nombre: string}[]>(
+        `${config.public.apiUrl}/groups/course/${course._id}/user/${docenteID}`,
+      );
+      groups.value = data;
+    } catch (error) {
+      groups.value = [];
+    }
+    
     showGroups.value = true;
   }
 

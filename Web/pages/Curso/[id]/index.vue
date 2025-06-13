@@ -501,7 +501,9 @@
           <div class="absolute bottom-4 left-4 right-4">
             <div class="flex items-center justify-between gap-3">
               <div class="flex flex-col items-start gap-2">
-                <h3 class="text-lg font-semibold text-white truncate">{{ displayRubric?.nombre }}</h3>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-lg font-semibold text-Pure-Black dark:text-White-w truncate">{{ displayRubric?.nombre }}</h3>
+                </div>
                 <UToggle v-if="isModerator"
                   v-model="getRubricState(displayRubric).value"
                   on-icon="fluent:checkmark-circle-24-filled"
@@ -512,6 +514,24 @@
                     inactive: 'bg-red-600 dark:bg-red-400',
                   }"
                 />
+              </div>
+              <div class="flex gap-2">
+                <UButton
+                  v-if="rubrics.length > 0"
+                  size="sm"
+                  class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
+                  @click="$router.push(`/Rubrica/${displayRubric?._id}?isModerator=${isModerator}`)"
+                >
+                  {{ isModerator ? 'Modificar' : 'Ver' }}
+                </UButton>
+                <UButton
+                  v-if="rubrics.length > 1"
+                  size="sm"
+                  class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
+                  @click="showRubricModal = true"
+                >
+                  Ver más
+                </UButton>
               </div>
             </div>
           </div>
@@ -532,25 +552,6 @@
               NO HAY<br />NINGUNA RÚBRICA
             </p>
           </div>
-        </div>
-
-        <div class="absolute bottom-4 right-4 flex gap-2">
-          <UButton
-            v-if="rubrics.length > 0"
-            size="lg"
-            class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
-            @click="$router.push(`/Rubrica/${displayRubric?._id}?isModerator=${isModerator}`)"
-          >
-            {{ isModerator ? 'Modificar' : 'Ver' }}
-          </UButton>
-          <UButton
-            v-if="rubrics.length > 1"
-            size="lg"
-            class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
-            @click="showRubricModal = true"
-          >
-            Ver más
-          </UButton>
         </div>
 
         <!-- Load screen for rubrics -->
