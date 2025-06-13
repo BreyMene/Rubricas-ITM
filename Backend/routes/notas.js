@@ -320,35 +320,12 @@ router.post('/:groupId/notas/:notaNumero/revert/:correo', async (req, res) => {
 
         // Find the nota and student
         const nota = group.notas.find(n => n.numero === parseInt(notaNumero));
-
         const student = group.estudiantes.find(e => e.correo === correo);
 
-        const calificacion = student.calificaciones.find(c => c.rubrica.toString() === nota.rubrica.toString());
-
-        // Get the original rubric
-        const originalRubric = await Rubrica.findById(nota.rubrica);
-        if (!originalRubric) {
-            return res.status(404).json({ message: 'Original rubric not found' });
-        }
-
-        // Reset the calificación to match the original rubric
-        calificacion.temas = originalRubric.temas.map(tema => ({
-            nombre: tema.nombre,
-            criterios: tema.criterios.map(criterio => ({
-                criterio: criterio.criterio,
-                peso: criterio.peso,
-                calificacion: criterio.calificacion,
-                acumulado: criterio.acumulado,
-                observaciones: criterio.observaciones
-            }))
-        }));
-
-        // Recalculate the final grade
-        const sumaNotas = calificacion.temas.reduce((sum, tema) => {
-            return sum + tema.criterios.reduce((temaSum, criterio) =>
-                temaSum + ((criterio.peso || 0) * (criterio.calificacion || 0)), 0);
-        }, 0);
-        calificacion.calificacionFinal = Number(sumaNotas.toFixed(2));
+        // Remove the grade from student's calificaciones
+        student.calificaciones = student.calificaciones.filter(
+            c => c.rubrica.toString() !== nota.rubrica.toString()
+        );
 
         // Recalculate student's promedio
         const sumaNotasTotal = student.calificaciones.reduce((sum, cal) => sum + cal.calificacionFinal, 0);
@@ -356,7 +333,7 @@ router.post('/:groupId/notas/:notaNumero/revert/:correo', async (req, res) => {
 
         await group.save();
 
-        res.json({ message: 'Rubric reverted successfully', calificacion });
+        res.json({ message: 'Rubric reverted successfully'});
     } catch (error) {
         res.status(500).json({ message: 'Error reverting rubric', error: error.message });
     }

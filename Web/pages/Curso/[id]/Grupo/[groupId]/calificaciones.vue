@@ -580,15 +580,25 @@
                                             {{ new Date(nota.fecha).toLocaleDateString() }}
                                         </p>
                                         <div class="flex items-center gap-2 mt-2">
-                                            <p class="text-sm text-Pure-Black dark:text-White-w">
-                                                Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
-                                            </p>
-                                            <UIcon
-                                                v-if="deletedRubrics.has(nota.rubrica)"
-                                                name="fluent:warning-24-filled"
-                                                class="w-5 h-5 text-red-500 animate-warning"
-                                            />
+                                            <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-Purple-P/5 dark:bg-Muted-Brown/5">
+                                                <UIcon
+                                                    name="fluent:document-ribbon-16-filled"
+                                                    class="w-4 h-4 text-Purple-P dark:text-Muted-Brown"
+                                                />
+                                                <p class="text-sm font-medium text-Pure-Black dark:text-White-w">
+                                                    {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
+                                                </p>
+                                                <UIcon
+                                                    v-if="deletedRubrics.has(nota.rubrica)"
+                                                    name="fluent:warning-24-filled"
+                                                    class="w-4 h-4 text-red-500 animate-warning"
+                                                />
+                                            </div>
                                         </div>
+                                        <AnalyticsGradingProgress
+                                            :nota="nota"
+                                            :estudiantes="estudiantesGrupo"
+                                        />
                                     </div>
                                     <div class="flex flex-col items-end gap-2">
                                         <div class="flex gap-2">
