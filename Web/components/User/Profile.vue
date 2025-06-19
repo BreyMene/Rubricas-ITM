@@ -1,6 +1,8 @@
 <script setup lang="ts">
-    const useDocente = useDocenteStore();
-    const useCurso = useCursoStore()
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+const useDocente = useDocenteStore();
+const useCurso = useCursoStore()
 
     const items = [
         [
@@ -10,12 +12,12 @@
                 disabled: true
             }],
             [{
-                label: 'Ajustes',
+                label: t('profile.settings'),
                 icon: 'fluent:settings-28-filled',
                 click: () => navigateTo('/Ajustes')
             }],
             [{
-                label: 'Cerrar Sesion',
+                label: t('profile.logout'),
                 icon: 'ph:sign-out-bold',
                 click: async() => {
                     useDocente.logout()
@@ -59,7 +61,7 @@
         <template #account="{ item }">
             <div class="text-left">
                 <p>
-                    Conectado como
+                    {{ t('profile.connected_as') }}
                 </p>
                 <p class="truncate font-medium">
                     {{ item.label }}

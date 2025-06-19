@@ -1,0 +1,57 @@
+{
+    "ajustes": {
+      "settings": "Settings",
+      "email_section": "Email",
+      "email_placeholder": "Your email address",
+      "update": "Update",
+      "language_section": "Language",
+      "delete_account_section": "Delete Account",
+      "delete_account_warning": "Deleting your account is a permanent action and cannot be undone. All your associated data, including courses, groups, and rubrics, will be deleted.",
+      "confirm_deletion": "Confirm Deletion",
+      "confirm_deletion_message": "Are you sure you want to delete your account? This action is irreversible and will delete all your data.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "change_password": {
+      "change_password": "Change Password",
+      "verify_identity": "To change your password, we first need to verify your identity.",
+      "current_password": "Current password",
+      "current_password_placeholder": "Current password",
+      "continue": "Continue",
+      "verification": "Verification",
+      "verification_sent": "A verification code has been sent to your email.",
+      "code_not_received": "Didn't receive the code?",
+      "resend_code": "Resend code",
+      "verify": "Verify",
+      "back": "Back",
+      "new_password": "New Password",
+      "password": "Password",
+      "confirm_password": "Confirm Password",
+      "hide_password": "Hide password",
+      "show_password": "Show password",
+      "update_password": "Change Password",
+      "cancel": "Cancel",
+      "passwords_do_not_match": "Passwords do not match",
+      "all_fields_required": "All fields are required",
+      "password_requirements": "The password does not meet the minimum requirements",
+      "incorrect_password": "Incorrect password",
+      "invalid_or_expired_code": "Invalid or expired code",
+      "error_resending_code": "Error resending the code",
+      "error_changing_password": "Error changing the password",
+      "no_authenticated_user": "No authenticated user"
+    },
+    "profile": {
+      "connected_as": "Connected as",
+      "settings": "Settings",
+      "logout": "Log out"
+    },
+    "theme_selector": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "navbar": {
+      "home": "Home",
+      "rubrics": "Rubrics"
+    }
+}

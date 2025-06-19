@@ -2,6 +2,9 @@
   import { ref, computed, onMounted, nextTick, onUnmounted, watch } from "vue";
   import { useRoute } from "vue-router";
   import type { RouteLocationNormalizedLoaded } from "vue-router";
+  import { useI18n } from 'vue-i18n'
+
+  const { t } = useI18n()
 
   const route: RouteLocationNormalizedLoaded = useRoute();
   const menuRefs = ref<HTMLElement[]>([]);
@@ -11,7 +14,10 @@
   const isLoading = ref<boolean>(true);
 
   const routes: string[] = ['/', '/rubricas'];
-  const routeNames: string[] = ['Inicio','Rubricas'];
+  const routeNames = computed(() => [
+    t('navbar.home'),
+    t('navbar.rubrics')
+  ]);
 
   // Determine active index based on current path
   const activeIndex = computed<number>(() => {
@@ -53,6 +59,14 @@
 
   // Observe changes in the route
   watch(() => route.path, updateIndicator);
+
+  // Watch for language changes
+  watch(routeNames, () => {
+    // Wait for DOM to update with new text content
+    nextTick(() => {
+      updateIndicator();
+    });
+  }, { deep: true });
 </script>
 
 <template>

@@ -1,28 +1,30 @@
 <script setup lang="ts">
-  import { ref, computed } from "vue";
+import { ref, computed } from "vue";
+import { useI18n } from 'vue-i18n'
 
-  const colorMode = useColorMode();
+const { t } = useI18n()
+const colorMode = useColorMode();
 
-  // Variable to store the selected theme
-  const selectedTheme = ref<string>(colorMode.preference);
+// Variable to store the selected theme
+const selectedTheme = ref<string>(colorMode.preference);
 
-  // Dropdown options with selection event
-  const themeOptions = computed(() => [
+// Dropdown options with selection event
+const themeOptions = computed(() => [
   [
-      {
-      label: "Claro",
+    {
+      label: t('theme_selector.light'),
       icon: "fluent:brightness-high-16-regular",
       value: "light",
       click: () => changeTheme("light"),
-      },
-      {
-      label: "Oscuro",
+    },
+    {
+      label: t('theme_selector.dark'),
       icon: "fluent:weather-moon-28-filled",
       value: "dark",
       click: () => changeTheme("dark"),
-      },
-      {
-      label: "Sistema",
+    },
+    {
+      label: t('theme_selector.system'),
       icon: "fluent:desktop-28-regular",
       value: "system",
       click: () => changeTheme("system"),

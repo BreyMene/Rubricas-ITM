@@ -1,0 +1,57 @@
+{
+    "ajustes": {
+      "settings": "Ajustes",
+      "email_section": "Correo Electrónico",
+      "email_placeholder": "Tu correo electrónico",
+      "update": "Actualizar",
+      "language_section": "Idioma",
+      "delete_account_section": "Eliminar Cuenta",
+      "delete_account_warning": "Eliminar tu cuenta es una acción permanente y no puede ser revertida. Se eliminarán todos tus datos asociados, incluyendo cursos, grupos y rúbricas.",
+      "confirm_deletion": "Confirmar Eliminación",
+      "confirm_deletion_message": "¿Estás seguro que deseas eliminar tu cuenta? Esta acción es irreversible y eliminará todos tus datos.",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "change_password": {
+      "change_password": "Cambiar Contraseña",
+      "verify_identity": "Para cambiar tu contraseña, primero necesitamos verificar tu identidad.",
+      "current_password": "Contraseña actual",
+      "current_password_placeholder": "Contraseña actual",
+      "continue": "Continuar",
+      "verification": "Verificación",
+      "verification_sent": "Se ha enviado un código de verificación a tu correo electrónico.",
+      "code_not_received": "¿No recibiste el código?",
+      "resend_code": "Reenviar código",
+      "verify": "Verificar",
+      "back": "Volver",
+      "new_password": "Nueva Contraseña",
+      "password": "Contraseña",
+      "confirm_password": "Verifica Contraseña",
+      "hide_password": "Ocultar contraseña",
+      "show_password": "Mostrar contraseña",
+      "update_password": "Cambiar Contraseña",
+      "cancel": "Cancelar",
+      "passwords_do_not_match": "Las contraseñas no coinciden",
+      "all_fields_required": "Todos los campos son requeridos",
+      "password_requirements": "La contraseña no cumple con los requisitos mínimos",
+      "incorrect_password": "Contraseña incorrecta",
+      "invalid_or_expired_code": "Código inválido o expirado",
+      "error_resending_code": "Error al reenviar el código",
+      "error_changing_password": "Error al cambiar la contraseña",
+      "no_authenticated_user": "No hay usuario autenticado"
+    },
+    "profile": {
+      "connected_as": "Conectado como",
+      "settings": "Ajustes",
+      "logout": "Cerrar Sesión"
+    },
+    "theme_selector": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
+    "navbar": {
+      "home": "Inicio",
+      "rubrics": "Rúbricas"
+    }
+}

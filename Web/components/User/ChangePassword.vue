@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 const config = useRuntimeConfig();
 const isOpen = ref(false);
 
@@ -27,6 +28,8 @@ const state = reactive({
     password: '',
     secPasword: ''
 });
+
+const { t } = useI18n()
 
 // Watch for modal close to reset all states
 watch(isOpen, (newValue) => {
@@ -249,7 +252,7 @@ const showConfirm = ref(false);
             @click="isOpen = true" 
             class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300"
         >
-            Cambiar Contraseña
+            {{ t('change_password.change_password') }}
         </UButton>
 
         <UModal 
@@ -286,15 +289,15 @@ const showConfirm = ref(false);
                     <div v-if="!showOTP && !showNewPassword">
                         <div class="flex items-center mb-4">
                             <UIcon name="fluent:lock-closed-24-filled" class="text-2xl mr-2 text-Purple-P dark:text-Muted-Brown" />
-                            <h3 class="text-lg font-semibold dark:text-white">Cambiar Contraseña</h3>
+                            <h3 class="text-lg font-semibold dark:text-white">{{ t('change_password.change_password') }}</h3>
                         </div>
                         
                         <p class="mb-6 text-gray-700 dark:text-gray-300">
-                            Para cambiar tu contraseña, primero necesitamos verificar tu identidad.
+                            {{ t('change_password.verify_identity') }}
                         </p>
                         
                         <UFormGroup
-                            label="Contraseña actual"
+                            :label="t('change_password.current_password')"
                             name="currentPassword"
                             :hint="currentPasswordError"
                             :error="formError"
@@ -306,7 +309,7 @@ const showConfirm = ref(false);
                             <UInput 
                                 v-model="currentPassword" 
                                 type="password" 
-                                placeholder="Contraseña actual"
+                                :placeholder="t('change_password.current_password_placeholder')"
                                 class="mb-4"
                                 :ui="{
                                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
@@ -326,13 +329,13 @@ const showConfirm = ref(false);
                                 color="gray"
                                 @click="isOpen = false"
                             >
-                                Cancelar
+                                {{ t('change_password.cancel') }}
                             </UButton>
                             <UButton 
                                 @click="sendOTP"
                                 class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300"
                             >
-                                Continuar
+                                {{ t('change_password.continue') }}
                             </UButton>
                         </div>
                     </div>
@@ -341,11 +344,11 @@ const showConfirm = ref(false);
                     <div v-if="showOTP">
                         <div class="flex items-center mb-4">
                             <UIcon name="fluent:key-24-filled" class="text-2xl mr-2 text-Purple-P dark:text-Muted-Brown" />
-                            <h3 class="text-lg font-semibold dark:text-white">Verificación</h3>
+                            <h3 class="text-lg font-semibold dark:text-white">{{ t('change_password.verification') }}</h3>
                         </div>
                         
                         <p class="mb-6 text-gray-700 dark:text-gray-300">
-                            Se ha enviado un código de verificación a tu correo electrónico.
+                            {{ t('change_password.verification_sent') }}
                         </p>
                         
                         <UtilitiesOTP 
@@ -364,24 +367,24 @@ const showConfirm = ref(false);
                                 color="gray"
                                 @click="backToPassword"
                             >
-                                Volver
+                                {{ t('change_password.back') }}
                             </UButton>
                             <UButton 
                                 @click="verifyOTP"
                                 class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300"
                             >
-                                Verificar
+                                {{ t('change_password.verify') }}
                             </UButton>
                         </div>
 
                         <div class="mt-4 text-center">
-                            <p class="text-sm">¿No recibiste el código?
+                            <p class="text-sm">{{ t('change_password.code_not_received') }}
                                 <UButton
                                     variant="link"
                                     @click="resendOTP"
                                     class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
                                 >
-                                    Reenviar código
+                                    {{ t('change_password.resend_code') }}
                                 </UButton>
                             </p>
                         </div>
@@ -391,11 +394,11 @@ const showConfirm = ref(false);
                     <div v-if="showNewPassword">
                         <div class="flex items-center mb-4">
                             <UIcon name="fluent:key-reset-24-filled" class="text-2xl mr-2 text-Purple-P dark:text-Muted-Brown" />
-                            <h3 class="text-lg font-semibold dark:text-white">Nueva Contraseña</h3>
+                            <h3 class="text-lg font-semibold dark:text-white">{{ t('change_password.new_password') }}</h3>
                         </div>
 
                         <UForm :state="state" :validate="validateNewPasswordForm" class="flex flex-col gap-3" @submit="updatePassword">
-                            <UFormGroup label="Contraseña" name="password" :hint="''"
+                            <UFormGroup :label="t('change_password.password')" name="password" :hint="''"
                                 :ui="{  
                                     hint: 'hidden',
                                     error: 'hidden'
@@ -421,7 +424,7 @@ const showConfirm = ref(false);
                                             variant="link"
                                             size="sm"
                                             :icon="show ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
-                                            :aria-label="show ? 'Hide password' : 'Show password'"
+                                            :aria-label="show ? t('change_password.hide_password') : t('change_password.show_password')"
                                             :aria-pressed="show"
                                             aria-controls="password"
                                             @click="show = !show"
@@ -435,7 +438,7 @@ const showConfirm = ref(false);
                                 />
                             </UFormGroup>
 
-                            <UFormGroup label="Verifica Contraseña" name="secPasword" :hint="secPasswordError"
+                            <UFormGroup :label="t('change_password.confirm_password')" name="secPasword" :hint="secPasswordError"
                                 :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                                     error: 'hidden'
                                 }">
@@ -459,7 +462,7 @@ const showConfirm = ref(false);
                                             variant="link"
                                             size="sm"
                                             :icon="showConfirm ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
-                                            :aria-label="showConfirm ? 'Hide password' : 'Show password'"
+                                            :aria-label="showConfirm ? t('change_password.hide_password') : t('change_password.show_password')"
                                             :aria-pressed="showConfirm"
                                             aria-controls="password"
                                             @click="showConfirm = !showConfirm"
@@ -474,10 +477,10 @@ const showConfirm = ref(false);
                                     color="gray"
                                     @click="isOpen = false"
                                 >
-                                    Cancelar
+                                    {{ t('change_password.cancel') }}
                                 </UButton>
                                 <UButton type="submit" class="bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                                    Cambiar Contraseña
+                                    {{ t('change_password.update_password') }}
                                 </UButton>
                             </div>
                         </UForm>
