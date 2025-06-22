@@ -8,6 +8,7 @@
   import { Color } from '@tiptap/extension-color'
   import TextStyle from '@tiptap/extension-text-style'
   import Highlight from '@tiptap/extension-highlight'
+  import { useI18n } from 'vue-i18n'
 
   const props = defineProps<{
     modelValue: string
@@ -19,15 +20,16 @@
     (e: 'update:modelValue', value: string): void
   }>()
 
+  const { t } = useI18n()
   const editor = ref<Editor>()
 
   // Map of badge types to their display labels
   const badgeLabels: Record<string, string> = {
-    studentName: 'Nombre del estudiante',
-    courseName: 'Nombre del curso',
-    groupName: 'Nombre del grupo',
-    teacherName: 'Nombre del docente',
-    rubricName: 'Nombre de la rúbrica'
+    studentName: t('email_editor.badge_labels.studentName'),
+    courseName: t('email_editor.badge_labels.courseName'),
+    groupName: t('email_editor.badge_labels.groupName'),
+    teacherName: t('email_editor.badge_labels.teacherName'),
+    rubricName: t('email_editor.badge_labels.rubricName')
   }
 
   // Custom extension for badges

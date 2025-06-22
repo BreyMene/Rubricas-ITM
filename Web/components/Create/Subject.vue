@@ -2,7 +2,9 @@
   const config = useRuntimeConfig();
   import type { iconOptions } from "~/utils/iconList";
   import { useDocenteStore } from "~/utils/store";
+  import { useI18n } from 'vue-i18n';
 
+  const { t } = useI18n();
   const isOpen = ref(false);
   const emit = defineEmits(["addCourse"]);
 
@@ -48,7 +50,7 @@
 
     // Check if course name is empty
     if (courseName.value.trim() === "") {
-      courseNameError.value = "Se requiere un nombre";
+      courseNameError.value = t('create_subject.toasts.name_required');
       return false;
     }
 
@@ -89,7 +91,7 @@
       });
 
       if (!curso) {
-        courseNameError.value = "Error al crear el curso";
+        courseNameError.value = t('create_subject.toasts.error_creating_course');
         return;
       }
 
@@ -98,9 +100,9 @@
       isOpen.value = false;
     }catch(error: any){
       if (error.response?.status === 409) {
-        courseNameError.value = "Ya existe un curso con este nombre";
+        courseNameError.value = t('create_subject.toasts.course_exists');
       }else {
-        courseNameError.value = "Ha ocurrido un error al crear el curso";
+        courseNameError.value = t('create_subject.toasts.generic_error');
       }
     }
   };
@@ -117,14 +119,14 @@
     // Check if it's a valid email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(docenteInput.value)) {
-      docenteInputError.value = "Email inválido";
+      docenteInputError.value = t('create_subject.toasts.invalid_email');
       isDocenteInputValid.value = false;
       return false;
     }
 
     // Check if it ends with the institutional domain
     if (!docenteInput.value.endsWith("@correo.itm.edu.co")) {
-      docenteInputError.value = "Debe usar un correo institucional";
+      docenteInputError.value = t('create_subject.toasts.institutional_email_required');
       isDocenteInputValid.value = false;
       return false;
     }
@@ -138,7 +140,7 @@
     }
 
     if (docenteList.value.some(docente => docente.correo === docenteInput.value)) {
-      docenteInputError.value = "Correo ya ingresado";
+      docenteInputError.value = t('create_subject.toasts.email_already_exists');
       isDocenteInputValid.value = false;
       return;
     }
@@ -227,7 +229,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Crear Curso
+              {{ t('create_subject.title') }}
             </h3>
             <UButton
               color="gray"
@@ -269,7 +271,7 @@
                           : 'text-gray-400 dark:text-Light-Gray',
                       ]"
                     />
-                    <span class="sr-only">Select course icon</span>
+                    <span class="sr-only">{{ t('create_subject.select_icon_label') }}</span>
                   </UButton>
 
                   <template #panel="{ close }">
@@ -278,7 +280,7 @@
                     >
                       <div class="flex justify-between mb-4">
                         <h3 class="text-base font-semibold dark:text-white">
-                          Seleccionar icono
+                          {{ t('create_subject.select_icon_title') }}
                         </h3>
                         <UButton
                           color="gray"
@@ -311,14 +313,14 @@
               </div>
 
               <!-- Left Side - Two Inputs -->
-              <UFormGroup label="Nombre del curso" required :error="!!courseNameError" :hint="courseNameError"
+              <UFormGroup :label="t('create_subject.course_name_label')" required :error="!!courseNameError" :hint="courseNameError"
                 :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
                   v-model="courseName"
                   size="sm"
-                  placeholder="Ingrese el nombre"
+                  :placeholder="t('create_subject.course_name_placeholder')"
                   class="w-full"
                   :ui="{
                     icon: {
@@ -336,13 +338,13 @@
                   @blur="validateCourseName"
                 />
               </UFormGroup>
-              <UFormGroup label="Agregar Docente" :error="!isDocenteInputValid" :hint="docenteInputError"
+              <UFormGroup :label="t('create_subject.add_teacher_label')" :error="!isDocenteInputValid" :hint="docenteInputError"
                 :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
                   size="sm"
-                  placeholder="ejemplo@correo.itm.edu.co"
+                  :placeholder="t('create_subject.teacher_email_placeholder', { atSign: '@' })"
                   class="w-full"
                   v-model="docenteInput"
                   @keyup.enter="addDocente"
@@ -383,13 +385,13 @@
 
           <div class="flex justify-end mt-2 gap-4">
             <UButton variant="link" color="black" @click="isOpen = false">
-              Cancelar
+              {{ t('create_subject.cancel') }}
             </UButton>
             <UButton
               class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
               @click="addCourse"
             >
-              Crear
+              {{ t('create_subject.create') }}
             </UButton>
           </div>
         </div>

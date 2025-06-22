@@ -1,5 +1,8 @@
 <script setup lang="ts">
+    import { useI18n } from 'vue-i18n';
+
     const config = useRuntimeConfig();
+    const { t } = useI18n();
 
     const props = defineProps({
         isMobile: {
@@ -46,9 +49,9 @@
 
         // Check if passwords match first
         if (state.password !== state.secPasword) {
-            secPasswordError.value = props.isMobile ? "" : "Las contraseñas no coinciden";
+            secPasswordError.value = props.isMobile ? "" : t('signIn.form.passwords_do_not_match');
             if (props.isMobile) {
-                formError.value = "Las contraseñas no coinciden";
+                formError.value = t('signIn.form.passwords_do_not_match');
             }
             return;
         }
@@ -56,16 +59,16 @@
         // Check password strength using the utility function
         const passwordValidation = validatePasswordStrength(state.password);
         if (!passwordValidation.isValid) {
-            passwordError.value = props.isMobile ? "" : "La contraseña no cumple con los requisitos mínimos";
+            passwordError.value = props.isMobile ? "" : t('signIn.form.password_requirements');
             if (props.isMobile) {
-                formError.value = "La contraseña no cumple con los requisitos mínimos";
+                formError.value = t('signIn.form.password_requirements');
             }
             return;
         }
 
         try {
             loadScreen.value = true;
-            emit("loadScreen", "Creando Cuenta...", loadScreen.value)
+            emit("loadScreen", t('signIn.loading'), loadScreen.value)
             const docente: Docente = await $fetch(`${config.public.apiUrl}/register`, {
                 method: 'POST',
                 body: {
@@ -78,10 +81,10 @@
             await navigateTo("/")
         } catch (error: any) {
             if (error.statusCode === 401){
-                formError.value = "Este correo ya está registrado";
+                formError.value = t('signIn.form.email_already_registered');
                 emailError.value = props.isMobile ? "" : formError.value;
             }else{
-                formError.value = "Error al registrar. Intente más tarde";
+                formError.value = t('signIn.form.registration_error');
                 emailError.value = props.isMobile ? "" : formError.value;
             }
         }finally {
@@ -103,7 +106,13 @@
         // Clear password error when user starts typing
         if (newPassword.length > 0) {
             passwordError.value = '';
-            if (formError.value.includes('contraseña') || formError.value.includes('requisitos')) {
+            const passwordErrorMessages = [
+                t('signIn.form.password_requirements'),
+                'contraseña', // Keep as fallback for existing errors
+                'requisitos'  // Keep as fallback for existing errors
+            ];
+            
+            if (passwordErrorMessages.some(msg => formError.value.includes(msg))) {
                 formError.value = '';
             }
         }
@@ -114,7 +123,12 @@
         // Clear errors when user starts typing
         if (newConfirmPassword.length > 0) {
             secPasswordError.value = '';
-            if (formError.value.includes('contraseñas no coinciden')) {
+            const mismatchErrorMessages = [
+                t('signIn.form.passwords_do_not_match'),
+                'contraseñas no coinciden' // Keep as fallback for existing errors
+            ];
+            
+            if (mismatchErrorMessages.some(msg => formError.value.includes(msg))) {
                 formError.value = '';
             }
         }
@@ -122,7 +136,7 @@
         // Show real-time validation only if both fields have content
         if (state.password.length > 0 && newConfirmPassword.length > 0) {
             if (state.password !== newConfirmPassword) {
-                secPasswordError.value = props.isMobile ? "" : "Las contraseñas no coinciden";
+                secPasswordError.value = props.isMobile ? "" : t('signIn.form.passwords_do_not_match');
             } else {
                 secPasswordError.value = '';
             }
@@ -138,15 +152,15 @@
             'font-semibold text-Pure-Black dark:text-White-w mb-6',
             isMobile ? 'text-xl text-center' : 'text-2xl text-end'
         ]">
-            REGISTRATE
+            {{ t('signIn.title') }}
         </h2>
         <div class="mb-6">
             <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleSignIn">
-                <UFormGroup label="Email" name="email" :error="formError" :hint="emailError"
+                <UFormGroup :label="t('signIn.form.email_label')" name="email" :error="formError" :hint="emailError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
-                    <UInput size="sm" v-model="state.email" placeholder="ejemplo@correo.itm.edu.co" class="w-full"
+                    <UInput size="sm" v-model="state.email" :placeholder="t('signIn.form.email_placeholder', { atSign: '@' })" class="w-full"
                         :ui="{
                             icon: {
                                 trailing: { pointer: '' }
@@ -162,7 +176,7 @@
                     />
                 </UFormGroup>
 
-                <UFormGroup label="Contraseña" name="password" :hint="''"
+                <UFormGroup :label="t('signIn.form.password_label')" name="password" :hint="''"
                     :ui="{  hint: 'hidden',
                         error: 'hidden'
                     }"
@@ -187,7 +201,7 @@
                                 variant="link"
                                 size="sm"
                                 :icon="show ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
-                                :aria-label="show ? 'Hide password' : 'Show password'"
+                                :aria-label="show ? t('signIn.form.hide_password') : t('signIn.form.show_password')"
                                 :aria-pressed="show"
                                 aria-controls="password"
                                 @click="show = !show"
@@ -201,7 +215,7 @@
                     />
                 </UFormGroup>
 
-                <UFormGroup label="Verifica Contraseña" name="secPasword" :hint="secPasswordError"
+                <UFormGroup :label="t('signIn.form.confirm_password_label')" name="secPasword" :hint="secPasswordError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
@@ -225,7 +239,7 @@
                                 variant="link"
                                 size="sm"
                                 :icon="show2 ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
-                                :aria-label="show2 ? 'Hide password' : 'Show password'"
+                                :aria-label="show2 ? t('signIn.form.hide_password') : t('signIn.form.show_password')"
                                 :aria-pressed="show2"
                                 aria-controls="password"
                                 @click="show2 = !show2"
@@ -235,7 +249,7 @@
                 </UFormGroup>
 
                 <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                    Crear Cuenta
+                    {{ t('signIn.form.submit_button') }}
                 </UButton>
             </UForm>
         </div>
@@ -243,13 +257,13 @@
             'mt-5 flex items-center justify-center',
             isMobile ? 'flex-wrap' : ''
         ]">
-            <p class="text-sm">Ya tienes cuenta?</p>
+            <p class="text-sm">{{ t('signIn.already_have_account') }}</p>
             <UButton
                 variant="link"
                 @click="toggleForm"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >
-                Inicia Sesión Aqui
+                {{ t('signIn.login_here') }}
             </UButton>
         </div>
     </div>

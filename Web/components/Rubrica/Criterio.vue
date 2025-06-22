@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import type { Criterio } from '~/utils/types';
     import { computed } from 'vue';
+    import { useI18n } from 'vue-i18n'
 
     const props = defineProps<{
         row: Criterio,
@@ -49,13 +50,15 @@
     const acumulado = computed(() => {
         return (props.row.peso || 0) * (props.row.calificacion || 0);
     });
+
+    const { t } = useI18n()
 </script>
 
 <template>
     <div class="flex">
       <UInput
         v-model="row.criterio"
-        placeholder="Criterio"
+        :placeholder="t('rubrica.criterio_placeholder')"
         class="flex-none w-[37%] p-3"
         color="gray"
         :disabled="!isModerator"
@@ -74,7 +77,7 @@
         step="0.1"
         min="0"
         max="5"
-        placeholder="Peso"
+        :placeholder="t('rubrica.peso_placeholder')"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
         :disabled="!isModerator"
@@ -95,7 +98,7 @@
         min="0"
         max="1"
         disabled
-        placeholder="Calificación"
+        :placeholder="t('rubrica.calificacion_placeholder')"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
         :ui="{
@@ -124,7 +127,7 @@
       <div class="flex flex-grow p-3 items-center">
         <UInput
           v-model="row.observaciones"
-          placeholder="Observaciones"
+          :placeholder="t('rubrica.observaciones_placeholder')"
           class="flex-grow mr-2"
           color="gray"
           :disabled="!isModerator"

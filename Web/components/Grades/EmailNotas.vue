@@ -2,7 +2,9 @@
 import type { Estudiante, Nota, Rubrica } from '~/utils/types'
 import { useRoute } from 'vue-router'
 import html2pdf from 'html2pdf.js'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n();
 const route = useRoute();
 const props = defineProps<{
   estudiantes: Estudiante[],
@@ -225,7 +227,7 @@ const sendEmails = async () => {
         // Show success toast
         const toast = useToast();
         toast.add({
-            title: 'Emails enviados exitosamente',
+            title: t('emailNotas.toasts.success'),
             icon: "fluent:checkmark-circle-16-filled",
             timeout: 3000,
             ui: {
@@ -256,7 +258,7 @@ const sendEmails = async () => {
         // Show error toast
         const toast = useToast();
         toast.add({
-            title: 'Error al enviar los emails',
+            title: t('emailNotas.toasts.error'),
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
             ui: {
@@ -309,7 +311,7 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
             class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
             @click="openSlideover"
         >
-            Enviar Notas por Email
+            {{ t('emailNotas.send_button') }}
         </UButton>
 
         <!-- Slideover -->
@@ -333,7 +335,7 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                 <template #header>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-semibold leading-6 dark:text-white">
-                            Enviar Notas por Email
+                            {{ t('emailNotas.slideover_title') }}
                         </h3>
                         <UButton
                             color="gray"
@@ -350,15 +352,15 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                         <!-- Students Selection -->
                         <div>
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
-                                Seleccionar Estudiantes
+                                {{ t('emailNotas.select_students') }}
                             </label>
                             <USelectMenu
                                 v-model="selectedStudents"
                                 :options="studentOptions"
                                 multiple
                                 searchable
-                                searchable-placeholder="Buscar estudiante..."
-                                placeholder="Seleccionar estudiantes"
+                                :searchable-placeholder="t('emailNotas.search_student_placeholder')"
+                                :placeholder="t('emailNotas.select_students_placeholder')"
                                 class="w-full"
                                 :ui="{
                                     ring: 'focus:ring-2 focus:ring-Purple-P dark:focus:ring-Muted-Brown focus:ring-offset-2',
@@ -408,7 +410,7 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                         <!-- Nota Selection -->
                         <div>
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
-                                Seleccionar Nota
+                                {{ t('emailNotas.select_nota') }}
                             </label>
                             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                                 <div v-for="nota in props.notas" :key="nota._id"
@@ -429,7 +431,7 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                                             />
                                             <div class="flex-1 min-w-0">
                                                 <p class="font-medium text-Pure-Black dark:text-White-w truncate">
-                                                    Nota {{ nota.numero }}
+                                                    {{ t('emailNotas.nota_label', { number: nota.numero }) }}
                                                 </p>
                                                 <p class="text-xs text-Light-Gray dark:text-MLight-White/50">
                                                     {{ new Date(nota.fecha).toLocaleDateString() }}
@@ -452,12 +454,12 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                         <!-- Email Subject -->
                         <div>
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
-                                Asunto
+                                {{ t('emailNotas.subject_label') }}
                             </label>
                             <GradesEmailEditor
                                 ref="subjectEditor"
                                 v-model="emailSubject"
-                                placeholder="Asunto del email"
+                                :placeholder="t('emailNotas.subject_placeholder')"
                                 type="subject"
                                 class="w-full"
                             />
@@ -466,12 +468,12 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                         <!-- Email Body -->
                         <div>
                             <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
-                                Mensaje
+                                {{ t('emailNotas.body_label') }}
                             </label>
                             <GradesEmailEditor
                                 ref="bodyEditor"
                                 v-model="emailBody"
-                                placeholder="Escribe tu mensaje aquí..."
+                                :placeholder="t('emailNotas.body_placeholder')"
                                 type="body"
                                 class="w-full"
                             />
@@ -481,27 +483,27 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                         <div class="flex flex-wrap gap-2">
                             <GradesDraggablePlaceholder
                                 icon="fluent:person-24-filled"
-                                label="Nombre del estudiante"
+                                :label="t('emailNotas.placeholders.student_name')"
                                 type="studentName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:book-32-filled"
-                                label="Nombre del curso"
+                                :label="t('emailNotas.placeholders.course_name')"
                                 type="courseName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:people-24-filled"
-                                label="Nombre del grupo"
+                                :label="t('emailNotas.placeholders.group_name')"
                                 type="groupName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:person-24-filled"
-                                label="Nombre del docente"
+                                :label="t('emailNotas.placeholders.teacher_name')"
                                 type="teacherName"
                             />
                             <GradesDraggablePlaceholder
                                 icon="fluent:document-24-filled"
-                                label="Nombre de la rúbrica"
+                                :label="t('emailNotas.placeholders.rubric_name')"
                                 type="rubricName"
                             />
                         </div>
@@ -516,7 +518,7 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                             @click="closeSlideover"
                             :disabled="isSending"
                         >
-                            Cancelar
+                            {{ t('emailNotas.cancel_button') }}
                         </UButton>
                         <UButton
                             class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400"
@@ -524,7 +526,7 @@ const handleDrop = (event: DragEvent, field: 'subject' | 'body') => {
                             :loading="isSending"
                             @click="sendEmails"
                         >
-                            Enviar Emails
+                            {{ t('emailNotas.send_emails_button') }}
                         </UButton>
                     </div>
                 </template>

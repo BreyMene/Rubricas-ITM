@@ -1,10 +1,13 @@
 <script setup lang="ts">
     import type { Tema } from '~/utils/types';
+    import { useI18n } from 'vue-i18n'
 
     const props = defineProps<{ 
         tema: Tema, 
         temaIndex: number 
     }>();
+
+    const { t } = useI18n()
 </script>
 
 <template>
@@ -13,7 +16,7 @@
             <UTextarea
                 v-model="tema.nombre"
                 :rows="1"
-                placeholder="Nombre del Tema"
+                :placeholder="t('rubrica.tema_placeholder')"
                 autoresize
                 class="mr-2 flex-grow h-fit"
                 color="gray"

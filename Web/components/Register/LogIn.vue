@@ -1,7 +1,9 @@
 <script setup lang="ts">
 const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const loadScreen = ref(false);
 
 const props = defineProps({
@@ -32,7 +34,7 @@ const handleLogin = async () => {
   
   try {
     loadScreen.value = true;
-    emit("loadScreen", "Iniciando sesión...", loadScreen.value)
+    emit("loadScreen", t('login.loading'), loadScreen.value)
     const docente = await $fetch<Docente>(`${config.public.apiUrl}/login`, {
       method: "POST",
       body: {
@@ -44,7 +46,7 @@ const handleLogin = async () => {
     useDocenteStore().setDocente(docente);
     await navigateTo("/");
   } catch (error) {
-    formError.value = "Credenciales incorrectas";
+    formError.value = t('login.form.invalid_credentials');
     emailError.value = props.isMobile ? "" : formError.value;
   } finally {
     loadScreen.value = false;
@@ -77,7 +79,7 @@ const show = ref(false);
         isMobile ? 'text-xl text-center' : 'text-2xl',
       ]"
     >
-      INICIAR SESION
+      {{ t('login.title') }}
     </h2>
     <div class="mb-6">
       <UForm
@@ -87,7 +89,7 @@ const show = ref(false);
         @submit="handleLogin"
       >
         <UFormGroup
-          label="Email"
+          :label="t('login.form.email_label')"
           name="email"
           :hint="emailError"
           :error="formError"
@@ -101,7 +103,7 @@ const show = ref(false);
           <UInput
             size="sm"
             v-model="state.email"
-            placeholder="ejemplo@correo.itm.edu.co"
+            :placeholder="t('login.form.email_placeholder', { atSign: '@' })"
             class="w-full"
             :ui="{
               icon: {
@@ -120,7 +122,7 @@ const show = ref(false);
         </UFormGroup>
 
         <UFormGroup
-          label="Contraseña"
+          :label="t('login.form.password_label')"
           name="password"
           :hint="passwordError"
           :error="formError"
@@ -153,7 +155,7 @@ const show = ref(false);
                 :icon="
                   show ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'
                 "
-                :aria-label="show ? 'Hide password' : 'Show password'"
+                :aria-label="show ? t('login.form.hide_password') : t('login.form.show_password')"
                 :aria-pressed="show"
                 aria-controls="password"
                 @click="show = !show"
@@ -168,7 +170,7 @@ const show = ref(false);
             class="w-fit text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             @click="showForgotPassword"
           >
-            ¿Olvidaste tu contraseña?
+            {{ t('login.form.forgot_password') }}
           </UButton>
         </div>
 
@@ -176,7 +178,7 @@ const show = ref(false);
           type="submit"
           class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium"
         >
-          Iniciar Sesión
+          {{ t('login.form.submit_button') }}
         </UButton>
       </UForm>
     </div>
@@ -186,13 +188,13 @@ const show = ref(false);
         isMobile ? 'flex-wrap' : '',
       ]"
     >
-      <p class="text-sm">No tienes Cuenta?</p>
+      <p class="text-sm">{{ t('login.no_account') }}</p>
       <UButton
         variant="link"
         @click="toggleForm"
         class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
       >
-        Registrate Aqui
+        {{ t('login.register_here') }}
       </UButton>
     </div>
   </div>

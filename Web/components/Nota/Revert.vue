@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Estudiante, Nota } from '~/utils/types'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     nota: Nota
@@ -14,6 +15,8 @@ const emit = defineEmits<{
     (e: 'reverted'): void
 }>()
 
+const { t } = useI18n()
+
 // Add modal state
 const isConfirmModalOpen = ref(false)
 
@@ -22,8 +25,8 @@ const handleRevertRubric = async () => {
         // Frontend validations
         if (!props.student || !props.student.calificaciones) {
             toast.add({
-                title: 'Error al revertir la rúbrica',
-                description: 'No se encontró la calificación del estudiante',
+                title: t('notaRevert.toasts.revert_error_title'),
+                description: t('notaRevert.toasts.student_grade_not_found'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -54,8 +57,8 @@ const handleRevertRubric = async () => {
         const calificacion = props.student.calificaciones.find(c => c.rubrica.toString() === props.nota.rubrica.toString());
         if (!calificacion) {
             toast.add({
-                title: 'Error al revertir la rúbrica',
-                description: 'No se encontró la calificación para esta nota',
+                title: t('notaRevert.toasts.revert_error_title'),
+                description: t('notaRevert.toasts.nota_grade_not_found'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -83,7 +86,7 @@ const handleRevertRubric = async () => {
             return;
         }
 
-        emit('loadingChange', true, 'Revirtiendo rúbrica...');
+        emit('loadingChange', true, t('notaRevert.loading_message'));
         
         await $fetch(`${config.public.apiUrl}/grades/${props.groupId}/notas/${props.nota.numero}/revert/${props.student.correo}`, {
             method: "POST"
@@ -93,7 +96,7 @@ const handleRevertRubric = async () => {
         emit('reverted');
         
         toast.add({
-            title: 'Rúbrica revertida exitosamente',
+            title: t('notaRevert.toasts.revert_success_title'),
             icon: "fluent:checkmark-circle-16-filled",
             timeout: 3000,
             ui: {
@@ -122,8 +125,8 @@ const handleRevertRubric = async () => {
         console.error("Error reverting rubric:", error);
         emit('loadingChange', false, '');
         toast.add({
-            title: 'Error al revertir la rúbrica',
-            description: 'Ocurrió un error al intentar revertir la rúbrica',
+            title: t('notaRevert.toasts.revert_error_title'),
+            description: t('notaRevert.toasts.revert_error_description'),
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
             ui: {
@@ -161,7 +164,7 @@ const handleRevertRubric = async () => {
             class="hover:bg-Purple-P/10 dark:hover:bg-Muted-Brown/10 transition-colors duration-200"
             @click="isConfirmModalOpen = true"
         >
-            Revertir
+            {{ t('notaRevert.revert_button') }}
         </UButton>
 
         <!-- Confirmation Modal -->
@@ -185,11 +188,11 @@ const handleRevertRubric = async () => {
                 <div class="p-4">
                     <div class="flex items-center mb-4">
                         <UIcon name="fluent:warning-24-filled" class="text-yellow-500 text-2xl mr-2" />
-                        <h3 class="text-lg font-semibold dark:text-white">Confirmar Reversión</h3>
+                        <h3 class="text-lg font-semibold dark:text-white">{{ t('notaRevert.confirm_modal_title') }}</h3>
                     </div>
                     
                     <p class="mb-6 text-gray-700 dark:text-gray-300">
-                        ¿Estás seguro que deseas revertir la calificación de la "Nota {{ nota.numero }}" para {{ student.nombre }}? Esta acción restablecerá la calificación a su estado original.
+                        {{ t('notaRevert.confirm_modal_text', { number: nota.numero, name: student.nombre }) }}
                     </p>
                     
                     <div class="flex justify-end gap-3">
@@ -198,7 +201,7 @@ const handleRevertRubric = async () => {
                             color="gray"
                             @click="isConfirmModalOpen = false"
                         >
-                            Cancelar
+                            {{ t('notaRevert.cancel_button') }}
                         </UButton>
                         <UButton 
                             color="yellow" 
@@ -207,7 +210,7 @@ const handleRevertRubric = async () => {
                                 handleRevertRubric();
                             }"
                         >
-                            Revertir
+                            {{ t('notaRevert.revert_button') }}
                         </UButton>
                     </div>
                 </div>

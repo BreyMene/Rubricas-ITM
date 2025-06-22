@@ -2,6 +2,7 @@
     import type { Criterio } from '~/utils/types';
     import { computed } from 'vue';
     import { useToast } from '#imports';
+    import { useI18n } from 'vue-i18n'
 
     const props = defineProps<{
         row: Criterio,
@@ -9,6 +10,7 @@
     }>();
 
     const toast = useToast();
+    const { t } = useI18n()
 
     const validateCalificacion = (value: number | string): number => {
         const numValue = typeof value === 'string' ? parseFloat(value) : value;
@@ -32,8 +34,8 @@
                 
                 // Show toast notification
                 toast.add({
-                    title: 'Valor no válido',
-                    description: 'El valor ingresado debe ser de 0 a 1',
+                    title: t('rubrica.calificacion'),
+                    description: t('rubrica.calificacion_placeholder'),
                     icon: "fluent:alert-urgent-16-filled",
                     timeout: 3000,
                     ui: {
@@ -81,7 +83,7 @@
     <div class="flex">
       <UInput
         v-model="row.criterio"
-        placeholder="Criterio"
+        :placeholder="t('rubrica.criterio_placeholder')"
         class="flex-none w-[37%] p-3"
         color="gray"
         disabled
@@ -100,7 +102,7 @@
         step="0.1"
         min="0"
         max="5"
-        placeholder="Peso"
+        :placeholder="t('rubrica.peso_placeholder')"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
         disabled
@@ -119,7 +121,7 @@
         step="0.1"
         min="0"
         max="1"
-        placeholder="Calificación"
+        :placeholder="t('rubrica.calificacion_placeholder')"
         class="flex-none w-[12.4%] p-3 text-center"
         color="gray"
         @input="handleCalificacionInput"
@@ -149,7 +151,7 @@
       <div class="flex flex-grow p-3 items-center">
         <UInput
           v-model="row.observaciones"
-          placeholder="Observaciones"
+          :placeholder="t('rubrica.observaciones_placeholder')"
           class="flex-grow mr-2"
           color="gray"
           :ui="{

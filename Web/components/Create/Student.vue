@@ -1,9 +1,12 @@
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n';
+
   const isOpen = ref(false)
   const toast = useToast()
   const config = useRuntimeConfig();
   const route = useRoute();
   const groupId = computed(() => route.params.groupId);
+  const { t } = useI18n();
 
   const estudianteList = ref<Estudiante[]>([])
   const estudianteNombre = ref('');
@@ -39,14 +42,14 @@
     // Check if it's a valid email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(estudianteCorreo.value)) {
-      estudianteCorreoError.value = 'Email inválido';
+      estudianteCorreoError.value = t('create_student.toasts.invalid_email');
       isEstudianteCorreoValid.value = false;
       return false;
     }
 
     // Check if it ends with the institutional domain
     if (!estudianteCorreo.value.endsWith('@correo.itm.edu.co')) {
-      estudianteCorreoError.value = 'Debe usar un correo institucional';
+      estudianteCorreoError.value = t('create_student.toasts.institutional_email_required');
       isEstudianteCorreoValid.value = false;
       return false;
     }
@@ -64,7 +67,7 @@
 
     // Check if student email already exists in the list
     if (estudianteList.value.some(estudiante => estudiante.correo === estudianteCorreo.value)) {
-      estudianteCorreoError.value = 'Correo ya ingresado';
+      estudianteCorreoError.value = t('create_student.toasts.email_already_exists');
       isEstudianteCorreoValid.value = false;
       return;
     }
@@ -119,7 +122,7 @@
         const emailList = alreadyInCourse.join(', ');
 
         toast.add({
-            title: `Algunos estudiantes ya existen`,
+            title: t('create_student.toasts.some_students_exist'),
             description: `${emailList}`,
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
@@ -148,7 +151,7 @@
         })
       }
       else
-        estudianteCorreoError.value = 'Ha ocurrido un error al ingresar los estudiantes'
+        estudianteCorreoError.value = t('create_student.toasts.error_adding_students');
     }
   };
 
@@ -188,7 +191,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Agregar Estudiante
+              {{ t('create_student.title') }}
             </h3>
             <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="isOpen = false" />
           </div>
@@ -212,14 +215,14 @@
 
                 <!-- Inputs -->
                 <div class="space-y-8">
-                  <UFormGroup label="Nombre Estudiante" :error="!isEstudianteNombreValid" :hint="estudianteNombreError"
+                  <UFormGroup :label="t('create_student.name_label')" :error="!isEstudianteNombreValid" :hint="estudianteNombreError"
                     :ui="{
                       hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                     }">
                     <UInput
                       v-model="estudianteNombre"
                       size="sm"
-                      placeholder="Ingrese el nombre"
+                      :placeholder="t('create_student.name_placeholder')"
                       class="w-full"
                       @blur="validateEstudianteNombre"
                       @keyup.enter="addEstudiante"
@@ -236,14 +239,14 @@
                     />
                   </UFormGroup>
 
-                  <UFormGroup label="Correo Estudiante" :error="!isEstudianteCorreoValid" :hint="estudianteCorreoError"
+                  <UFormGroup :label="t('create_student.email_label')" :error="!isEstudianteCorreoValid" :hint="estudianteCorreoError"
                     :ui="{
                       hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                     }">
                     <UInput
                       v-model="estudianteCorreo"
                       size="sm"
-                      placeholder="ejemplo@correo.itm.edu.co"
+                      :placeholder="t('create_student.email_placeholder', { atSign: '@' })"
                       class="w-full"
                       @blur="validateEstudianteCorreo"
                       @keyup.enter="addEstudiante"
@@ -272,10 +275,10 @@
 
           <div class="flex justify-end mt-2 gap-4">
             <UButton variant="link" color="black" @click="isOpen = false">
-              Cancelar
+              {{ t('create_student.cancel') }}
             </UButton>
             <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="saveChanges">
-              Terminar
+              {{ t('create_student.finish') }}
             </UButton>
           </div>
 

@@ -1,5 +1,8 @@
 <script setup lang="ts">
+    import { useI18n } from 'vue-i18n'
+    
     const config = useRuntimeConfig();
+    const { t } = useI18n()
 
     const props = defineProps({
         isMobile: {
@@ -27,7 +30,13 @@
         // Clear password error when user starts typing
         if (newPassword.length > 0) {
             passwordError.value = '';
-            if (formError.value.includes('contraseña') || formError.value.includes('requisitos')) {
+            const passwordErrorMessages = [
+                t('resetPassword.form.password_requirements'),
+                'contraseña', // Keep as fallback for existing errors
+                'requisitos'  // Keep as fallback for existing errors
+            ];
+            
+            if (passwordErrorMessages.some(msg => formError.value.includes(msg))) {
                 formError.value = '';
             }
         }
@@ -38,7 +47,12 @@
         // Clear errors when user starts typing
         if (newConfirmPassword.length > 0) {
             secPasswordError.value = '';
-            if (formError.value.includes('contraseñas no coinciden')) {
+            const mismatchErrorMessages = [
+                t('resetPassword.form.passwords_do_not_match'),
+                'contraseñas no coinciden' // Keep as fallback for existing errors
+            ];
+            
+            if (mismatchErrorMessages.some(msg => formError.value.includes(msg))) {
                 formError.value = '';
             }
         }
@@ -46,13 +60,13 @@
         // Show real-time validation only if both fields have content
         if (state.password.length > 0 && newConfirmPassword.length > 0) {
             if (state.password !== newConfirmPassword) {
-                secPasswordError.value = props.isMobile ? "" : "Las contraseñas no coinciden";
+                secPasswordError.value = props.isMobile ? "" : t('resetPassword.form.passwords_do_not_match');
                 if (props.isMobile) {
-                    formError.value = "Las contraseñas no coinciden";
+                    formError.value = t('resetPassword.form.passwords_do_not_match');
                 }
             } else {
                 secPasswordError.value = '';
-                if (formError.value.includes('contraseñas no coinciden')) {
+                if (formError.value.includes(t('resetPassword.form.passwords_do_not_match'))) {
                     formError.value = '';
                 }
             }
@@ -78,15 +92,15 @@
 
         // Manual validation before submission
         if (!state.password || !state.secPasword) {
-            formError.value = "Todos los campos son requeridos";
+            formError.value = t('resetPassword.form.all_fields_required');
             return;
         }
 
         // Check if passwords match
         if (state.password !== state.secPasword) {
-            secPasswordError.value = props.isMobile ? "" : "Las contraseñas no coinciden";
+            secPasswordError.value = props.isMobile ? "" : t('resetPassword.form.passwords_do_not_match');
             if (props.isMobile) {
-                formError.value = "Las contraseñas no coinciden";
+                formError.value = t('resetPassword.form.passwords_do_not_match');
             }
             return;
         }
@@ -94,9 +108,9 @@
         // Check password strength
         const passwordValidation = validatePasswordStrength(state.password);
         if (!passwordValidation.isValid) {
-            passwordError.value = props.isMobile ? "" : "La contraseña no cumple con los requisitos mínimos";
+            passwordError.value = props.isMobile ? "" : t('resetPassword.form.password_requirements');
             if (props.isMobile) {
-                formError.value = "La contraseña no cumple con los requisitos mínimos";
+                formError.value = t('resetPassword.form.password_requirements');
             }
             return;
         }
@@ -112,7 +126,7 @@
             emit('backToLogin', true);
         } catch (error) {
             console.error('Error:', error);
-            formError.value = "Error al cambiar la contraseña. Intente más tarde";
+            formError.value = t('resetPassword.form.change_password_error');
         }
     }
 
@@ -132,7 +146,7 @@
             'font-semibold text-Pure-Black dark:text-White-w mb-4',
             isMobile ? 'text-xl text-center' : 'text-2xl text-end'
         ]">
-            RESTABLECE TU CONTRASEÑA
+            {{ t('resetPassword.title') }}
         </h2>
 
         <!-- Display general form error for mobile -->
@@ -142,7 +156,7 @@
 
         <div class="mb-6">
             <UForm :state="state" :validate="validate" class="flex flex-col gap-3" @submit="handleChangePassword">
-                <UFormGroup label="Nueva Contraseña" name="password" :hint="''"
+                <UFormGroup :label="t('resetPassword.form.new_password_label')" name="password" :hint="''"
                     :ui="{  hint: 'hidden',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }"
@@ -167,7 +181,7 @@
                                 variant="link"
                                 size="sm"
                                 :icon="show ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
-                                :aria-label="show ? 'Hide password' : 'Show password'"
+                                :aria-label="show ? t('resetPassword.form.hide_password') : t('resetPassword.form.show_password')"
                                 :aria-pressed="show"
                                 aria-controls="password"
                                 @click="show = !show"
@@ -181,7 +195,7 @@
                     />
                 </UFormGroup>
 
-                <UFormGroup label="Confirmar Contraseña" name="secPasword" :hint="secPasswordError"
+                <UFormGroup :label="t('resetPassword.form.confirm_password_label')" name="secPasword" :hint="secPasswordError"
                     :ui="{  hint: 'text-red-500 dark:text-red-500 text-sm',
                         error: isMobile ? 'text-red-500 dark:text-red-500 text-sm' : 'hidden'
                     }">
@@ -205,7 +219,7 @@
                                 variant="link"
                                 size="sm"
                                 :icon="showConfirmPassword ? 'fluent:eye-off-16-filled' : 'fluent:eye-16-filled'"
-                                :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                                :aria-label="showConfirmPassword ? t('resetPassword.form.hide_password') : t('resetPassword.form.show_password')"
                                 :aria-pressed="showConfirmPassword"
                                 aria-controls="password"
                                 @click="showConfirmPassword = !showConfirmPassword"
@@ -215,7 +229,7 @@
                 </UFormGroup>
 
                 <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                    Restablecer Contraseña
+                    {{ t('resetPassword.form.submit_button') }}
                 </UButton>
             </UForm>
         </div>
@@ -228,7 +242,7 @@
                 @click="backToLogin"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >
-                Volver a Inicio de Sesión
+                {{ t('resetPassword.form.back_to_login') }}
             </UButton>
         </div>
     </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import type { Tema } from '~/utils/types';
+    import { useI18n } from 'vue-i18n'
 
     const props = defineProps<{ 
         tema: Tema, 
@@ -8,6 +9,8 @@
     }>();
 
     const emit = defineEmits(['deleteTema', 'addRow', 'deleteRow']);
+
+    const { t } = useI18n()
 
     const deleteTema = () => emit('deleteTema', props.temaIndex);
     const addRow = () => emit('addRow', props.temaIndex);
@@ -20,7 +23,7 @@
             <UTextarea
                 v-model="tema.nombre"
                 :rows="1"
-                placeholder="Nombre del Tema"
+                :placeholder="t('rubrica.tema_placeholder')"
                 autoresize
                 class="mr-2 flex-grow h-fit"
                 color="gray"
@@ -67,7 +70,7 @@
                 @click="addRow()"
                 class="hover:bg-Light-Gray hover:text-White-w hover:dark:bg-Medium-Gray text-Pure-Black/55 dark:text-White-w"
             >
-                Agregar Criterio
+                {{ t('rubrica.add_criterio') }}
             </UButton>
         </div>
     </div>

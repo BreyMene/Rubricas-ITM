@@ -1,4 +1,7 @@
 <script setup lang="ts">
+    import { useI18n } from 'vue-i18n'
+
+    const { t } = useI18n()
     // Ref for the search input
     const searchQuery = ref('');
 
@@ -18,7 +21,7 @@
     <UInput
         v-model="searchQuery"
         icon="fluent:search-12-filled"
-        :placeholder="placeholderText || 'Buscar...' "
+        :placeholder="placeholderText || t('search_bar.placeholder') "
         size="lg"
         class="w-auto sm:w-96"
         :ui="{

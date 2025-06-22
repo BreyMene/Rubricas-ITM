@@ -50,8 +50,353 @@
       "dark": "Oscuro",
       "system": "Sistema"
     },
+    "loading_screen": {
+      "message": "Cargando..."
+    },
+    "search_bar": {"placeholder": "Buscar..."},
     "navbar": {
       "home": "Inicio",
       "rubrics": "Rúbricas"
+    },
+    "people_table": {
+      "columns": {
+        "email": "Correo",
+        "name": "Nombre",
+        "final_grade": "Nota Final"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "remove_moderator": "Quitar moderador",
+        "make_moderator": "Hacer moderador",
+        "edit_email": "Editar Correo"
+      },
+      "toasts": {
+        "user_deleted": {
+          "teacher": "Se eliminó el docente {correo}",
+          "student": "Se eliminó el estudiante {correo}"
+        },
+        "edit_error": "Error al editar",
+        "invalid_email": "Email inválido",
+        "institutional_email_required": "Debe usar un correo institucional",
+        "email_already_exists": "El correo ya existe en la lista"
+      },
+      "empty_state": {
+        "no_teachers": "¡No hay docentes!",
+        "no_students": "¡No hay estudiantes!"
+      }
+    },
+    "analytics": {
+      "grading_progress": {
+        "title": "Estado de calificación",
+        "graded": "Calificado",
+        "pending": "Pendiente"
+      }
+    },
+    "create_group": {
+      "title": "Crear Grupo",
+      "group_name_label": "Nombre del Grupo",
+      "group_name_placeholder": "Ingrese el nombre",
+      "group_name_required": "Se requiere un nombre",
+      "student_name_label": "Nombre Estudiante",
+      "student_name_placeholder": "Ingrese el nombre",
+      "student_email_label": "Correo Estudiante",
+      "student_email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+      "invalid_email": "Email inválido",
+      "institutional_email_required": "Debe usar un correo institucional",
+      "email_already_entered": "Correo ya ingresado",
+      "error_creating_group": "Error al crear grupo",
+      "cancel": "Cancelar",
+      "create": "Crear"
+    },
+    "nota": {
+        "new_nota": "Nueva Nota",
+        "grade_number": "Nota {number}",
+        "rubric": "Rúbrica:",
+        "grade_percentage": "Porcentaje de la nota",
+        "current_total_percentage": "Porcentaje Total Actual",
+        "available_percentage": "Porcentaje Disponible",
+        "creation_info": "Se creará una nueva nota utilizando la rúbrica activa. Esta nota estará disponible para todos los estudiantes del grupo.",
+        "cancel": "Cancelar",
+        "create_nota": "Crear Nota",
+        "no_active_rubric": "NO HAY RÚBRICA ACTIVA",
+        "no_active_rubric_info": "Para crear una nota, primero debes activar una rúbrica en el grupo.",
+        "close": "Cerrar",
+        "toasts": {
+            "invalid_value": "Valor no válido",
+            "invalid_value_desc": "El valor debe estar entre 0 y {percentage}%.",
+            "error_creating": "Error al crear la nota",
+            "percentage_exceeded": "El porcentaje total no puede exceder 100%. Porcentaje actual: {percentage}%",
+            "creation_success": "Nota creada exitosamente",
+            "generic_error": "Error al crear la nota"
+        },
+        "loading": "Creando nota...",
+        "no_rubric_error": "No hay rúbrica activa disponible"
+    },
+    "create_student": {
+        "title": "Agregar Estudiante",
+        "name_label": "Nombre Estudiante",
+        "name_placeholder": "Ingrese el nombre",
+        "email_label": "Correo Estudiante",
+        "email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+        "cancel": "Cancelar",
+        "finish": "Terminar",
+        "toasts": {
+            "invalid_email": "Email inválido",
+            "institutional_email_required": "Debe usar un correo institucional",
+            "email_already_exists": "Correo ya ingresado",
+            "some_students_exist": "Algunos estudiantes ya existen",
+            "error_adding_students": "Ha ocurrido un error al ingresar los estudiantes"
+        }
+    },
+    "create_subject": {
+        "title": "Crear Curso",
+        "select_icon_label": "Seleccionar icono del curso",
+        "select_icon_title": "Seleccionar icono",
+        "course_name_label": "Nombre del curso",
+        "course_name_placeholder": "Ingrese el nombre",
+        "add_teacher_label": "Agregar Docente",
+        "teacher_email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+        "cancel": "Cancelar",
+        "create": "Crear",
+        "toasts": {
+            "name_required": "Se requiere un nombre",
+            "error_creating_course": "Error al crear el curso",
+            "course_exists": "Ya existe un curso con este nombre",
+            "generic_error": "Ha ocurrido un error al crear el curso",
+            "invalid_email": "Email inválido",
+            "institutional_email_required": "Debe usar un correo institucional",
+            "email_already_exists": "Correo ya ingresado"
+        }
+    },
+    "create_teacher": {
+        "title": "Agregar Docente",
+        "add_teacher_label": "Agregar Docente",
+        "teacher_email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+        "cancel": "Cancelar",
+        "finish": "Terminar",
+        "toasts": {
+            "invalid_email": "Email inválido",
+            "institutional_email_required": "Debe usar un correo institucional",
+            "email_already_exists": "Correo ya ingresado",
+            "some_teachers_exist": "Algunos docentes ya existen en el curso",
+            "error_adding_teachers": "Ha ocurrido un error al ingresar los docentes"
+        }
+    },
+    "email_editor": {
+        "badge_labels": {
+            "studentName": "Nombre del estudiante",
+            "courseName": "Nombre del curso",
+            "groupName": "Nombre del grupo",
+            "teacherName": "Nombre del docente",
+            "rubricName": "Nombre de la rúbrica"
+        }
+    },
+    "emailNotas": {
+      "send_button": "Enviar Notas por Email",
+      "slideover_title": "Enviar Notas por Email",
+      "select_students": "Seleccionar Estudiantes",
+      "search_student_placeholder": "Buscar estudiante...",
+      "select_students_placeholder": "Seleccionar estudiantes",
+      "select_nota": "Seleccionar Nota",
+      "nota_label": "Nota {number}",
+      "subject_label": "Asunto",
+      "subject_placeholder": "Asunto del email",
+      "body_label": "Mensaje",
+      "body_placeholder": "Escribe tu mensaje aquí...",
+      "cancel_button": "Cancelar",
+      "send_emails_button": "Enviar Emails",
+      "toasts": {
+        "success": "Emails enviados exitosamente",
+        "error": "Error al enviar los emails"
+      },
+      "placeholders": {
+        "student_name": "Nombre del estudiante",
+        "course_name": "Nombre del curso",
+        "group_name": "Nombre del grupo",
+        "teacher_name": "Nombre del docente",
+        "rubric_name": "Nombre de la rúbrica"
+      }
+    },
+    "notaPercentage": {
+      "toasts": {
+        "error_title": "Error",
+        "percentage_range_error": "El porcentaje debe estar entre 0 y {percentage}%",
+        "update_error_title": "Error al actualizar el porcentaje"
+      }
+    },
+    "notaRevert": {
+      "toasts": {
+        "revert_error_title": "Error al revertir la rúbrica",
+        "student_grade_not_found": "No se encontró la calificación del estudiante",
+        "nota_grade_not_found": "No se encontró la calificación para esta nota",
+        "revert_success_title": "Rúbrica revertida exitosamente",
+        "revert_error_description": "Ocurrió un error al intentar revertir la rúbrica"
+      },
+      "loading_message": "Revirtiendo rúbrica...",
+      "revert_button": "Revertir",
+      "confirm_modal_title": "Confirmar Reversión",
+      "confirm_modal_text": "Estás seguro que deseas revertir la calificación de la \"Nota {number}\" para {name}? Esta acción restablecerá la calificación a su estado original.",
+      "cancel_button": "Cancelar"
+    },
+    "login": {
+      "title": "INICIAR SESIÓN",
+      "loading": "Iniciando sesión...",
+      "no_account": "¿No tienes Cuenta?",
+      "register_here": "Regístrate Aquí",
+      "form": {
+        "email_label": "Email",
+        "email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+        "password_label": "Contraseña",
+        "hide_password": "Ocultar contraseña",
+        "show_password": "Mostrar contraseña",
+        "forgot_password": "¿Olvidaste tu contraseña?",
+        "submit_button": "Iniciar Sesión",
+        "invalid_credentials": "Credenciales incorrectas"
+      }
+    },
+    "signIn": {
+      "title": "REGÍSTRATE",
+      "loading": "Creando Cuenta...",
+      "already_have_account": "¿Ya tienes cuenta?",
+      "login_here": "Inicia Sesión Aquí",
+      "form": {
+        "email_label": "Email",
+        "email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+        "password_label": "Contraseña",
+        "confirm_password_label": "Verifica Contraseña",
+        "hide_password": "Ocultar contraseña",
+        "show_password": "Mostrar contraseña",
+        "submit_button": "Crear Cuenta",
+        "passwords_do_not_match": "Las contraseñas no coinciden",
+        "password_requirements": "La contraseña no cumple con los requisitos mínimos",
+        "email_already_registered": "Este correo ya está registrado",
+        "registration_error": "Error al registrar. Intente más tarde"
+      }
+    },
+    "forgotPassword": {
+      "title": "RECUPERAR CONTRASEÑA",
+      "error": "Error:",
+      "back_to_login": "Volver a Iniciar Sesión",
+      "form": {
+        "email_label": "Email",
+        "email_placeholder": "ejemplo{atSign}correo.itm.edu.co",
+        "submit_button": "Enviar Código"
+      }
+    },
+    "otp": {
+      "title": "INGRESA EL CÓDIGO DE VERIFICACIÓN",
+      "code_sent_message": "Se ha enviado un código a tu correo electrónico",
+      "verify_code": "Verificar Código",
+      "didnt_receive_code": "¿No recibiste el código?",
+      "resend_code": "Reenviar código",
+      "back_to_password_recovery": "Volver a Recuperación de Contraseña",
+      "incomplete_code": "Código incompleto",
+      "error_getting_code": "Error al obtener el código",
+      "invalid_expired_code": "Código inválido o expirado",
+      "error_resending_code": "Error al reenviar el código"
+    },
+    "resetPassword": {
+      "title": "RESTABLECE TU CONTRASEÑA",
+      "form": {
+        "new_password_label": "Nueva Contraseña",
+        "confirm_password_label": "Confirmar Contraseña",
+        "submit_button": "Restablecer Contraseña",
+        "back_to_login": "Volver a Inicio de Sesión",
+        "hide_password": "Ocultar contraseña",
+        "show_password": "Mostrar contraseña",
+        "all_fields_required": "Todos los campos son requeridos",
+        "passwords_do_not_match": "Las contraseñas no coinciden",
+        "password_requirements": "La contraseña no cumple con los requisitos mínimos",
+        "change_password_error": "Error al cambiar la contraseña. Intente más tarde"
+      }
+    },
+    "rubrica": {
+      "criterio": "Criterio",
+      "tema": "Tema",
+      "peso": "Peso",
+      "calificacion": "Calificación",
+      "observaciones": "Observaciones",
+      "add_criterio": "Agregar Criterio",
+      "delete_criterio": "Eliminar Criterio",
+      "criterio_placeholder": "Describe el criterio",
+      "tema_placeholder": "Nombre del Tema",
+      "peso_placeholder": "Peso (0-5)",
+      "calificacion_placeholder": "Calificación (0-1)",
+      "observaciones_placeholder": "Observaciones",
+      "preview_access_denied": "Acceso Restringido",
+      "preview_no_permission": "No tienes permisos para ver el contenido",
+      "preview_title": "Vista Previa",
+      "preview_instruction": "Pasa el cursor para ver detalles",
+      "preview_loading": "Cargando detalles...",
+      "preview_table_tema": "Tema",
+      "preview_table_criterio": "Criterio",
+      "preview_table_peso": "Peso",
+      "preview_table_cal": "Cal",
+      "preview_table_acum": "Acum",
+      "preview_table_obs": "Obs"
+    },
+    "courseSettings": {
+      "modal_title": "Ajustes del Curso",
+      "icon_section_title": "Ícono del Curso",
+      "icon_section_hint": "Haz clic en el icono para cambiarlo",
+      "icon_select_title": "Seleccionar icono",
+      "icon_select_sr": "Seleccionar icono del curso",
+      "course_name_label": "Nombre del Curso",
+      "course_name_placeholder": "Ingrese el nombre del curso",
+      "course_name_required": "Se requiere un nombre",
+      "save_changes": "Guardar Cambios",
+      "cancel": "Cancelar",
+      "danger_zone_title": "Zona de Peligro",
+      "danger_zone_warning": "Eliminar un curso es una acción permanente y no puede ser revertida. Se eliminarán todos los grupos y datos asociados.",
+      "delete_course": "Eliminar Curso",
+      "delete_confirm_title": "Confirmar Eliminación",
+      "delete_confirm_message": "¿Estás seguro que deseas eliminar este curso? Esta acción es irreversible.",
+      "delete": "Eliminar",
+      "toast_no_changes_title": "Sin cambios",
+      "toast_no_changes_desc": "No se realizaron cambios en el curso.",
+      "toast_update_success_title": "Actualización Exitosa",
+      "toast_update_success_desc": "El curso \"{course}\" se actualizó con éxito",
+      "toast_update_error": "Error al actualizar el curso",
+      "toast_delete_success_title": "Eliminación Exitosa",
+      "toast_delete_success_desc": "El curso \"{course}\" se eliminó con éxito",
+      "toast_delete_fail_title": "Eliminación Fallida",
+      "toast_delete_fail_desc": "El curso \"{course}\" no se pudo eliminar"
+    },
+    "groupSettings": {
+      "modal_title": "Ajustes del Grupo",
+      "group_name_label": "Nombre del Grupo",
+      "group_name_placeholder": "Ingrese el nombre del grupo",
+      "group_name_required": "Se requiere un nombre",
+      "save_changes": "Guardar Cambios",
+      "cancel": "Cancelar",
+      "danger_zone_title": "Zona de Peligro",
+      "danger_zone_warning": "Eliminar un grupo es una acción permanente y no puede ser revertida. Se eliminarán todos los datos asociados.",
+      "delete_group": "Eliminar Grupo",
+      "delete_confirm_title": "Confirmar Eliminación",
+      "delete_confirm_message": "¿Estás seguro que deseas eliminar este grupo? Esta acción es irreversible.",
+      "delete": "Eliminar",
+      "toast_no_changes_title": "Sin cambios",
+      "toast_no_changes_desc": "No se realizaron cambios en el grupo.",
+      "toast_update_success_title": "Actualización Exitosa",
+      "toast_update_success_desc": "El grupo {group} se actualizó con éxito",
+      "toast_update_error": "Error al actualizar el grupo",
+      "toast_update_conflict": "El grupo ya existe",
+      "toast_delete_success_title": "Eliminación Exitosa",
+      "toast_delete_success_desc": "El grupo {group} se eliminó con éxito",
+      "toast_delete_fail_title": "Eliminación Fallida",
+      "toast_delete_fail_desc": "El grupo {group} no se pudo eliminar"
+    },
+    "passwordValidator": {
+      "strength_label": "Fortaleza de la contraseña",
+      "very_weak": "Muy débil",
+      "weak": "Débil",
+      "medium": "Media",
+      "strong": "Fuerte",
+      "requirement_length": "Al menos 8 caracteres",
+      "requirement_uppercase": "Una letra mayúscula",
+      "requirement_lowercase": "Una letra minúscula",
+      "requirement_number": "Un número",
+      "requirement_special": "Un carácter especial ({special})"
     }
 }

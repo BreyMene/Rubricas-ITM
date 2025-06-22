@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import type { Nota } from '~/utils/types'
+    import { useI18n } from 'vue-i18n'
 
     interface Props {
         nota: Nota
@@ -10,6 +11,7 @@
     const props = defineProps<Props>()
     const config = useRuntimeConfig()
     const toast = useToast()
+    const { t } = useI18n()
 
     const isEditing = ref(false)
     const editingValue = ref(0)
@@ -38,8 +40,8 @@
             // Validate the value
             if (editingValue.value < 0 || editingValue.value > remainingPercentage) {
                 toast.add({
-                    title: 'Error',
-                    description: `El porcentaje debe estar entre 0 y ${remainingPercentage}%`,
+                    title: t('notaPercentage.toasts.error_title'),
+                    description: t('notaPercentage.toasts.percentage_range_error', { percentage: remainingPercentage }),
                     icon: "fluent:alert-urgent-16-filled",
                     timeout: 3000,
                     ui: {
@@ -72,7 +74,7 @@
         } catch (error) {
             console.error("Error updating percentage:", error)
             toast.add({
-                title: 'Error al actualizar el porcentaje',
+                title: t('notaPercentage.toasts.update_error_title'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {

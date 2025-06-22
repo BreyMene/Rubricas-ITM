@@ -1,38 +1,43 @@
 <script setup lang="ts">
-defineProps({
-  isLoading: {
-    type: Boolean,
-    default: false
-  },
-  message: {
-    type: String,
-    default: 'Cargando...'
-  },
-  fullscreen: {
-    type: Boolean,
-    default: false
-  },
-  // Option to remove transparent background
-  noBackground: {
-    type: Boolean,
-    default: false
-  },
-  // Option to remove spinner background
-  noSpinnerBackground: {
-    type: Boolean,
-    default: false
-  },
-  spinnerSize: {
-    type: String as PropType<'sm' | 'md' | 'lg'>,
-    default: 'md'
-  }
-});
+  import { useI18n } from 'vue-i18n'
 
-const spinnerSizes: Record<string, string> = {
-  sm: 'h-4 w-4 border-2',
-  md: 'h-8 w-8 border-2',
-  lg: 'h-12 w-12 border-4'
-}
+  defineProps({
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    message: {
+      type: String,
+      default: () => {
+        const { t } = useI18n()
+        return t('loading_screen.message')
+      }
+    },
+    fullscreen: {
+      type: Boolean,
+      default: false
+    },
+    // Option to remove transparent background
+    noBackground: {
+      type: Boolean,
+      default: false
+    },
+    // Option to remove spinner background
+    noSpinnerBackground: {
+      type: Boolean,
+      default: false
+    },
+    spinnerSize: {
+      type: String as PropType<'sm' | 'md' | 'lg'>,
+      default: 'md'
+    }
+  });
+
+  const spinnerSizes: Record<string, string> = {
+    sm: 'h-4 w-4 border-2',
+    md: 'h-8 w-8 border-2',
+    lg: 'h-12 w-12 border-4'
+  }
 </script>
 
 <template>

@@ -50,8 +50,353 @@
       "dark": "Dark",
       "system": "System"
     },
+    "loading_screen": {
+      "message": "Loading..."
+    },
+    "search_bar": {"placeholder": "Search..."},
     "navbar": {
       "home": "Home",
       "rubrics": "Rubrics"
+    },
+    "people_table": {
+      "columns": {
+        "email": "Email",
+        "name": "Name",
+        "final_grade": "Final Grade"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "remove_moderator": "Remove Moderator",
+        "make_moderator": "Make Moderator",
+        "edit_email": "Edit Email"
+      },
+      "toasts": {
+        "user_deleted": {
+          "teacher": "Teacher {correo} was deleted",
+          "student": "Student {correo} was deleted"
+        },
+        "edit_error": "Error while editing",
+        "invalid_email": "Invalid email",
+        "institutional_email_required": "An institutional email is required",
+        "email_already_exists": "The email already exists in the list"
+      },
+      "empty_state": {
+        "no_teachers": "No teachers!",
+        "no_students": "No students!"
+      }
+    },
+    "analytics": {
+      "grading_progress": {
+        "title": "Grading Status",
+        "graded": "Graded",
+        "pending": "Pending"
+      }
+    },
+    "create_group": {
+      "title": "Create Group",
+      "group_name_label": "Group Name",
+      "group_name_placeholder": "Enter the name",
+      "group_name_required": "A name is required",
+      "student_name_label": "Student Name",
+      "student_name_placeholder": "Enter the name",
+      "student_email_label": "Student Email",
+      "student_email_placeholder": "example{atSign}correo.itm.edu.co",
+      "invalid_email": "Invalid email",
+      "institutional_email_required": "Must use an institutional email",
+      "email_already_entered": "Email already entered",
+      "error_creating_group": "Error creating group",
+      "cancel": "Cancel",
+      "create": "Create"
+    },
+    "nota": {
+        "new_nota": "New Grade",
+        "grade_number": "Grade {number}",
+        "rubric": "Rubric:",
+        "grade_percentage": "Grade Percentage",
+        "current_total_percentage": "Current Total Percentage",
+        "available_percentage": "Available Percentage",
+        "creation_info": "A new grade will be created using the active rubric. This grade will be available to all students in the group.",
+        "cancel": "Cancel",
+        "create_nota": "Create Grade",
+        "no_active_rubric": "NO ACTIVE RUBRIC",
+        "no_active_rubric_info": "To create a grade, you must first activate a rubric in the group.",
+        "close": "Close",
+        "toasts": {
+            "invalid_value": "Invalid Value",
+            "invalid_value_desc": "The value must be between 0 and {percentage}%.",
+            "error_creating": "Error creating grade",
+            "percentage_exceeded": "Total percentage cannot exceed 100%. Current percentage: {percentage}%",
+            "creation_success": "Grade created successfully",
+            "generic_error": "Error creating grade"
+        },
+        "loading": "Creating grade...",
+        "no_rubric_error": "No active rubric available"
+    },
+    "create_student": {
+        "title": "Add Student",
+        "name_label": "Student Name",
+        "name_placeholder": "Enter the name",
+        "email_label": "Student Email",
+        "email_placeholder": "example{atSign}correo.itm.edu.co",
+        "cancel": "Cancel",
+        "finish": "Finish",
+        "toasts": {
+            "invalid_email": "Invalid email",
+            "institutional_email_required": "Must use an institutional email",
+            "email_already_exists": "Email already entered",
+            "some_students_exist": "Some students already exist",
+            "error_adding_students": "An error occurred while adding students"
+        }
+    },
+    "create_subject": {
+        "title": "Create Course",
+        "select_icon_label": "Select course icon",
+        "select_icon_title": "Select icon",
+        "course_name_label": "Course Name",
+        "course_name_placeholder": "Enter the name",
+        "add_teacher_label": "Add Teacher",
+        "teacher_email_placeholder": "example{atSign}correo.itm.edu.co",
+        "cancel": "Cancel",
+        "create": "Create",
+        "toasts": {
+            "name_required": "A name is required",
+            "error_creating_course": "Error creating the course",
+            "course_exists": "A course with this name already exists",
+            "generic_error": "An error occurred while creating the course",
+            "invalid_email": "Invalid email",
+            "institutional_email_required": "Must use an institutional email",
+            "email_already_exists": "Email already entered"
+        }
+    },
+    "create_teacher": {
+        "title": "Add Teacher",
+        "add_teacher_label": "Add Teacher",
+        "teacher_email_placeholder": "example{atSign}correo.itm.edu.co",
+        "cancel": "Cancel",
+        "finish": "Finish",
+        "toasts": {
+            "invalid_email": "Invalid email",
+            "institutional_email_required": "Must use an institutional email",
+            "email_already_exists": "Email already entered",
+            "some_teachers_exist": "Some teachers already exist in the course",
+            "error_adding_teachers": "An error occurred while adding teachers"
+        }
+    },
+    "email_editor": {
+        "badge_labels": {
+            "studentName": "Student Name",
+            "courseName": "Course Name",
+            "groupName": "Group Name",
+            "teacherName": "Teacher Name",
+            "rubricName": "Rubric Name"
+        }
+    },
+    "emailNotas": {
+      "send_button": "Send Grades by Email",
+      "slideover_title": "Send Grades by Email",
+      "select_students": "Select Students",
+      "search_student_placeholder": "Search student...",
+      "select_students_placeholder": "Select students",
+      "select_nota": "Select Grade",
+      "nota_label": "Grade {number}",
+      "subject_label": "Subject",
+      "subject_placeholder": "Email subject",
+      "body_label": "Message",
+      "body_placeholder": "Write your message here...",
+      "cancel_button": "Cancel",
+      "send_emails_button": "Send Emails",
+      "toasts": {
+        "success": "Emails sent successfully",
+        "error": "Error sending emails"
+      },
+      "placeholders": {
+        "student_name": "Student Name",
+        "course_name": "Course Name",
+        "group_name": "Group Name",
+        "teacher_name": "Teacher Name",
+        "rubric_name": "Rubric Name"
+      }
+    },
+    "notaPercentage": {
+      "toasts": {
+        "error_title": "Error",
+        "percentage_range_error": "The percentage must be between 0 and {percentage}%",
+        "update_error_title": "Error updating percentage"
+      }
+    },
+    "notaRevert": {
+      "toasts": {
+        "revert_error_title": "Error reverting rubric",
+        "student_grade_not_found": "Student grade not found",
+        "nota_grade_not_found": "Grade for this nota not found",
+        "revert_success_title": "Rubric reverted successfully",
+        "revert_error_description": "An error occurred while trying to revert the rubric"
+      },
+      "loading_message": "Reverting rubric...",
+      "revert_button": "Revert",
+      "confirm_modal_title": "Confirm Reversion",
+      "confirm_modal_text": "Are you sure you want to revert the grade for 'Grade {number}' for {name}? This action will reset the grade to its original state.",
+      "cancel_button": "Cancel"
+    },
+    "login": {
+      "title": "LOG IN",
+      "loading": "Logging in...",
+      "no_account": "Don't have an account?",
+      "register_here": "Register Here",
+      "form": {
+        "email_label": "Email",
+        "email_placeholder": "example{atSign}correo.itm.edu.co",
+        "password_label": "Password",
+        "hide_password": "Hide password",
+        "show_password": "Show password",
+        "forgot_password": "Forgot your password?",
+        "submit_button": "Log In",
+        "invalid_credentials": "Incorrect credentials"
+      }
+    },
+    "signIn": {
+      "title": "SIGN UP",
+      "loading": "Creating Account...",
+      "already_have_account": "Already have an account?",
+      "login_here": "Log In Here",
+      "form": {
+        "email_label": "Email",
+        "email_placeholder": "example{atSign}correo.itm.edu.co",
+        "password_label": "Password",
+        "confirm_password_label": "Confirm Password",
+        "hide_password": "Hide password",
+        "show_password": "Show password",
+        "submit_button": "Create Account",
+        "passwords_do_not_match": "Passwords do not match",
+        "password_requirements": "Password does not meet minimum requirements",
+        "email_already_registered": "This email is already registered",
+        "registration_error": "Error registering. Please try again later"
+      }
+    },
+    "forgotPassword": {
+      "title": "RECOVER PASSWORD",
+      "error": "Error:",
+      "back_to_login": "Back to Log In",
+      "form": {
+        "email_label": "Email",
+        "email_placeholder": "example{atSign}correo.itm.edu.co",
+        "submit_button": "Send Code"
+      }
+    },
+    "otp": {
+      "title": "ENTER VERIFICATION CODE",
+      "code_sent_message": "A code has been sent to your email",
+      "verify_code": "Verify Code",
+      "didnt_receive_code": "Didn't receive the code?",
+      "resend_code": "Resend code",
+      "back_to_password_recovery": "Back to Password Recovery",
+      "incomplete_code": "Incomplete code",
+      "error_getting_code": "Error getting the code",
+      "invalid_expired_code": "Invalid or expired code",
+      "error_resending_code": "Error resending the code"
+    },
+    "resetPassword": {
+      "title": "RESET YOUR PASSWORD",
+      "form": {
+        "new_password_label": "New Password",
+        "confirm_password_label": "Confirm Password",
+        "submit_button": "Reset Password",
+        "back_to_login": "Back to Log In",
+        "hide_password": "Hide password",
+        "show_password": "Show password",
+        "all_fields_required": "All fields are required",
+        "passwords_do_not_match": "Passwords do not match",
+        "password_requirements": "The password does not meet the minimum requirements",
+        "change_password_error": "Error changing password. Please try again later"
+      }
+    },
+    "rubrica": {
+      "criterio": "Criterion",
+      "tema": "Topic",
+      "peso": "Weight",
+      "calificacion": "Grade",
+      "observaciones": "Observations",
+      "add_criterio": "Add Criterion",
+      "delete_criterio": "Delete Criterion",
+      "criterio_placeholder": "Describe the criterion",
+      "tema_placeholder": "Topic Name",
+      "peso_placeholder": "Weight (0-5)",
+      "calificacion_placeholder": "Grade (0-1)",
+      "observaciones_placeholder": "Observations",
+      "preview_access_denied": "Access Denied",
+      "preview_no_permission": "You do not have permission to view the content",
+      "preview_title": "Preview",
+      "preview_instruction": "Hover to see details",
+      "preview_loading": "Loading details...",
+      "preview_table_tema": "Topic",
+      "preview_table_criterio": "Criterion",
+      "preview_table_peso": "Weight",
+      "preview_table_cal": "Grade",
+      "preview_table_acum": "Accum.",
+      "preview_table_obs": "Obs."
+    },
+    "courseSettings": {
+      "modal_title": "Course Settings",
+      "icon_section_title": "Course Icon",
+      "icon_section_hint": "Click the icon to change it",
+      "icon_select_title": "Select icon",
+      "icon_select_sr": "Select course icon",
+      "course_name_label": "Course Name",
+      "course_name_placeholder": "Enter the course name",
+      "course_name_required": "A name is required",
+      "save_changes": "Save Changes",
+      "cancel": "Cancel",
+      "danger_zone_title": "Danger Zone",
+      "danger_zone_warning": "Deleting a course is permanent and cannot be undone. All groups and associated data will be deleted.",
+      "delete_course": "Delete Course",
+      "delete_confirm_title": "Confirm Deletion",
+      "delete_confirm_message": "Are you sure you want to delete this course? This action is irreversible.",
+      "delete": "Delete",
+      "toast_no_changes_title": "No changes",
+      "toast_no_changes_desc": "No changes were made to the course.",
+      "toast_update_success_title": "Update Successful",
+      "toast_update_success_desc": "The course \"{course}\" was updated successfully",
+      "toast_update_error": "Error updating the course",
+      "toast_delete_success_title": "Deletion Successful",
+      "toast_delete_success_desc": "The course \"{course}\" was deleted successfully",
+      "toast_delete_fail_title": "Deletion Failed",
+      "toast_delete_fail_desc": "The course \"{course}\" could not be deleted"
+    },
+    "groupSettings": {
+      "modal_title": "Group Settings",
+      "group_name_label": "Group Name",
+      "group_name_placeholder": "Enter the group name",
+      "group_name_required": "A name is required",
+      "save_changes": "Save Changes",
+      "cancel": "Cancel",
+      "danger_zone_title": "Danger Zone",
+      "danger_zone_warning": "Deleting a group is permanent and cannot be undone. All associated data will be deleted.",
+      "delete_group": "Delete Group",
+      "delete_confirm_title": "Confirm Deletion",
+      "delete_confirm_message": "Are you sure you want to delete this group? This action is irreversible.",
+      "delete": "Delete",
+      "toast_no_changes_title": "No changes",
+      "toast_no_changes_desc": "No changes were made to the group.",
+      "toast_update_success_title": "Update Successful",
+      "toast_update_success_desc": "The group {group} was updated successfully",
+      "toast_update_error": "Error updating the group",
+      "toast_update_conflict": "Group already exists",
+      "toast_delete_success_title": "Deletion Successful",
+      "toast_delete_success_desc": "The group {group} was deleted successfully",
+      "toast_delete_fail_title": "Deletion Failed",
+      "toast_delete_fail_desc": "The group {group} could not be deleted"
+    },
+    "passwordValidator": {
+      "strength_label": "Password strength",
+      "very_weak": "Very weak",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong",
+      "requirement_length": "At least 8 characters",
+      "requirement_uppercase": "An uppercase letter",
+      "requirement_lowercase": "A lowercase letter",
+      "requirement_number": "A number",
+      "requirement_special": "A special character ({special})"
     }
 }

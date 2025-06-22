@@ -2,6 +2,8 @@
   const config = useRuntimeConfig();
   const route = useRoute();
   import { useDocenteStore } from "~/utils/store";
+  import { useI18n } from 'vue-i18n';
+  const { t } = useI18n();
 
   const isOpen = ref(false);
   const emit = defineEmits(['addGroup']);
@@ -25,7 +27,7 @@
 
     // Check if group name is empty
     if (groupName.value.trim() === '') {
-      groupNameError.value = 'Se requiere un nombre';
+      groupNameError.value = t('create_group.group_name_required');
       isGroupNameValid.value = false;
       return false;
     }
@@ -59,14 +61,14 @@
     // Check if it's a valid email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(estudianteCorreo.value)) {
-      estudianteCorreoError.value = 'Email inválido';
+      estudianteCorreoError.value = t('create_group.invalid_email');
       isEstudianteCorreoValid.value = false;
       return false;
     }
 
     // Check if it ends with the institutional domain
     if (!estudianteCorreo.value.endsWith('@correo.itm.edu.co')) {
-      estudianteCorreoError.value = 'Debe usar un correo institucional';
+      estudianteCorreoError.value = t('create_group.institutional_email_required');
       isEstudianteCorreoValid.value = false;
       return false;
     }
@@ -84,7 +86,7 @@
 
     // Check if student email already exists in the list
     if (estudianteList.value.some(estudiante => estudiante.correo === estudianteCorreo.value)) {
-      estudianteCorreoError.value = 'Correo ya ingresado';
+      estudianteCorreoError.value = t('create_group.email_already_entered');
       isEstudianteCorreoValid.value = false;
       return;
     }
@@ -129,7 +131,7 @@
     });
 
     if (!grupo) {
-      groupNameError.value = "Error al crear grupo";
+      groupNameError.value = t('create_group.error_creating_group');
       return;
     }
 
@@ -194,7 +196,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Crear Grupo
+              {{ t('create_group.title') }}
             </h3>
             <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="isOpen = false" />
           </div>
@@ -206,11 +208,11 @@
           <div class="flex flex-col md:flex-row gap-9">
             <div class="md:w-2/5 space-y-7 my-auto">
               <!-- Left Side - Two Inputs -->
-              <UFormGroup label="Nombre del Grupo" required :error="!isGroupNameValid" :hint="groupNameError"
+              <UFormGroup :label="t('create_group.group_name_label')" required :error="!isGroupNameValid" :hint="groupNameError"
                 :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
-                <UInput v-model="groupName" size="sm" placeholder="Ingrese el nombre" class="w-full" @blur="validateGroupName"
+                <UInput v-model="groupName" size="sm" :placeholder="t('create_group.group_name_placeholder')" class="w-full" @blur="validateGroupName"
                   :ui="{
                     icon: {
                           trailing: { pointer: '' }
@@ -238,14 +240,14 @@
 
                 <!-- Inputs -->
                 <div class="space-y-8">
-                  <UFormGroup label="Nombre Estudiante" :error="!isEstudianteNombreValid" :hint="estudianteNombreError"
+                  <UFormGroup :label="t('create_group.student_name_label')" :error="!isEstudianteNombreValid" :hint="estudianteNombreError"
                     :ui="{
                       hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                     }">
                     <UInput
                       size="sm"
                       v-model="estudianteNombre"
-                      placeholder="Ingrese el nombre"
+                      :placeholder="t('create_group.student_name_placeholder')"
                       class="w-full"
                       @blur="validateEstudianteNombre"
                       @keyup.enter="addEstudiante"
@@ -262,14 +264,14 @@
                     />
                   </UFormGroup>
 
-                  <UFormGroup label="Correo Estudiante" :error="!isEstudianteCorreoValid" :hint="estudianteCorreoError"
+                  <UFormGroup :label="t('create_group.student_email_label')" :error="!isEstudianteCorreoValid" :hint="estudianteCorreoError"
                     :ui="{
                       hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                     }">
                     <UInput
                       size="sm"
                       v-model="estudianteCorreo"
-                      placeholder="ejemplo@correo.itm.edu.co"
+                      :placeholder="t('create_group.student_email_placeholder', { atSign: '@' })"
                       class="w-full"
                       @blur="validateEstudianteCorreo"
                       @keyup.enter="addEstudiante"
@@ -298,10 +300,10 @@
 
           <div class="flex justify-end mt-2 gap-4">
             <UButton variant="link" color="black" @click="isOpen = false">
-              Cancelar
+              {{ t('create_group.cancel') }}
             </UButton>
             <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="addGroup">
-              Crear
+              {{ t('create_group.create') }}
             </UButton>
           </div>
 

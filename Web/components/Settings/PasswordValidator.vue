@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 const props = defineProps({
     password: {
         type: String,
@@ -10,33 +12,35 @@ const props = defineProps({
     }
 });
 
+const { t } = useI18n()
+
 // Password validation rules
 const passwordValidation = computed(() => {
     const password = props.password;
     const rules = [
         {
             id: 'length',
-            label: 'Al menos 8 caracteres',
+            label: t('passwordValidator.requirement_length'),
             valid: password.length >= 8
         },
         {
             id: 'uppercase',
-            label: 'Una letra mayúscula',
+            label: t('passwordValidator.requirement_uppercase'),
             valid: /[A-Z]/.test(password)
         },
         {
             id: 'lowercase',
-            label: 'Una letra minúscula',
+            label: t('passwordValidator.requirement_lowercase'),
             valid: /[a-z]/.test(password)
         },
         {
             id: 'number',
-            label: 'Un número',
+            label: t('passwordValidator.requirement_number'),
             valid: /\d/.test(password)
         },
         {
             id: 'special',
-            label: 'Un carácter especial (!@#$%^&*)',
+            label: t('passwordValidator.requirement_special', { special: '!@#$%^&*()' }),
             valid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
         }
     ];
@@ -44,20 +48,20 @@ const passwordValidation = computed(() => {
     const validCount = rules.filter(rule => rule.valid).length;
     const strength = validCount / rules.length;
     
-    let strengthLabel = 'Muy débil';
+    let strengthLabel = t('passwordValidator.very_weak');
     let strengthColor = 'red';
     let uiColor: 'red' | 'orange' | 'amber' | 'green' = 'red';
     
     if (strength >= 0.8) {
-        strengthLabel = 'Fuerte';
+        strengthLabel = t('passwordValidator.strong');
         strengthColor = 'green';
         uiColor = 'green';
     } else if (strength >= 0.6) {
-        strengthLabel = 'Media';
+        strengthLabel = t('passwordValidator.medium');
         strengthColor = 'yellow';
         uiColor = 'amber';
     } else if (strength >= 0.4) {
-        strengthLabel = 'Débil';
+        strengthLabel = t('passwordValidator.weak');
         strengthColor = 'orange';
         uiColor = 'orange';
     }
@@ -111,7 +115,7 @@ const emit = defineEmits(['update:show']);
             <div class="mb-2">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
-                        Fortaleza de la contraseña
+                        {{ t('passwordValidator.strength_label') }}
                     </span>
                     <span :class="[
                         'text-xs font-medium',

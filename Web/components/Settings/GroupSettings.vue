@@ -1,175 +1,178 @@
-<script setup lang="ts">  
-  const grupo = computed(() => useCursoStore().grupoActivo);
-  const toast = useToast()
-  const config = useRuntimeConfig();
+<script setup lang="ts">
+    import { useI18n } from 'vue-i18n'
 
-  const route = useRoute();
-  const courseId = computed(() => route.params.id);
-  const grupoId = computed(() => route.params.groupId);
+    const grupo = computed(() => useCursoStore().grupoActivo);
+    const toast = useToast()
+    const config = useRuntimeConfig();
+    const { t } = useI18n()
 
-  const isOpen = ref(false);
-  const isConfirmDeleteOpen = ref(false);
-  const loadScreen = ref(false)
-  const emit = defineEmits(["loadScreen"]);
+    const route = useRoute();
+    const courseId = computed(() => route.params.id);
+    const grupoId = computed(() => route.params.groupId);
 
-  // Form state
-  const groupName = ref('');
-  const groupNameError = ref('');
-  const isGroupNameValid = ref(true);
-  
-  // Delete state
-  const isDeleting = ref(false);   
+    const isOpen = ref(false);
+    const isConfirmDeleteOpen = ref(false);
+    const loadScreen = ref(false)
+    const emit = defineEmits(["loadScreen"]);
 
-  const validateGroupName = () => {
-    // Reset error
-    groupNameError.value = '';
-    isGroupNameValid.value = true;
+    // Form state
+    const groupName = ref('');
+    const groupNameError = ref('');
+    const isGroupNameValid = ref(true);
 
-    // Check if group name is empty
-    if (groupName.value.trim() === '') {
-      groupNameError.value = 'Se requiere un nombre';
-      isGroupNameValid.value = false;
-      return false;
-    }
+    // Delete state
+    const isDeleting = ref(false);   
 
-    return true;
-  };
-  
+    const validateGroupName = () => {
+        // Reset error
+        groupNameError.value = '';
+        isGroupNameValid.value = true;
+
+        // Check if group name is empty
+        if (groupName.value.trim() === '') {
+            groupNameError.value = t('groupSettings.group_name_required');
+            isGroupNameValid.value = false;
+            return false;
+        }
+
+        return true;
+    };
+
   const updateGroup = async () => {
     if (!validateGroupName()) {
       return;
     }
 
     const originalName = grupo.value?.nombre;
-    if (groupName.value === originalName) {
-        toast.add({
-            title: 'Sin cambios',
-            description: 'No se realizaron cambios en el grupo.',
-            icon: "fluent:info-16-filled",
-            timeout: 2000,
-            ui: {
-                'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                'rounded': 'rounded-lg',
-                'shadow': 'shadow-lg',
-                'ring': 'ring-0',
-                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                'icon': {
-                    'base': 'flex-shrink-0 w-5 h-5',
-                    'color': 'text-Purple-P dark:text-Muted-Brown'
-                },
-                'progress': {
-                    'base': 'absolute bottom-0 end-0 start-0 h-1',
-                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                },
-                'closeButton': {
-                    'base': 'absolute top-2 right-2',
-                    'icon': 'fluent:add-16-filled',
-                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+        if (groupName.value === originalName) {
+            toast.add({
+                title: t('groupSettings.toast_no_changes_title'),
+                description: t('groupSettings.toast_no_changes_desc'),
+                icon: "fluent:info-16-filled",
+                timeout: 2000,
+                ui: {
+                    'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                    'rounded': 'rounded-lg',
+                    'shadow': 'shadow-lg',
+                    'ring': 'ring-0',
+                    'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                    'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                    'icon': {
+                        'base': 'flex-shrink-0 w-5 h-5',
+                        'color': 'text-Purple-P dark:text-Muted-Brown'
+                    },
+                    'progress': {
+                        'base': 'absolute bottom-0 end-0 start-0 h-1',
+                        'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                    },
+                    'closeButton': {
+                        'base': 'absolute top-2 right-2',
+                        'icon': 'fluent:add-16-filled',
+                        'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                    }
                 }
-            }
-        });
-        isOpen.value = false;
-        return;
-    }
-    
-    try {
-        loadScreen.value = true
-        emit("loadScreen", "Actualizando Grupo...", loadScreen.value)
+            });
+            isOpen.value = false;
+            return;
+        }
+        
+        try {
+            loadScreen.value = true
+            emit("loadScreen", t('groupSettings.toast_update_success_title'), loadScreen.value)
 
-        const response = await $fetch<Grupo>(`${config.public.apiUrl}/groups/${grupoId.value}/update`, {
-            method: 'PUT',
-            body: {
-                nombre: groupName.value,
-            },
-        });
-        useCursoStore().setGrupo(response)
-      
-        toast.add({
-            title: `Actualizacion Exitosa`,
-            description: `El grupo "${grupo.value?.nombre}" se actualizo con exito`,
-            icon: "fluent:checkmark-circle-16-filled",
-            timeout: 3000,
-
-            ui: {
-                'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                'rounded': 'rounded-lg',
-                'shadow': 'shadow-lg',
-                'ring': 'ring-0',
-                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                'icon': {
-                    'base': 'flex-shrink-0 w-5 h-5',
-                    'color': 'text-Purple-P dark:text-Muted-Brown'
+            const response = await $fetch<Grupo>(`${config.public.apiUrl}/groups/${grupoId.value}/update`, {
+                method: 'PUT',
+                body: {
+                    nombre: groupName.value,
                 },
-                'progress': {
-                    'base': 'absolute bottom-0 end-0 start-0 h-1',
-                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                },
-                'closeButton': {
-                    'base': 'absolute top-2 right-2',
-                    'icon': 'fluent:add-16-filled',
-                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                }
-            }
-        })
+            });
+            useCursoStore().setGrupo(response)
+            
+            toast.add({
+                title: t('groupSettings.toast_update_success_title'),
+                description: t('groupSettings.toast_update_success_desc', { group: grupo.value?.nombre }),
+                icon: "fluent:checkmark-circle-16-filled",
+                timeout: 3000,
 
-        isOpen.value = false;
-    } catch (error: any) {
-      groupNameError.value = "Error al actualizar el grupo";
-      if(error.statusCode == 409) groupNameError.value = "Grupo ya existe"
-    } finally{
-        loadScreen.value = false
-        emit("loadScreen", "", loadScreen.value)
-    }
-  };
+                    ui: {
+                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                        'rounded': 'rounded-lg',
+                        'shadow': 'shadow-lg',
+                        'ring': 'ring-0',
+                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                        'icon': {
+                            'base': 'flex-shrink-0 w-5 h-5',
+                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                        },
+                        'progress': {
+                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                        },
+                        'closeButton': {
+                            'base': 'absolute top-2 right-2',
+                            'icon': 'fluent:add-16-filled',
+                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                        }
+                    }
+                })
+
+            isOpen.value = false;
+        } catch (error: any) {
+            groupNameError.value = t('groupSettings.toast_update_error');
+            if(error.statusCode == 409) groupNameError.value = t('groupSettings.toast_update_conflict');
+        } finally{
+            loadScreen.value = false
+            emit("loadScreen", "", loadScreen.value)
+        }
+    };
   
-  const deleteGroup = async () => {
-    isDeleting.value = true;
-    
-    try {
-      loadScreen.value = true
-      emit("loadScreen", "Eliminando Grupo...", loadScreen.value)
+const deleteGroup = async () => {
+  isDeleting.value = true;
+  
+  try {
+    loadScreen.value = true
+    emit("loadScreen", t('groupSettings.toast_delete_success_title'), loadScreen.value)
 
       await $fetch<Grupo>(`${config.public.apiUrl}/groups/${grupoId.value}/delete`, {
         method: 'DELETE',
       });
 
-      toast.add({
-            title: `Eliminacion Exitosa`,
-            description: `El grupo "${grupo.value?.nombre}" se elimino con exito`,
-            icon: "fluent:checkmark-circle-16-filled",
-            timeout: 3000,
+    toast.add({
+          title: t('groupSettings.toast_delete_success_title'),
+          description: t('groupSettings.toast_delete_success_desc', { group: grupo.value?.nombre }),
+          icon: "fluent:checkmark-circle-16-filled",
+          timeout: 3000,
 
-            ui: {
-                'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                'rounded': 'rounded-lg',
-                'shadow': 'shadow-lg',
-                'ring': 'ring-0',
-                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                'icon': {
-                    'base': 'flex-shrink-0 w-5 h-5',
-                    'color': 'text-Purple-P dark:text-Muted-Brown'
-                },
-                'progress': {
-                    'base': 'absolute bottom-0 end-0 start-0 h-1',
-                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                },
-                'closeButton': {
-                    'base': 'absolute top-2 right-2',
-                    'icon': 'fluent:add-16-filled',
-                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                }
-            }
-        })
-      navigateTo(`/Curso/${courseId.value}`);
-    } catch (error) {
-      toast.add({
-            title: `Eliminacion Fallida`,
-            description: `El grupo "${grupo.value?.nombre}" no se pudo eliminar`,
-            icon: "fluent:alert-urgent-16-filled",
-            timeout: 3000,
+          ui: {
+              'background': 'bg-Warm-White dark:bg-Medium-Dark',
+              'rounded': 'rounded-lg',
+              'shadow': 'shadow-lg',
+              'ring': 'ring-0',
+              'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+              'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+              'icon': {
+                  'base': 'flex-shrink-0 w-5 h-5',
+                  'color': 'text-Purple-P dark:text-Muted-Brown'
+              },
+              'progress': {
+                  'base': 'absolute bottom-0 end-0 start-0 h-1',
+                  'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+              },
+              'closeButton': {
+                  'base': 'absolute top-2 right-2',
+                  'icon': 'fluent:add-16-filled',
+                  'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+              }
+          }
+      })
+    navigateTo(`/Curso/${courseId.value}`);
+  } catch (error) {
+    toast.add({
+          title: t('groupSettings.toast_delete_fail_title'),
+          description: t('groupSettings.toast_delete_fail_desc', { group: grupo.value?.nombre }),
+          icon: "fluent:alert-urgent-16-filled",
+          timeout: 3000,
 
             ui: {
                 'background': 'bg-Warm-White dark:bg-Medium-Dark',
@@ -240,7 +243,7 @@
             <template #header>
                 <div class="flex items-center justify-between">
                     <h3 class="text-base font-semibold leading-6 dark:text-white">
-                        Ajustes del Grupo
+                        {{ t('groupSettings.modal_title') }}
                     </h3>
                     <UButton 
                         color="gray" 
@@ -257,7 +260,7 @@
                 <!-- Main Section - Group Name -->
                 <div class="mb-8">
                     <UFormGroup 
-                        label="Nombre del Grupo" 
+                        :label="t('groupSettings.group_name_label')" 
                         required 
                         :error="!isGroupNameValid" 
                         :hint="groupNameError"
@@ -268,7 +271,7 @@
                         <UInput 
                             v-model="groupName" 
                             size="md" 
-                            placeholder="Ingrese el nombre del grupo" 
+                            :placeholder="t('groupSettings.group_name_placeholder')" 
                             class="w-full max-w-lg" 
                             @blur="validateGroupName"
                             :ui="{
@@ -289,9 +292,9 @@
                 
                 <!-- Danger Zone -->
                 <div class="mt-10 border border-red-500/30 rounded-lg p-4">
-                    <h4 class="text-red-500 font-medium mb-2">Zona de Peligro</h4>
+                    <h4 class="text-red-500 font-medium mb-2">{{ t('groupSettings.danger_zone_title') }}</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        Eliminar un grupo es una acción permanente y no puede ser revertida. Se eliminarán todos los datos asociados.
+                        {{ t('groupSettings.danger_zone_warning') }}
                     </p>
                     <UButton 
                         color="red" 
@@ -299,7 +302,7 @@
                         class="w-auto"
                         @click="isConfirmDeleteOpen = true"
                     >
-                        Eliminar Grupo
+                        {{ t('groupSettings.delete_group') }}
                     </UButton>
                 </div>
                 
@@ -310,13 +313,13 @@
                         color="black" 
                         @click="isOpen = false"
                     >
-                        Cancelar
+                        {{ t('groupSettings.cancel') }}
                     </UButton>
                     <UButton 
                         class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
                         @click="updateGroup"
                     >
-                        Guardar Cambios
+                        {{ t('groupSettings.save_changes') }}
                     </UButton>
                 </div>
             </div>
@@ -339,11 +342,11 @@
             <div class="p-4">
                 <div class="flex items-center mb-4">
                     <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
-                    <h3 class="text-lg font-semibold dark:text-white">Confirmar Eliminación</h3>
+                    <h3 class="text-lg font-semibold dark:text-white">{{ t('groupSettings.delete_confirm_title') }}</h3>
                 </div>
                 
                 <p class="mb-6 text-gray-700 dark:text-gray-300">
-                    ¿Estás seguro que deseas eliminar este grupo? Esta acción es irreversible.
+                    {{ t('groupSettings.delete_confirm_message') }}
                 </p>
                 
                 <div class="flex justify-end gap-3">
@@ -353,13 +356,13 @@
                         @click="isConfirmDeleteOpen = false"
                         :disabled="isDeleting"
                     >
-                        Cancelar
+                        {{ t('groupSettings.cancel') }}
                     </UButton>
                     <UButton 
                         color="red" 
                         @click="deleteGroup"
                     >
-                        Eliminar
+                        {{ t('groupSettings.delete') }}
                     </UButton>
                 </div>
             </div>

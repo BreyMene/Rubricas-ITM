@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import type { Estudiante, Nota } from '~/utils/types'
+    import { useI18n } from 'vue-i18n'
 
     interface Props {
         nota: Nota
@@ -14,6 +15,8 @@
 
     const barWidth = 8
     const barGap = 2
+
+    const { t } = useI18n()
 
     const updateStatusBars = () => {
     if (!containerRef.value) return
@@ -76,7 +79,7 @@
         class="text-Purple-P dark:text-Muted-Brown"
       />
       <span class="text-sm font-medium text-Pure-Black dark:text-White-w">
-        Estado de calificación
+        {{ t('analytics.grading_progress.title') }}
       </span>
     </div>
 
@@ -121,7 +124,7 @@
               :class="bar.status === 'graded' ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'"
               class="w-3.5 h-3.5"
             />
-            {{ bar.status === 'graded' ? 'Calificado' : 'Pendiente' }}
+            {{ bar.status === 'graded' ? t('analytics.grading_progress.graded') : t('analytics.grading_progress.pending') }}
           </div>
         </div>
       </div>

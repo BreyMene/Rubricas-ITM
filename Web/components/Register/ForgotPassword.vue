@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 const config = useRuntimeConfig();
+const { t } = useI18n();
 
 const props = defineProps({
     isMobile: {
@@ -39,7 +42,7 @@ const handleResetPassword = async () => {
             console.log('No hay email ingresado');
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error(t('forgotPassword.error'), error);
     }
 }
 
@@ -59,18 +62,18 @@ const backToLogin = () => {
             'font-semibold text-Pure-Black dark:text-White-w mb-8',
             props.isMobile ? 'text-xl text-center' : 'text-2xl'
         ]">
-            RECUPERAR CONTRASEÑA
+            {{ t('forgotPassword.title') }}
         </h2>
         <div class="mb-6">
             <UForm :state="forgotPasswordState" :validate="validate" @submit="handleResetPassword" class="flex flex-col gap-3">
-                <UFormGroup label="Email" name="email" :hint="emailError"
+                <UFormGroup :label="t('forgotPassword.form.email_label')" name="email" :hint="emailError"
                 :ui="{
                     hint: 'text-red-500 dark:text-red-500 text-sm',
                     error: isMobile
                     ? 'text-red-500 dark:text-red-500 text-sm'
                     : 'hidden',
                 }">
-                    <UInput size="sm" v-model="forgotPasswordState.email" placeholder="ejemplo@correo.itm.edu.co"
+                    <UInput size="sm" v-model="forgotPasswordState.email" :placeholder="t('forgotPassword.form.email_placeholder', { atSign: '@' })"
                         class="w-full"
                         :ui="{
                             icon: {
@@ -88,14 +91,14 @@ const backToLogin = () => {
                 </UFormGroup>
 
                 <UButton type="submit" class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium">
-                    Enviar Codigo
+                    {{ t('forgotPassword.form.submit_button') }}
                 </UButton>
             </UForm>
         </div>
         <div class="mt-5 flex items-center justify-center">
             <UButton variant="link" @click="backToLogin"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w">
-                Volver a Iniciar Sesión
+                {{ t('forgotPassword.back_to_login') }}
             </UButton>
         </div>
     </div>

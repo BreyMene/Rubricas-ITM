@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import type { Rubrica, Nota } from '~/utils/types'
+    import { useI18n } from 'vue-i18n'
 
     // Props
     interface Props {
@@ -23,6 +24,7 @@
     // Composables
     const config = useRuntimeConfig()
     const toast = useToast()
+    const { t } = useI18n()
 
     // State
     const showModal = ref(false)
@@ -51,8 +53,8 @@
                 
                 // Show toast notification
                 toast.add({
-                    title: 'Valor no válido',
-                    description: `El valor debe estar entre 0 y ${remainingPercentage.value}%`,
+                    title: t('nota.toasts.invalid_value'),
+                    description: t('nota.toasts.invalid_value_desc', { percentage: remainingPercentage.value }),
                     icon: "fluent:alert-urgent-16-filled",
                     timeout: 3000,
                     ui: {
@@ -112,19 +114,19 @@
     }
 
     const handleCreateNota = async () => {
-        if (!props.activeRubric) {
-            emit('error', 'No hay rúbrica activa disponible')
-            return
-    }
+      if (!props.activeRubric) {
+          emit('error', t('nota.no_rubric_error'))
+          return
+      }
 
-    try {
-        emit('loadingChange', true, 'Creando nota...')
+      try {
+        emit('loadingChange', true, t('nota.loading'))
         
         // Validate percentage
         if (totalPercentage.value + notaPercentage.value > 100) {
             toast.add({
-                title: 'Error al crear la nota',
-                description: `El porcentaje total no puede exceder 100%. Porcentaje actual: ${totalPercentage.value}%`,
+                title: t('nota.toasts.error_creating'),
+                description: t('nota.toasts.percentage_exceeded', { percentage: totalPercentage.value }),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -178,7 +180,7 @@
 
         // Add success toast
         toast.add({
-            title: 'Nota creada exitosamente',
+            title: t('nota.toasts.creation_success'),
             icon: "fluent:checkmark-circle-16-filled",
             timeout: 3000,
             ui: {
@@ -203,14 +205,14 @@
                 }
             }
         })
-    } catch (error) {
+      } catch (error) {
         console.error("Error creating nota:", error)
         emit('loadingChange', false, '')
-        emit('error', 'Error al crear la nota')
+        emit('error', t('nota.toasts.error_creating'))
         
         // Add error toast
         toast.add({
-            title: 'Error al crear la nota',
+            title: t('nota.toasts.generic_error'),
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
             ui: {
@@ -256,7 +258,7 @@
         class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-all duration-300"
         @click="openModal"
       >
-        Nueva Nota
+        {{ t('nota.new_nota') }}
       </UButton>
   
       <!-- Nueva Nota Modal -->
@@ -281,7 +283,7 @@
           <template #header>
             <div class="flex items-center justify-between">
               <h3 class="text-base font-semibold leading-6 dark:text-white">
-                Nueva Nota
+                {{ t('nota.new_nota') }}
               </h3>
               <UButton
                 color="gray"
@@ -297,14 +299,14 @@
             <div v-if="activeRubric" class="space-y-6">
               <div class="bg-Warm-White dark:bg-Warm-Dark rounded-xl p-4">
                 <h4 class="text-lg font-medium text-Pure-Black dark:text-White-w mb-2">
-                  Nota {{ nextNotaNumber }}
+                  {{ t('nota.grade_number', { number: nextNotaNumber }) }}
                 </h4>
                 <p class="text-sm text-Light-Gray dark:text-MLight-White/50">
-                  Rúbrica: {{ activeRubric.nombre }}
+                  {{ t('nota.rubric') }} {{ activeRubric.nombre }}
                 </p>
                 <div class="mt-4">
                   <label class="block text-sm font-medium text-Pure-Black dark:text-White-w mb-2">
-                    Porcentaje de la nota
+                    {{ t('nota.grade_percentage') }}
                   </label>
                   <div class="flex items-center gap-2">
                     <UInput
@@ -333,17 +335,17 @@
                 <!-- Percentage Information Card -->
                 <div class="mt-4 bg-Purple-P/10 dark:bg-Muted-Brown/10 rounded-lg p-4 border border-Purple-P/20 dark:border-Muted-Brown/20">
                   <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-Purple-P dark:text-Muted-Brown">Porcentaje Total Actual</span>
+                    <span class="text-sm font-medium text-Purple-P dark:text-Muted-Brown">{{ t('nota.current_total_percentage') }}</span>
                     <span class="text-lg font-bold text-Purple-P dark:text-Muted-Brown">{{ totalPercentage }}%</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium text-Purple-P dark:text-Muted-Brown">Porcentaje Disponible</span>
+                    <span class="text-sm font-medium text-Purple-P dark:text-Muted-Brown">{{ t('nota.available_percentage') }}</span>
                     <span class="text-lg font-bold text-Purple-P dark:text-Muted-Brown">{{ remainingPercentage }}%</span>
                   </div>
                 </div>
 
                 <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-4">
-                  Se creará una nueva nota utilizando la rúbrica activa. Esta nota estará disponible para todos los estudiantes del grupo.
+                  {{ t('nota.creation_info') }}
                 </p>
               </div>
   
@@ -353,14 +355,14 @@
                   color="black"
                   @click="closeModal"
                 >
-                  Cancelar
+                  {{ t('nota.cancel') }}
                 </UButton>
                 <UButton
                   class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray disabled:dark:bg-Medium-Gray disabled:bg-Light-Gray"
                   :disabled="notaPercentage <= 0 || notaPercentage > remainingPercentage"
                   @click="handleCreateNota"
                 >
-                  Crear Nota
+                  {{ t('nota.create_nota') }}
                 </UButton>
               </div>
             </div>
@@ -375,9 +377,9 @@
                 <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
   
                 <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY RÚBRICA ACTIVA</p>
+                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">{{ t('nota.no_active_rubric') }}</p>
                 <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
-                  Para crear una nota, primero debes activar una rúbrica en el grupo.
+                  {{ t('nota.no_active_rubric_info') }}
                 </p>
               </div>
   
@@ -387,7 +389,7 @@
                   color="black"
                   @click="closeModal"
                 >
-                  Cerrar
+                  {{ t('nota.close') }}
                 </UButton>
               </div>
             </div>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
+    import { useI18n } from 'vue-i18n'
+    
     const config = useRuntimeConfig();
+    const { t } = useI18n()
 
     // Define the type for the OtpInput component ref
     interface OtpInputInstance {
@@ -40,13 +43,13 @@
                     });
                     emit('showResetPassword');
                 } else {
-                    formError.value = 'Código incompleto';
+                    formError.value = t('otp.incomplete_code');
                 }
             } else {
-                formError.value = 'Error al obtener el código';
+                formError.value = t('otp.error_getting_code');
             }
         } catch(error) {
-            formError.value = 'Código inválido o expirado';
+            formError.value = t('otp.invalid_expired_code');
             // Reset the OTP fields on error
             if (otpRef.value) {
                 otpRef.value.resetOtp();
@@ -72,7 +75,7 @@
                 formError.value = '';
             }
         } catch (error) {
-            formError.value = 'Error al reenviar el código';
+            formError.value = t('otp.error_resending_code');
         }
     }
 </script>
@@ -87,11 +90,11 @@
             'font-semibold text-Pure-Black dark:text-White-w mb-4',
             props.isMobile ? 'text-xl' : 'text-2xl'
         ]">
-            INGRESA EL CÓDIGO DE VERIFICACIÓN
+            {{ t('otp.title') }}
         </h2>
 
         <p class="text-sm text-gray-600 dark:text-gray-300 mb-8">
-            Se ha enviado un código a tu correo electrónico
+            {{ t('otp.code_sent_message') }}
             <span class="font-bold">{{ props.email }}</span>
         </p>
 
@@ -112,19 +115,19 @@
                     @click="verifyOTP"
                     class="justify-center mt-6 bg-Dark-Blue dark:bg-Muted-Brown text-White-w dark:text-White-w py-3 rounded-md hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition duration-300 font-medium"
                 >
-                    Verificar Código
+                    {{ t('otp.verify_code') }}
                 </UButton>
             </div>
         </div>
 
         <div class="mt-5 flex flex-col items-center justify-center">
-            <p class="text-sm text-center">¿No recibiste el código?
+            <p class="text-sm text-center">{{ t('otp.didnt_receive_code') }}
                 <UButton
                     variant="link"
                     @click="resendCode"
                     class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
                 >
-                    Reenviar código
+                    {{ t('otp.resend_code') }}
                 </UButton>
             </p>
             <UButton
@@ -132,7 +135,7 @@
                 @click="backToForgotPassword"
                 class="text-Dark-Blue dark:text-White-w hover:text-Dark-Blue hover:dark:text-White-w"
             >
-                Volver a Recuperación de Contraseña
+                {{ t('otp.back_to_password_recovery') }}
             </UButton>
         </div>
     </div>

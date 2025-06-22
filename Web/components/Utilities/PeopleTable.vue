@@ -1,305 +1,304 @@
 <script setup lang="ts">
-    const props = defineProps<{
-        view: "docentes" | "estudiantes";
-        isModerator?: boolean; 
-        hideFinalNote?: boolean;
-        searchTerm?: string;
-        data: DocenteEnCurso[] | Estudiante[]
-    }>();
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
-    const toast = useToast()
+const props = defineProps<{
+    view: "docentes" | "estudiantes";
+    isModerator?: boolean; 
+    hideFinalNote?: boolean;
+    searchTerm?: string;
+    data: DocenteEnCurso[] | Estudiante[]
+}>();
 
-    // Add new state for editing
-    const editingRow = ref<{correo: string, field: string} | null>(null);
-    const editValue = ref('');
+const toast = useToast()
 
-    // Change columns depends of the view
-    const columns = computed(() => {
-        if (props.view === "docentes") {
-            return [
-                { key: "correo", label: "Correo", sortable: true },
-                { key: "moderador", label: "", sortable: false },
-                { key: "actions" }
-                ];
-        }
-        
-        const studentColumns = [
-            { key: "nombre", label: "Nombre", sortable: true },
-            { key: "correo", label: "Correo", sortable: true },
+// Add new state for editing
+const editingRow = ref<{correo: string, field: string} | null>(null);
+const editValue = ref('');
+
+// Change columns depends of the view
+const columns = computed(() => {
+    if (props.view === "docentes") {
+        return [
+            { key: "correo", label: t('people_table.columns.email'), sortable: true },
+            { key: "moderador", label: "", sortable: false },
             { key: "actions" }
-        ];
-        
-        if (!props.hideFinalNote) {
-            studentColumns.splice(2, 0, { key: "promedio", label: "Nota Final", sortable: true });
-        }
-        
-        return studentColumns;
-    });
-
-    // Auxiliary Functions
-    interface TableRow {
-        correo: string;
-        moderador?: boolean;
+            ];
     }
-
-    interface MenuItem {
-        label: string;
-        icon: string;
-        click: () => void;
-        disabled?: boolean;
+    
+    const studentColumns = [
+        { key: "nombre", label: t('people_table.columns.name'), sortable: true },
+        { key: "correo", label: t('people_table.columns.email'), sortable: true },
+        { key: "actions" }
+    ];
+    
+    if (!props.hideFinalNote) {
+        studentColumns.splice(2, 0, { key: "promedio", label: t('people_table.columns.final_grade'), sortable: true });
     }
+    
+    return studentColumns;
+});
 
-    // Add new emit for edit
-    const emits = defineEmits(['delete-user', 'make-moderator', 'edit-user']);
+// Auxiliary Functions
+interface TableRow {
+    correo: string;
+    moderador?: boolean;
+}
 
-    // Función para eliminar un usuario
-    const deleteUser = (correo: string) => {
-        const userType = props.view === "docentes" ? "docente" : "estudiante";
-        toast.add({
-            title: `Se elimino el ${userType} ${correo}`,
-            icon: "fluent:alert-urgent-16-filled",
-            timeout: 2000,
+interface MenuItem {
+    label: string;
+    icon: string;
+    click: () => void;
+    disabled?: boolean;
+}
 
-            ui: {
-                'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                'rounded': 'rounded-lg',
-                'shadow': 'shadow-lg',
-                'ring': 'ring-0',
-                'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                'icon': {
-                    'base': 'flex-shrink-0 w-5 h-5',
-                    'color': 'text-Purple-P dark:text-Muted-Brown'
-                },
-                'progress': {
-                    'base': 'absolute bottom-0 end-0 start-0 h-1',
-                    'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                },
-                'closeButton': {
-                    'base': 'absolute top-2 right-2',
-                    'icon': 'fluent:add-16-filled',
-                    'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                }
+// Add new emit for edit
+const emits = defineEmits(['delete-user', 'make-moderator', 'edit-user']);
+
+// Función para eliminar un usuario
+const deleteUser = (correo: string) => {
+    const userTypeKey = props.view === "docentes" ? 'teacher' : 'student';
+    toast.add({
+        title: t(`people_table.toasts.user_deleted.${userTypeKey}`, { correo }),
+        icon: "fluent:alert-urgent-16-filled",
+        timeout: 2000,
+
+        ui: {
+            'background': 'bg-Warm-White dark:bg-Medium-Dark',
+            'rounded': 'rounded-lg',
+            'shadow': 'shadow-lg',
+            'ring': 'ring-0',
+            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+            'icon': {
+                'base': 'flex-shrink-0 w-5 h-5',
+                'color': 'text-Purple-P dark:text-Muted-Brown'
+            },
+            'progress': {
+                'base': 'absolute bottom-0 end-0 start-0 h-1',
+                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+            },
+            'closeButton': {
+                'base': 'absolute top-2 right-2',
+                'icon': 'fluent:add-16-filled',
+                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
             }
-        })
-        emits('delete-user', correo);
-    };
+        }
+    })
+    emits('delete-user', correo);
+};
 
-    const makeModerator = (correo: string, mod: boolean) => {
-        emits('make-moderator', correo, mod);
-    }
+const makeModerator = (correo: string, mod: boolean) => {
+    emits('make-moderator', correo, mod);
+}
 
-    // Add edit handlers
-    const startEditing = (row: TableRow, field: string) => {
-        editingRow.value = { correo: row.correo, field };
-        editValue.value = row[field as keyof TableRow] as string;
-    };
+// Add edit handlers
+const startEditing = (row: TableRow, field: string) => {
+    editingRow.value = { correo: row.correo, field };
+    editValue.value = row[field as keyof TableRow] as string;
+};
 
-    const saveEdit = () => {
-        if (editingRow.value) {
-            // Validate email format if editing email
-            if (editingRow.value.field === 'correo') {
-                // Check if it's a valid email format
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(editValue.value)) {
-                    toast.add({
-                        title: 'Error al editar',
-                        description: 'Email inválido',
-                        icon: "fluent:alert-urgent-16-filled",
-                        timeout: 3000,
-                        ui: {
-                            'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                            'rounded': 'rounded-lg',
-                            'shadow': 'shadow-lg',
-                            'ring': 'ring-0',
-                            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                            'icon': {
-                                'base': 'flex-shrink-0 w-5 h-5',
-                                'color': 'text-Purple-P dark:text-Muted-Brown'
-                            },
-                            'progress': {
-                                'base': 'absolute bottom-0 end-0 start-0 h-1',
-                                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                            },
-                            'closeButton': {
-                                'base': 'absolute top-2 right-2',
-                                'icon': 'fluent:add-16-filled',
-                                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                            }
+const saveEdit = () => {
+    if (editingRow.value) {
+        // Validate email format if editing email
+        if (editingRow.value.field === 'correo') {
+            // Check if it's a valid email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(editValue.value)) {
+                toast.add({
+                    title: t('people_table.toasts.edit_error'),
+                    description: t('people_table.toasts.invalid_email'),
+                    icon: "fluent:alert-urgent-16-filled",
+                    timeout: 3000,
+                    ui: {
+                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                        'rounded': 'rounded-lg',
+                        'shadow': 'shadow-lg',
+                        'ring': 'ring-0',
+                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                        'icon': {
+                            'base': 'flex-shrink-0 w-5 h-5',
+                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                        },
+                        'progress': {
+                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                        },
+                        'closeButton': {
+                            'base': 'absolute top-2 right-2',
+                            'icon': 'fluent:add-16-filled',
+                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
                         }
-                    });
-                    return;
-                }
-
-                // Check if it ends with the institutional domain
-                if (!editValue.value.endsWith('@correo.itm.edu.co')) {
-                    toast.add({
-                        title: 'Error al editar',
-                        description: 'Debe usar un correo institucional',
-                        icon: "fluent:alert-urgent-16-filled",
-                        timeout: 3000,
-                        ui: {
-                            'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                            'rounded': 'rounded-lg',
-                            'shadow': 'shadow-lg',
-                            'ring': 'ring-0',
-                            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                            'icon': {
-                                'base': 'flex-shrink-0 w-5 h-5',
-                                'color': 'text-Purple-P dark:text-Muted-Brown'
-                            },
-                            'progress': {
-                                'base': 'absolute bottom-0 end-0 start-0 h-1',
-                                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                            },
-                            'closeButton': {
-                                'base': 'absolute top-2 right-2',
-                                'icon': 'fluent:add-16-filled',
-                                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                            }
-                        }
-                    });
-                    return;
-                }
-
-                // Check if email already exists in the list
-                const emailExists = props.data.some(item => 
-                    item.correo === editValue.value && item.correo !== editingRow.value?.correo
-                );
-                if (emailExists) {
-                    toast.add({
-                        title: 'Error al editar',
-                        description: 'El correo ya existe en la lista',
-                        icon: "fluent:alert-urgent-16-filled",
-                        timeout: 3000,
-                        ui: {
-                            'background': 'bg-Warm-White dark:bg-Medium-Dark',
-                            'rounded': 'rounded-lg',
-                            'shadow': 'shadow-lg',
-                            'ring': 'ring-0',
-                            'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
-                            'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
-                            'icon': {
-                                'base': 'flex-shrink-0 w-5 h-5',
-                                'color': 'text-Purple-P dark:text-Muted-Brown'
-                            },
-                            'progress': {
-                                'base': 'absolute bottom-0 end-0 start-0 h-1',
-                                'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
-                            },
-                            'closeButton': {
-                                'base': 'absolute top-2 right-2',
-                                'icon': 'fluent:add-16-filled',
-                                'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
-                            }
-                        }
-                    });
-                    return;
-                }
+                    }
+                });
+                return;
             }
 
-            emits('edit-user', editingRow.value.correo, editingRow.value.field, editValue.value);
-            editingRow.value = null;
-            editValue.value = '';
-        }
-    };
+            // Check if it ends with the institutional domain
+            if (!editValue.value.endsWith('@correo.itm.edu.co')) {
+                toast.add({
+                    title: t('people_table.toasts.edit_error'),
+                    description: t('people_table.toasts.institutional_email_required'),
+                    icon: "fluent:alert-urgent-16-filled",
+                    timeout: 3000,
+                    ui: {
+                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                        'rounded': 'rounded-lg',
+                        'shadow': 'shadow-lg',
+                        'ring': 'ring-0',
+                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                        'icon': {
+                            'base': 'flex-shrink-0 w-5 h-5',
+                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                        },
+                        'progress': {
+                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                        },
+                        'closeButton': {
+                            'base': 'absolute top-2 right-2',
+                            'icon': 'fluent:add-16-filled',
+                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                        }
+                    }
+                });
+                return;
+            }
 
-    const cancelEdit = () => {
+            // Check if email already exists in the list
+            const emailExists = props.data.some(item => 
+                item.correo === editValue.value && item.correo !== editingRow.value?.correo
+            );
+            if (emailExists) {
+                toast.add({
+                    title: t('people_table.toasts.edit_error'),
+                    description: t('people_table.toasts.email_already_exists'),
+                    icon: "fluent:alert-urgent-16-filled",
+                    timeout: 3000,
+                    ui: {
+                        'background': 'bg-Warm-White dark:bg-Medium-Dark',
+                        'rounded': 'rounded-lg',
+                        'shadow': 'shadow-lg',
+                        'ring': 'ring-0',
+                        'title': 'text-base font-semibold text-Pure-Black dark:text-White-w',
+                        'description': 'mt-1 text-sm text-gray-500 dark:text-Light-Gray',
+                        'icon': {
+                            'base': 'flex-shrink-0 w-5 h-5',
+                            'color': 'text-Purple-P dark:text-Muted-Brown'
+                        },
+                        'progress': {
+                            'base': 'absolute bottom-0 end-0 start-0 h-1',
+                            'background': 'bg-Purple-P/60 dark:bg-Muted-Brown/60'
+                        },
+                        'closeButton': {
+                            'base': 'absolute top-2 right-2',
+                            'icon': 'fluent:add-16-filled',
+                            'color': 'text-gray-400 hover:text-gray-500 dark:text-Light-Gray dark:hover:text-White-w'
+                        }
+                    }
+                });
+                return;
+            }
+        }
+
+        emits('edit-user', editingRow.value.correo, editingRow.value.field, editValue.value);
         editingRow.value = null;
         editValue.value = '';
-    };
+    }
+};
 
-    const items = (row: TableRow) => {
-        const menuItems: MenuItem[][] = [
-            [
-                { 
-                    label: 'Editar', 
-                    icon: 'fluent:compose-12-filled',
-                    click: () => startEditing(row, props.view === "docentes" ? "correo" : "nombre")
-                }
-            ],
-            [
-                {
-                    label: 'Eliminar',
-                    icon: 'fluent:delete-12-regular',
-                    click: () => deleteUser(row.correo)
-                }
-            ]
-        ];
-        
-        // Add moderator option only for docentes view
-        if (props.view === "docentes") {
-            const moderatorLabel = row.moderador ? 'Quitar moderador' : 'Hacer moderador';
-            const moderatorIcon = row.moderador ? 'fluent:person-delete-20-filled' : 'fluent:person-key-20-filled';
-            
-            // Count how many moderators there are
-            const moderatorCount = props.data.filter(d => (d as DocenteEnCurso).moderador).length;
-            
-            // Insert moderator option after Edit and before Delete
-            menuItems.splice(1, 0, [
-                {
-                    label: moderatorLabel,
-                    icon: moderatorIcon,
-                    click: () => makeModerator(row.correo, !!row.moderador),
-                    disabled: row.moderador && moderatorCount <= 1
-                }
-            ]);
-        } else {
-            // Add edit email option for students
-            menuItems[0].push({
-                label: 'Editar Correo',
-                icon: 'fluent:mail-12-filled',
-                click: () => startEditing(row, "correo")
-            });
-        }
-        
-        return menuItems;
-    };
+const cancelEdit = () => {
+    editingRow.value = null;
+    editValue.value = '';
+};
 
-    // Filtered people with proper type checking
-    const filteredPeople = computed(() => {
-        const processPerson = (person: DocenteEnCurso | Estudiante) => {
-            if (props.view === "estudiantes") {
-                const student = person as Estudiante;
-                return {
-                    ...student,
-                    promedio: student.promedio ? Number(student.promedio).toFixed(2) : '0.00'
-                };
+const items = (row: TableRow) => {
+    const menuItems: MenuItem[][] = [
+        [
+            { 
+                label: t('people_table.actions.edit'), 
+                icon: 'fluent:compose-12-filled',
+                click: () => startEditing(row, props.view === "docentes" ? "correo" : "nombre")
             }
-            return person;
-        };
-
-        if (!props.searchTerm) {
-            return props.data.map(processPerson);
-        }
+        ],
+        [
+            {
+                label: t('people_table.actions.delete'),
+                icon: 'fluent:delete-12-regular',
+                click: () => deleteUser(row.correo)
+            }
+        ]
+    ];
+    
+    if (props.view === "docentes") {
+        const moderatorLabel = row.moderador ? t('people_table.actions.remove_moderator') : t('people_table.actions.make_moderator');
+        const moderatorIcon = row.moderador ? 'fluent:person-delete-20-filled' : 'fluent:person-key-20-filled';
         
-        const searchLower = props.searchTerm.toLowerCase();
-        return props.data
-            .filter(person => {
-                if (props.view === "docentes") {
-                    return (person as DocenteEnCurso).correo.toLowerCase().includes(searchLower);
-                } else {
-                    // Type guard to ensure we're working with a Student
-                    const studentPerson = person as Estudiante;
-                    return (
-                        studentPerson.nombre.toLowerCase().includes(searchLower) ||
-                        studentPerson.correo.toLowerCase().includes(searchLower)
-                    );
-                }
-            })
-            .map(processPerson);
-    });
+        const moderatorCount = props.data.filter(d => (d as DocenteEnCurso).moderador).length;
+        
+        menuItems.splice(1, 0, [
+            {
+                label: moderatorLabel,
+                icon: moderatorIcon,
+                click: () => makeModerator(row.correo, !!row.moderador),
+                disabled: row.moderador && moderatorCount <= 1
+            }
+        ]);
+    } else {
+        menuItems[0].push({
+            label: t('people_table.actions.edit_email'),
+            icon: 'fluent:mail-12-filled',
+            click: () => startEditing(row, "correo")
+        });
+    }
+    
+    return menuItems;
+};
 
-    const page = ref(1)
-    const pageCount = 5
+// Filtered people with proper type checking
+const filteredPeople = computed(() => {
+    const processPerson = (person: DocenteEnCurso | Estudiante) => {
+        if (props.view === "estudiantes") {
+            const student = person as Estudiante;
+            return {
+                ...student,
+                promedio: student.promedio ? Number(student.promedio).toFixed(2) : '0.00'
+            };
+        }
+        return person;
+    };
 
-    const rows = computed(() => {
-        return filteredPeople.value.slice((page.value - 1) * pageCount, page.value * pageCount);
-    });
+    if (!props.searchTerm) {
+        return props.data.map(processPerson);
+    }
+    
+    const searchLower = props.searchTerm.toLowerCase();
+    return props.data
+        .filter(person => {
+            if (props.view === "docentes") {
+                return (person as DocenteEnCurso).correo.toLowerCase().includes(searchLower);
+            } else {
+                // Type guard to ensure we're working with a Student
+                const studentPerson = person as Estudiante;
+                return (
+                    studentPerson.nombre.toLowerCase().includes(searchLower) ||
+                    studentPerson.correo.toLowerCase().includes(searchLower)
+                );
+            }
+        })
+        .map(processPerson);
+});
 
-    const totalItems = computed(() => filteredPeople.value.length);
+const page = ref(1)
+const pageCount = 5
+
+const rows = computed(() => {
+    return filteredPeople.value.slice((page.value - 1) * pageCount, page.value * pageCount);
+});
+
+const totalItems = computed(() => filteredPeople.value.length);
 </script>
 
 <template>
@@ -452,8 +451,8 @@
             <template #empty-state>
                 <div class="flex flex-col items-center justify-center py-6 gap-3 transition-colors duration-150">
                     <UIcon name="fluent:beach-24-regular" class="text-7xl transition-colors duration-[0.1s]"/>
-                    <span v-if="view == 'docentes'" class="italic text-sm transition-colors duration-[0.1s]">No hay docentes!</span>
-                    <span v-else class="italic text-sm transition-colors duration-[0.1s]">No hay estudiantes!</span>
+                    <span v-if="view == 'docentes'" class="italic text-sm transition-colors duration-[0.1s]">{{ t('people_table.empty_state.no_teachers') }}</span>
+                    <span v-else class="italic text-sm transition-colors duration-[0.1s]">{{ t('people_table.empty_state.no_students') }}</span>
                 </div>
             </template>
 

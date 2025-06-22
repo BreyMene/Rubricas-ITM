@@ -2,6 +2,7 @@
   import type { Tema } from '~/utils/types';
   import { useDocenteStore } from "~/utils/store";
   import { useRubricPermissions } from "~/composables/useRubricPermissions";
+  import { useI18n } from 'vue-i18n'
 
   const props = withDefaults(defineProps<{
     temas: Tema[];
@@ -17,6 +18,7 @@
   const docenteID = useDocenteStore().getID;
   const { validateRubricAccess } = useRubricPermissions();
   const isLoading = ref(false);
+  const { t } = useI18n()
   
   // Cache for rubric data to avoid repeated API calls
   const rubricCache = new Map<string, Tema[]>();
@@ -130,8 +132,8 @@
             class="w-6 h-6 transition-all duration-500 ease-out group-hover:rotate-3 group-hover:scale-110 text-red-500 dark:text-red-400" 
           />
         </div>
-        <div class="text-sm font-medium mb-1 transition-all duration-500 ease-out text-red-600 dark:text-red-400">Acceso Restringido</div>
-        <div class="text-xs transition-all duration-500 ease-out">No tienes permisos para ver el contenido</div>
+        <div class="text-sm font-medium mb-1 transition-all duration-500 ease-out text-red-600 dark:text-red-400">{{ t('rubrica.preview_access_denied') }}</div>
+        <div class="text-xs transition-all duration-500 ease-out">{{ t('rubrica.preview_no_permission') }}</div>
       </div>
     </div>
 
@@ -150,8 +152,8 @@
             class="w-6 h-6 transition-all duration-500 ease-out group-hover:rotate-3 group-hover:scale-110 text-Purple-P dark:text-Muted-Brown" 
           />
         </div>
-        <div class="text-sm font-medium mb-1 transition-all duration-500 ease-out text-Purple-P dark:text-Muted-Brown">Vista Previa</div>
-        <div class="text-xs transition-all duration-500 ease-out">Pasa el cursor para ver detalles</div>
+        <div class="text-sm font-medium mb-1 transition-all duration-500 ease-out text-Purple-P dark:text-Muted-Brown">{{ t('rubrica.preview_title') }}</div>
+        <div class="text-xs transition-all duration-500 ease-out">{{ t('rubrica.preview_instruction') }}</div>
       </div>
     </div>
 
@@ -168,7 +170,7 @@
       >
         <UtilitiesLoadingScreen 
           :isLoading="isLoading"
-          message="Cargando detalles..."
+          :message="t('rubrica.preview_loading')"
           :noBackground="true"
           :noSpinnerBackground="true"
           spinnerSize="sm"
@@ -177,12 +179,12 @@
 
       <!-- Mini Table Header -->
       <div class="hidden group-hover:flex text-[8px] font-bold text-Pure-Black dark:text-White-w mb-1 leading-tight transition-all duration-500 ease-out bg-Warm-White dark:bg-Warm-Dark rounded-lg shadow-sm">
-        <div class="w-[20%] px-2 py-0.5 text-left">Tema</div>
-        <div class="w-[30%] px-2 py-0.5 text-left">Criterio</div>
-        <div class="w-[10%] px-2 py-0.5 text-center">Peso</div>
-        <div class="w-[10%] px-2 py-0.5 text-center">Cal</div>
-        <div class="w-[10%] px-2 py-0.5 text-center">Acum</div>
-        <div class="w-[20%] px-2 py-0.5 text-center">Obs</div>
+        <div class="w-[20%] px-2 py-0.5 text-left">{{ t('rubrica.preview_table_tema') }}</div>
+        <div class="w-[30%] px-2 py-0.5 text-left">{{ t('rubrica.preview_table_criterio') }}</div>
+        <div class="w-[10%] px-2 py-0.5 text-center">{{ t('rubrica.preview_table_peso') }}</div>
+        <div class="w-[10%] px-2 py-0.5 text-center">{{ t('rubrica.preview_table_cal') }}</div>
+        <div class="w-[10%] px-2 py-0.5 text-center">{{ t('rubrica.preview_table_acum') }}</div>
+        <div class="w-[20%] px-2 py-0.5 text-center">{{ t('rubrica.preview_table_obs') }}</div>
       </div>
 
       <!-- Real content -->

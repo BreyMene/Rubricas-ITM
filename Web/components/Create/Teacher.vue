@@ -1,10 +1,13 @@
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n';
+
   const isOpen = ref(false)
   const toast = useToast()
 
   const config = useRuntimeConfig();
   const route = useRoute();
   const courseId = computed(() => route.params.id);
+  const { t } = useI18n();
 
   const docenteList = ref<DocenteEnCurso[]>([])
   const docenteInput = ref("");
@@ -23,14 +26,14 @@
     // Check if it's a valid email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(docenteInput.value)) {
-      docenteInputError.value = "Email inválido";
+      docenteInputError.value = t('create_teacher.toasts.invalid_email');
       isDocenteInputValid.value = false;
       return false;
     }
 
     // Check if it ends with the institutional domain
     if (!docenteInput.value.endsWith("@correo.itm.edu.co")) {
-      docenteInputError.value = "Debe usar un correo institucional";
+      docenteInputError.value = t('create_teacher.toasts.institutional_email_required');
       isDocenteInputValid.value = false;
       return false;
     }
@@ -44,7 +47,7 @@
     }
 
     if (docenteList.value.some(docente => docente.correo === docenteInput.value)) {
-      docenteInputError.value = "Correo ya ingresado";
+      docenteInputError.value = t('create_teacher.toasts.email_already_exists');
       isDocenteInputValid.value = false;
       return;
     }
@@ -103,7 +106,7 @@
         const emailList = alreadyInCourse.join(', ');
 
         toast.add({
-            title: `Algunos docentes ya existen`,
+            title: t('create_teacher.toasts.some_teachers_exist'),
             description: `${emailList}`,
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
@@ -132,7 +135,7 @@
         })
       }
       else
-        docenteInputError.value = 'Ha ocurrido un error al ingresar los docentes'
+        docenteInputError.value = t('create_teacher.toasts.error_adding_teachers');
     }
   };
 
@@ -168,7 +171,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Agregar Docente
+              {{ t('create_teacher.title') }}
             </h3>
             <UButton color="gray" variant="ghost" icon="fluent:dismiss-12-filled" class="-my-1 hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20" @click="isOpen = false" />
           </div>
@@ -179,13 +182,13 @@
           <!-- Form Content -->
           <div class="flex flex-col md:flex-row gap-9">  
             <div class="md:w-2/5 space-y-7 my-auto">
-              <UFormGroup label="Agregar Docente" :error="!isDocenteInputValid" :hint="docenteInputError"
+              <UFormGroup :label="t('create_teacher.add_teacher_label')" :error="!isDocenteInputValid" :hint="docenteInputError"
                 :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
                   size="sm"
-                  placeholder="ejemplo@correo.itm.edu.co"
+                  :placeholder="t('create_teacher.teacher_email_placeholder', { atSign: '@' })"
                   class="w-full"
                   v-model="docenteInput"
                   @keyup.enter="addDocente"
@@ -226,10 +229,10 @@
 
           <div class="flex justify-end mt-2 gap-4">
             <UButton variant="link" color="black" @click="isOpen = false">
-              Cancelar
+              {{ t('create_teacher.cancel') }}
             </UButton>
             <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="saveChanges">
-              Terminar
+              {{ t('create_teacher.finish') }}
             </UButton>
           </div>
 
