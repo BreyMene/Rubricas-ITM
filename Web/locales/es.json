@@ -10,7 +10,21 @@
       "confirm_deletion": "Confirmar Eliminación",
       "confirm_deletion_message": "¿Estás seguro que deseas eliminar tu cuenta? Esta acción es irreversible y eliminará todos tus datos.",
       "cancel": "Cancelar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "email_verification": "Verificación de Correo",
+      "email_verification_sent": "Se ha enviado un código de verificación a:",
+      "verify": "Verificar",
+      "code_not_received": "¿No recibiste el código?",
+      "resend_code": "Reenviar código",
+      "email_new_must_be_different": "El nuevo correo debe ser diferente al actual",
+      "email_must_be_institutional": "Debe ser un correo institucional (@correo.itm.edu.co)",
+      "email_required": "El correo es requerido",
+      "otp_incomplete": "Código incompleto",
+      "otp_invalid": "Código inválido o expirado",
+      "otp_error_sending": "Error al enviar el código de verificación",
+      "otp_error_resending": "Error al reenviar el código",
+      "otp_success": "Correo cambiado exitosamente",
+      "no_authenticated_user": "No hay usuario autenticado"
     },
     "change_password": {
       "change_password": "Cambiar Contraseña",

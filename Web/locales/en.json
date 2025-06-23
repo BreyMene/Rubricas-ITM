@@ -10,7 +10,21 @@
       "confirm_deletion": "Confirm Deletion",
       "confirm_deletion_message": "Are you sure you want to delete your account? This action is irreversible and will delete all your data.",
       "cancel": "Cancel",
-      "delete": "Delete"
+      "delete": "Delete",
+      "email_verification": "Email Verification",
+      "email_verification_sent": "A verification code has been sent to your current email:",
+      "verify": "Verify",
+      "code_not_received": "Didn't receive the code?",
+      "resend_code": "Resend code",
+      "email_new_must_be_different": "The new email must be different from the current one.",
+      "email_must_be_institutional": "Must be an institutional email (@correo.itm.edu.co)",
+      "email_required": "Email is required",
+      "otp_incomplete": "Incomplete code",
+      "otp_invalid": "Invalid or expired code",
+      "otp_error_sending": "Error sending verification code",
+      "otp_error_resending": "Error resending the code",
+      "otp_success": "Email changed successfully",
+      "no_authenticated_user": "No authenticated user"
     },
     "change_password": {
       "change_password": "Change Password",

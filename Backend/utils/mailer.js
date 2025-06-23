@@ -101,6 +101,49 @@ async function sendPasswordChangeCode(to, code) {
   });
 }
 
+async function sendEmailChangeCode(to, code) {
+  await transporter.sendMail({
+    from: "Soporte Rubricas <rubritm@gmail.com>",
+    to,
+    subject: "Código de verificación para cambio de correo electrónico",
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #fafafa; border: 1px solid #d3d3d3; border-radius: 10px; overflow: hidden;">
+        <!-- Header -->
+        <div style="background-color: #2a3465; padding: 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Cambio de Correo Electrónico</h1>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 30px;">
+          <p style="font-size: 16px; color: #2a3465;">Hola,</p>
+          <p style="font-size: 15px; color: #2a3465; line-height: 1.5;">
+            Hemos recibido una solicitud para cambiar el correo electrónico de tu cuenta en <strong>Rúbricas ITM</strong>.
+          </p>
+
+          <p style="font-size: 15px; margin-top: 30px; text-align: center; color: #523a72;">
+            Tu código de verificación es:
+          </p>
+
+          <div style="text-align: center; margin: 20px 0;">
+            <span style="display: inline-block; font-size: 32px; font-weight: bold; background-color: #f3f4f6; padding: 12px 24px; border-radius: 8px; letter-spacing: 2px; color: #4e5ea3;">
+              ${code}
+            </span>
+          </div>
+
+          <p style="font-size: 14px; text-align: center; color: #807467;">
+            Este código expirará en 10 minutos.
+          </p>
+
+          <hr style="margin: 30px 0; border-color: #d3d3d3;">
+
+          <p style="font-size: 13px; color: #545250; text-align: center;">
+            Si no solicitaste este cambio de correo, por favor contacta a soporte inmediatamente.
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
 
 function styleEmailHtml(html) {
   // Bold all badges
@@ -157,4 +200,39 @@ async function sendRubricPDF(to, studentName, rubricName, pdfBuffer, subject, bo
   });
 }
 
-module.exports = { sendCodeEmail, sendPasswordChangeCode, sendRubricPDF };
+async function sendEmailChangeNotification(oldEmail, newEmail) {
+  const subject = "Notificación de cambio de correo electrónico";
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #fafafa; border: 1px solid #d3d3d3; border-radius: 10px; overflow: hidden;">
+      <div style="background-color: #2a3465; padding: 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Cambio de Correo Electrónico</h1>
+      </div>
+      <div style="padding: 30px;">
+        <p style="font-size: 16px; color: #2a3465;">Hola,</p>
+        <p style="font-size: 15px; color: #2a3465; line-height: 1.5;">
+          Te informamos que el correo electrónico asociado a tu cuenta de <strong>RubrITM</strong> ha sido cambiado.<br>
+          <strong>Correo anterior:</strong> ${oldEmail}<br>
+          <strong>Correo nuevo:</strong> ${newEmail}
+        </p>
+        <p style="font-size: 14px; color: #807467; margin-top: 20px;">
+          Si tú realizaste este cambio, puedes ignorar este mensaje.<br>
+          Si no reconoces esta acción, por favor contacta a soporte inmediatamente.
+        </p>
+      </div>
+    </div>
+  `;
+  await transporter.sendMail({
+    from: "Soporte Rubricas <rubritm@gmail.com>",
+    to: oldEmail,
+    subject,
+    html,
+  });
+  await transporter.sendMail({
+    from: "Soporte Rubricas <rubritm@gmail.com>",
+    to: newEmail,
+    subject,
+    html,
+  });
+}
+
+module.exports = { sendCodeEmail, sendPasswordChangeCode, sendRubricPDF, sendEmailChangeCode, sendEmailChangeNotification };
