@@ -4,11 +4,13 @@
   import { useDocenteStore } from "~/utils/store";
   import { useRubricPermissions } from "~/composables/useRubricPermissions";
   import { useCursoStore } from "~/utils/store";
+  import { useI18n } from 'vue-i18n';
 
   const route = useRoute();
   const config = useRuntimeConfig();
   const toast = useToast();
   const docenteID = useDocenteStore().getID;
+  const { t } = useI18n();
 
   const temas = ref<Tema[]>([])
   const rubricName = ref('')
@@ -47,8 +49,8 @@
       if (!cloneId || !nota || !estudiante || !grupo || !curso) {
         showError({
           statusCode: 400,
-          statusMessage: 'Parámetros faltantes',
-          message: 'Faltan parámetros necesarios para cargar la rúbrica.'
+          statusMessage: t('calificar_rubrica.parameters_missing'),
+          message: t('calificar_rubrica.missing_parameters_to_load_rubric')
         });
         return;
       }
@@ -86,15 +88,15 @@
     } catch (error: any) {
       showError({
         statusCode: error.statusCode || 500,
-        statusMessage: error.statusMessage || 'Error',
-        message: error.message || 'Ha ocurrido un error al cargar la rúbrica.'
+        statusMessage: t('calificar_rubrica.error'),
+        message: t('calificar_rubrica.error_loading_rubric')
       });
     }
   };
 
   const saveGrade = async () => {
     try {
-      loadScreen('Guardando calificación...', true);
+      loadScreen(t('calificar_rubrica.saving_grade'), true);
       const updatedGroup = await $fetch<Grupo>(`${config.public.apiUrl}/grades/${route.query.grupo}/notas/${notaId.value}/grade`, {
         method: 'PUT',
         body: {
@@ -107,7 +109,7 @@
       useCursoStore().setGrupo(updatedGroup);
 
       toast.add({
-        title: 'Calificación guardada exitosamente',
+        title: t('calificar_rubrica.grade_saved'),
         icon: "fluent:checkmark-circle-16-filled",
         timeout: 3000,
         ui: {
@@ -138,7 +140,7 @@
     } catch (error) {
       console.error("Error saving grade:", error);
       toast.add({
-        title: 'Error al guardar la calificación',
+        title: t('calificar_rubrica.grade_save_error'),
         icon: "fluent:alert-urgent-16-filled",
         timeout: 3000,
         ui: {
@@ -193,7 +195,7 @@
                 class="dark:text-White-w hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
                 @click="$router.back()"
             >
-                Volver
+                {{ t('calificar_rubrica.back') }}
             </UButton>
         </div>
 
@@ -202,21 +204,21 @@
                 <!-- Header with student info -->
                 <div class="bg-MLight-White dark:bg-Warm-Dark p-4 rounded-t-xl transition-all duration-150">
                     <h2 class="text-xl font-semibold dark:text-white mb-2">{{ rubricName }}</h2>
-                    <p class="text-Light-Gray dark:text-MLight-White/50">Estudiante: {{ studentName }}</p>
+                    <p class="text-Light-Gray dark:text-MLight-White/50">{{ t('calificar_rubrica.student_label') }}: {{ studentName }}</p>
                 </div>
 
                 <!-- Rubric table header -->
                 <div class="sticky top-0 flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 z-10 text-xs lg:text-sm xl:text-base rounded-b-lg transition-all duration-150">
-                    <div class="flex-none w-[20%] px-3">Tema</div>
-                    <div class="flex-none w-[30%] px-3">Criterio</div>
-                    <div class="flex-none w-[10%] px-3">Peso</div>
-                    <div class="flex-none w-[10%] px-3">Calificación</div>
-                    <div class="flex-none w-[10%] px-3">Acumulado</div>
-                    <div class="flex-none w-[20%] px-3">Observaciones</div>
+                    <div class="flex-none w-[20%] px-3">{{ t('calificar_rubrica.tema') }}</div>
+                    <div class="flex-none w-[30%] px-3">{{ t('calificar_rubrica.criterio') }}</div>
+                    <div class="flex-none w-[10%] px-3">{{ t('calificar_rubrica.peso') }}</div>
+                    <div class="flex-none w-[10%] px-3">{{ t('calificar_rubrica.calificacion') }}</div>
+                    <div class="flex-none w-[10%] px-3">{{ t('calificar_rubrica.acumulado') }}</div>
+                    <div class="flex-none w-[20%] px-3">{{ t('calificar_rubrica.observaciones') }}</div>
                 </div>
 
                 <div v-if="temas.length === 0" class="text-center p-4 text-Light-Gray dark:text-MLight-White/50">
-                    No hay temas.
+                    {{ t('calificar_rubrica.no_temas') }}
                 </div>
 
                 <RubricaTemaCalificacion
@@ -228,7 +230,7 @@
 
                 <!-- Add totals row -->
                 <div v-if="temas.length > 0" class="flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 text-xs lg:text-sm xl:text-base rounded-lg mt-2 transition-all duration-150">
-                    <div class="flex-none w-[20%] px-3">Total</div>
+                    <div class="flex-none w-[20%] px-3">{{ t('calificar_rubrica.total') }}</div>
                     <div class="flex-none w-[30%] px-3"></div>
                     <div class="flex-none w-[10%] px-3 text-center">{{ totalPeso }}</div>
                     <div class="flex-none w-[10%] px-3 text-center">{{ totalCalificacion }}</div>
@@ -246,7 +248,7 @@
                 @click="saveGrade"
             >
                 <UIcon name="fluent:save-16-filled" class="text-xl dark:text-White-w"/>
-                <span class="text-white">Guardar Calificación</span>
+                <span class="text-white">{{ t('calificar_rubrica.save_grade') }}</span>
             </UButton>
         </div>
 

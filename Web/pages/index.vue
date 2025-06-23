@@ -2,7 +2,9 @@
 const config = useRuntimeConfig();
 import { useDocenteStore } from "~/utils/store";
 import { useCursoStore } from "~/utils/store";
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const loading = ref(true);
 
 // Sample courses data (you can replace this with your actual data)
@@ -51,7 +53,7 @@ function addCourse(c: Curso) {
           <div
             class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative transition-colors duration-150"
           >
-            <h2 class="text-2xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">Cursos</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">{{ t('pages.index.title') }}</h2>
             <CreateSubject
               @addCourse="addCourse"
               class="sm:relative sm:ml-auto fixed bottom-6 right-6 z-1 sm:z-auto sm:bottom-0 sm:right-0"
@@ -93,7 +95,7 @@ function addCourse(c: Curso) {
                     <p
                       class="text-xl font-medium text-center text-Pure-Black dark:text-White-w transition-colors duration-150"
                     >
-                      NO TIENES<br />NINGUN CURSO
+                      {{ t('pages.index.no_courses_line1') }}<br />{{ t('pages.index.no_courses_line2') }}
                     </p>
                   </div>
                 </div>

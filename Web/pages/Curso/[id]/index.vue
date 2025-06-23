@@ -1,7 +1,9 @@
 <script setup lang="ts">
   import { useCursoStore } from "~/utils/store";
   import { useCoursePermissions } from "~/composables/useCoursePermissions";
+  import { useI18n } from 'vue-i18n';
 
+  const { t } = useI18n();
   const config = useRuntimeConfig();
   // Get the route object
   const route = useRoute();
@@ -23,12 +25,12 @@
 
   const items = computed(() => [
     {
-      label: "Inicio",
+      label: t('pages.curso.breadcrumbs_home'),
       icon: "fluent:home-12-filled",
       to: "/",
     },
     {
-      label: `Curso ${curso.value?.nombre}` || "Curso",
+      label: curso.value?.nombre ? `${t('pages.curso.breadcrumbs_course_default')} ${curso.value.nombre}` : t('pages.curso.breadcrumbs_course_default'),
       icon: curso.value?.icono || "fluent:book-32-filled",
       to: `/Curso/${courseId.value}`,
     },
@@ -64,7 +66,7 @@
         showError({
           statusCode: error.statusCode || 500,
           statusMessage: error.statusMessage || 'Error',
-          message: error.message || 'Ha ocurrido un error al cargar el curso.'
+          message: error.message || t('pages.curso.error_loading_course')
         });
       } finally {
         loading.value = false;
@@ -78,7 +80,7 @@
         showError({
           statusCode: error.statusCode || 500,
           statusMessage: error.statusMessage || 'Error',
-          message: error.message || 'Ha ocurrido un error al validar el acceso al curso.'
+          message: error.message || t('pages.curso.error_validating_access')
         });
       }
     }
@@ -217,8 +219,8 @@
     } catch (error: any) {
       if (error.data?.error === "teacher email does not exist in the system") {
         toast.add({
-            title: 'Error al editar',
-            description: 'El correo no existe',
+            title: t('pages.curso.toast_edit_error_title'),
+            description: t('pages.curso.toast_email_not_exist'),
             icon: "fluent:alert-urgent-16-filled",
             timeout: 3000,
             ui: {
@@ -289,7 +291,7 @@
 
   // Placeholder text for the search bar
   const placeholderText = computed(() =>
-    showGroups.value ? "Buscar Grupo..." : "Buscar Docente...",
+    showGroups.value ? t('pages.curso.search_placeholder_group') : t('pages.curso.search_placeholder_teacher'),
   );
 
   // SEARCH BAR  ---------------
@@ -423,7 +425,7 @@
                       <p
                         class="text-xl font-medium text-center text-Pure-Black dark:text-White-w transition-colors duration-150"
                       >
-                        NO HAY<br />NINGUN GRUPO
+                        {{ t('pages.curso.no_groups_warning_line1') }}<br />{{ t('pages.curso.no_groups_warning_line2') }}
                       </p>
                     </div>
                   </div>
@@ -447,7 +449,7 @@
                         {{ group.nombre }}
                       </h3>
                       <p class="text-sm text-center w-full text-Medium-Gray dark:text-Light-Gray transition-colors duration-[0.1s]">
-                        Profesor encargado <br />
+                        {{ t('pages.curso.group_card_assigned_teacher') }} <br />
                         <span class="block truncate max-w-full text-Medium-Gray/70 dark:text-Light-Gray/70 transition-colors duration-[0.1s]">{{ group.docente.correo }}</span>
                       </p>
                     </UButton>
@@ -522,7 +524,7 @@
                   class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                   @click="$router.push(`/Rubrica/${displayRubric?._id}?isModerator=${isModerator}`)"
                 >
-                  {{ isModerator ? 'Modificar' : 'Ver' }}
+                  {{ isModerator ? t('pages.curso.rubric_preview_modify') : t('pages.curso.rubric_preview_view') }}
                 </UButton>
                 <UButton
                   v-if="rubrics.length > 1"
@@ -530,7 +532,7 @@
                   class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                   @click="showRubricModal = true"
                 >
-                  Ver más
+                  {{ t('pages.curso.rubric_preview_see_more') }}
                 </UButton>
               </div>
             </div>
@@ -549,7 +551,7 @@
               class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
             />
             <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w transition-colors duration-150">
-              NO HAY<br />NINGUNA RÚBRICA
+              {{ t('pages.curso.no_rubrics_warning_line1') }}<br />{{ t('pages.curso.no_rubrics_warning_line2') }}
             </p>
           </div>
         </div>
@@ -557,7 +559,7 @@
         <!-- Load screen for rubrics -->
         <UtilitiesLoadingScreen
           :isLoading="loadingRubrics"
-          message="Cargando rúbricas..."
+          :message="t('pages.curso.loading_rubrics')"
           :noBackground="true"
           :noSpinnerBackground="true"
           spinnerSize="sm"
@@ -595,7 +597,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Todas las Rúbricas
+              {{ t('pages.curso.all_rubrics_modal_title') }}
             </h3>
             <UButton
               color="gray"
@@ -632,7 +634,7 @@
                 class="mt-2 w-full bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w"
                 @click="$router.push(`/Rubrica/${rubric._id}`)"
               >
-                Ver detalles
+                {{ t('pages.curso.view_details') }}
               </UButton>
             </div>
           </div>

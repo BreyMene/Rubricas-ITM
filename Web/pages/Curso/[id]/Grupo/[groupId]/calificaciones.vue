@@ -2,7 +2,9 @@
     import { useCursoStore } from '~/utils/store'
     import type { Estudiante, Rubrica, Nota, Grupo, Curso } from '~/utils/types'
     import { useCoursePermissions } from '~/composables/useCoursePermissions'
+    import { useI18n } from 'vue-i18n'
 
+    const { t } = useI18n();
     const route = useRoute();
     const config = useRuntimeConfig();
     const toast = useToast()
@@ -41,8 +43,8 @@
                 if (!teacher) {
                     showError({
                         statusCode: 403,
-                        statusMessage: 'Acceso denegado',
-                        message: 'Solo el profesor del grupo puede acceder a las calificaciones.'
+                        statusMessage: t('pages.calificaciones.access_denied'),
+                        message: t('pages.calificaciones.access_denied_message')
                     });
                     return;
                 }
@@ -52,8 +54,8 @@
             } catch (error: any) {
                 showError({
                     statusCode: error.statusCode || 500,
-                    statusMessage: error.statusMessage || 'Error',
-                    message: error.message || 'Ha ocurrido un error al cargar el curso.'
+                    statusMessage: error.statusMessage || t('pages.calificaciones.toast_generic_error_title'),
+                    message: error.message || t('pages.calificaciones.error_loading_course')
                 });
             }
         } else {
@@ -65,8 +67,8 @@
                 if (!teacher) {
                     showError({
                         statusCode: 403,
-                        statusMessage: 'Acceso denegado',
-                        message: 'Solo el profesor del grupo puede acceder a las calificaciones.'
+                        statusMessage: t('pages.calificaciones.access_denied'),
+                        message: t('pages.calificaciones.access_denied_message')
                     });
                     return;
                 }
@@ -76,8 +78,8 @@
                 console.error("Error al validar acceso:", error);
                 showError({
                     statusCode: error.statusCode || 500,
-                    statusMessage: error.statusMessage || 'Error',
-                    message: error.message || 'Ha ocurrido un error al validar el acceso al grupo.'
+                    statusMessage: error.statusMessage || t('pages.calificaciones.toast_generic_error_title'),
+                    message: error.message || t('pages.calificaciones.error_validating_access')
                 });
             }
         }
@@ -92,7 +94,7 @@
             } catch (error: any) {
                 console.error("Error al cargar el grupo:", error);
                 toast.add({
-                    title: 'Error al cargar el grupo',
+                    title: t('pages.calificaciones.error_loading_group'),
                     icon: "fluent:alert-urgent-16-filled",
                     timeout: 3000,
                     ui: {
@@ -135,22 +137,22 @@
     // Navigation items
     const items = computed(() => [
         {
-            label: 'Inicio',
+            label: t('pages.calificaciones.breadcrumbs_home'),
             icon: 'fluent:home-12-filled',
             to: '/'
         },
         {
-            label: `Curso ${curso.value?.nombre}` || 'Curso',
+            label: `Curso ${curso.value?.nombre}` || t('pages.calificaciones.breadcrumbs_course_default'),
             icon: curso.value?.icono || 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}`
         },
         {
-            label: `Grupo ${grupo.value?.nombre}`,
+            label: `Grupo ${grupo.value?.nombre}` || t('pages.calificaciones.breadcrumbs_group_default'),
             icon: 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}/Grupo/${groupId.value}`
         },
         {
-            label: 'Calificaciones',
+            label: t('pages.calificaciones.breadcrumbs_grades'),
             icon: 'fluent:document-edit-16-filled',
             to: `/Curso/${courseId.value}/Grupo/${groupId.value}/Calificaciones`
         }
@@ -171,7 +173,7 @@
     // Function to grade a nota for a student
     const gradeNota = async (nota: Nota) => {
         try {
-            loadScreen('Preparando Notas...', true);
+            loadScreen(t('pages.calificaciones.loading_preparing_grades'), true);
             
             if (!nota.rubrica || !nota.numero || !selectedStudent.value?.correo) {
                 console.error('Missing required data:', { 
@@ -179,7 +181,7 @@
                     notaNumero: nota.numero, 
                     estudiante: selectedStudent.value?.correo 
                 });
-                throw new Error('Missing required data for grading');
+                throw new Error(t('pages.calificaciones.error_missing_data'));
             }
 
             // Navigate to the grading page with the nota and student info
@@ -199,8 +201,8 @@
             console.error("Error grading nota:", error);
             loadScreen('', false);
             toast.add({
-                title: 'Error al preparar la calificación',
-                description: 'No se pudo acceder a la página de calificación',
+                title: t('pages.calificaciones.error_preparing_grade_title'),
+                description: t('pages.calificaciones.error_preparing_grade_desc'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -269,7 +271,7 @@
         } catch (error) {
             console.error("Error fetching rubrics:", error);
             toast.add({
-                title: 'Error al cargar las rúbricas',
+                title: t('pages.calificaciones.error_loading_rubrics'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -309,7 +311,7 @@
     // Add delete function
     const handleDeleteNota = async (nota: Nota) => {
         try {
-            loadScreen('Eliminando nota...', true);
+            loadScreen(t('pages.calificaciones.loading_deleting_nota'), true);
             await $fetch(`${config.public.apiUrl}/grades/${groupId.value}/notas/${nota.numero}`, {
                 method: "DELETE"
             });
@@ -326,7 +328,7 @@
             useCursoStore().setGrupo(group);
             
             toast.add({
-                title: 'Nota eliminada exitosamente',
+                title: t('pages.calificaciones.toast_delete_success'),
                 icon: "fluent:checkmark-circle-16-filled",
                 timeout: 3000,
                 ui: {
@@ -355,7 +357,7 @@
             loadScreen('', false);
             // Add error toast
             toast.add({
-                title: 'Error al eliminar la nota',
+                title: t('pages.calificaciones.toast_delete_error'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -403,7 +405,7 @@
             }
 
             toast.add({
-                title: 'Porcentaje actualizado',
+                title: t('pages.calificaciones.toast_percentage_updated'),
                 icon: "fluent:checkmark-circle-16-filled",
                 timeout: 3000,
                 ui: {
@@ -431,7 +433,7 @@
         } catch (error) {
             console.error("Error updating percentage:", error);
             toast.add({
-                title: 'Error al intentar actualizar el porcentaje',
+                title: t('pages.calificaciones.toast_percentage_update_error'),
                 icon: "fluent:alert-urgent-16-filled",
                 timeout: 3000,
                 ui: {
@@ -496,7 +498,7 @@
             <!-- Notas List -->
             <div class="mb-2 relative min-h-[200px]">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold dark:text-white">Notas del Grupo</h2>
+                    <h2 class="text-xl font-semibold dark:text-white">{{ t('pages.calificaciones.title_group_grades') }}</h2>
                     <div class="flex gap-2">
                         <ClientOnly>
                             <GradesEmailNotas
@@ -526,7 +528,7 @@
                             @loadingChange="(isLoading, message) => loadScreen(message, isLoading)"
                             @error="(message) => {
                                 toast.add({
-                                    title: 'Error',
+                                    title: t('pages.calificaciones.toast_generic_error_title'),
                                     description: message,
                                     icon: 'fluent:alert-urgent-16-filled',
                                     timeout: 3000,
@@ -574,7 +576,7 @@
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <h3 class="font-medium text-Pure-Black dark:text-White-w">
-                                            Nota {{ nota.numero }}
+                                            {{ t('pages.calificaciones.nota_number', { number: nota.numero }) }}
                                         </h3>
                                         <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-1">
                                             {{ new Date(nota.fecha).toLocaleDateString() }}
@@ -639,9 +641,9 @@
                                 <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"></div>
 
                                 <UIcon name="fluent:document-edit-16-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY NOTAS</p>
+                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">{{ t('pages.calificaciones.empty_state_no_grades_title') }}</p>
                                 <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
-                                    Crea una nueva nota para comenzar a calificar a los estudiantes.
+                                    {{ t('pages.calificaciones.empty_state_no_grades_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -668,7 +670,7 @@
                 <div v-if="LoadingNotas" class="flex items-center justify-center absolute inset-0">
                     <UtilitiesLoadingScreen
                         :isLoading="LoadingNotas"
-                        message="Cargando Notas"
+                        :message="t('pages.calificaciones.loading_grades')"
                         :noBackground="true"
                     />
                 </div>
@@ -676,7 +678,7 @@
 
             <!-- Students List -->
             <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 dark:text-white">Estudiantes</h2>
+                <h2 class="text-xl font-semibold mb-4 dark:text-white">{{ t('pages.calificaciones.title_students') }}</h2>
                 <ClientOnly>
                     <!-- Show students when loaded and not loading -->
                     <div 
@@ -724,9 +726,9 @@
                                 <div class="absolute bottom-0 -right-2 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"></div>
 
                                 <UIcon name="fluent:person-24-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">NO HAY ESTUDIANTES</p>
+                                <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2">{{ t('pages.calificaciones.empty_state_no_students_title') }}</p>
                                 <p class="text-sm text-Light-Gray dark:text-MLight-White/50 text-center">
-                                    Agrega estudiantes al grupo para poder calificarlos.
+                                    {{ t('pages.calificaciones.empty_state_no_students_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -774,7 +776,7 @@
                 <template #header>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-semibold leading-6 dark:text-white">
-                            Calificar Notas - {{ selectedStudent?.nombre }}
+                            {{ t('pages.calificaciones.modal_grade_title', { name: selectedStudent?.nombre }) }}
                         </h3>
                         <UButton
                             color="gray"
@@ -793,13 +795,13 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h4 class="font-medium text-Pure-Black dark:text-White-w">
-                                        Nota {{ nota.numero }}
+                                        {{ t('pages.calificaciones.nota_number', { number: nota.numero }) }}
                                     </h4>
                                     <p class="text-sm text-Light-Gray dark:text-MLight-White/50 mt-1">
                                         {{ new Date(nota.fecha).toLocaleDateString() }}
                                     </p>
                                     <p class="text-sm text-Pure-Black dark:text-White-w mt-2">
-                                        Rúbrica: {{ rubrics.find(r => r._id === nota.rubrica)?.nombre }}
+                                        {{ t('pages.calificaciones.rubric_label', { name: rubrics.find(r => r._id === nota.rubrica)?.nombre }) }}
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -833,7 +835,7 @@
                                         class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                                         @click="gradeNota(nota)"
                                     >
-                                        Calificar
+                                        {{ t('pages.calificaciones.button_grade') }}
                                     </UButton>
                                 </div>
                             </div>
@@ -841,8 +843,8 @@
                     </div>
                     <div v-else class="text-center p-8">
                         <UIcon name="fluent:document-edit-16-filled" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                        <p class="text-Light-Gray dark:text-MLight-White/50 text-lg">No hay notas registradas</p>
-                        <p class="text-Light-Gray dark:text-MLight-White/50 text-sm mt-2">Crea una nota para poder calificar</p>
+                        <p class="text-Light-Gray dark:text-MLight-White/50 text-lg">{{ t('pages.calificaciones.modal_no_grades_registered') }}</p>
+                        <p class="text-Light-Gray dark:text-MLight-White/50 text-sm mt-2">{{ t('pages.calificaciones.modal_create_grade_to_start') }}</p>
                     </div>
                 </div>
             </UCard>
@@ -869,11 +871,11 @@
                 <div class="p-4">
                     <div class="flex items-center mb-4">
                         <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
-                        <h3 class="text-lg font-semibold dark:text-white">Confirmar Eliminación</h3>
+                        <h3 class="text-lg font-semibold dark:text-white">{{ t('pages.calificaciones.modal_confirm_delete_title') }}</h3>
                     </div>
                     
                     <p class="mb-6 text-gray-700 dark:text-gray-300">
-                        ¿Estás seguro que deseas eliminar la "Nota {{ selectedNota?.numero }}"? Esta acción es irreversible.
+                        {{ t('pages.calificaciones.modal_confirm_delete_desc', { number: selectedNota?.numero }) }}
                     </p>
                     
                     <div class="flex justify-end gap-3">
@@ -882,13 +884,13 @@
                             color="gray"
                             @click="isDeleteModalOpen = false"
                         >
-                            Cancelar
+                            {{ t('pages.calificaciones.button_cancel') }}
                         </UButton>
                         <UButton 
                             color="red" 
                             @click="selectedNota && handleDeleteNota(selectedNota)"
                         >
-                            Eliminar
+                            {{ t('pages.calificaciones.button_delete') }}
                         </UButton>
                     </div>
                 </div>
@@ -914,11 +916,11 @@
                 <div class="p-4">
                     <div class="flex items-center mb-4">
                         <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
-                        <h3 class="text-lg font-semibold dark:text-white">Rúbrica Eliminada</h3>
+                        <h3 class="text-lg font-semibold dark:text-white">{{ t('pages.calificaciones.modal_rubric_deleted_title') }}</h3>
                     </div>
                     
                     <p class="mb-6 text-gray-700 dark:text-gray-300">
-                        La rúbrica asociada a esta nota ha sido eliminada. No es posible ver su contenido.
+                        {{ t('pages.calificaciones.modal_rubric_deleted_desc') }}
                     </p>
                     
                     <div class="flex justify-end">
@@ -927,7 +929,7 @@
                             color="gray"
                             @click="showDeletedRubricModal = false"
                         >
-                            Cerrar
+                            {{ t('pages.calificaciones.button_close') }}
                         </UButton>
                     </div>
                 </div>

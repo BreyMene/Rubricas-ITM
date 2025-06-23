@@ -2,6 +2,7 @@
   import { ref, onMounted, computed } from 'vue'
   import type {Criterio, Tema, Rubrica} from '~/utils/types'
   import { useDocenteStore } from "~/utils/store";
+  import { useI18n } from 'vue-i18n';
 
   const route = useRoute();
   const config = useRuntimeConfig();
@@ -9,6 +10,7 @@
   const isMobile = ref(false);
   const isSaveModalOpen = ref(false);
   const toast = useToast();
+  const { t } = useI18n();
 
   const temas = ref<Tema[]>([])
 
@@ -143,7 +145,7 @@
     rubricNameError.value = "";
 
     if (rubricName.value.trim() === "") {
-      rubricNameError.value = "Se requiere un nombre";
+      rubricNameError.value = t('crear_rubrica.rubric_name_required');
       return false;
     }
 
@@ -153,10 +155,9 @@
   // Add validation for peso and acumulado
   const validateTotals = (showToast: boolean) => {
     if (totalPeso.value > 5) {
-      // Only show toast if showToast is true
       if (showToast) {
         toast.add({
-          title: 'El peso total no puede exceder 5',
+          title: t('crear_rubrica.toast_total_weight_error'),
           icon: "fluent:alert-urgent-16-filled",
           timeout: 3000,
           ui: {
@@ -194,7 +195,7 @@
 
     if (selectedGroups.value.length === 0 && !isGuideRubric.value) {
       toast.add({
-        title: 'Debe seleccionar al menos un grupo o marcar como rúbrica guía',
+        title: t('crear_rubrica.toast_select_group_or_guide'),
         icon: "fluent:alert-urgent-16-filled",
         timeout: 3000,
         ui: {
@@ -352,7 +353,7 @@
       await navigateTo(`/rubrica/${id}`);
       
       toast.add({
-        title: 'Rúbrica guardada exitosamente',
+        title: t('crear_rubrica.toast_save_success'),
         icon: "fluent:checkmark-circle-16-filled",
         timeout: 3000,
         ui: {
@@ -380,7 +381,7 @@
 
     } catch (error) {
       toast.add({
-        title: 'Error al guardar la rúbrica',
+        title: t('crear_rubrica.toast_save_error'),
         icon: "fluent:alert-urgent-16-filled",
         timeout: 3000,
         ui: {
@@ -432,23 +433,23 @@
         class="dark:text-White-w hover:bg-Medium-Blue/20 dark:hover:bg-Medium-Gray/20"
         @click="$router.back()"
       >
-        Volver
+        {{ t('crear_rubrica.back') }}
       </UButton>
     </div>
 
     <div class="overflow-x-auto lg:overflow-x-clip">
       <div class="min-w-[1200px] lg:min-w-0 bg-White-w dark:bg-Dark-Grey shadow-lg rounded-xl overflow-visible transition-all duration-150">
         <div class="sticky top-0 flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 z-10 text-xs lg:text-sm xl:text-base rounded-lg transition-colors duration-150">
-          <div class="flex-none w-[20%] px-3">Tema</div>
-          <div class="flex-none w-[30%] px-3">Criterio</div>
-          <div class="flex-none w-[10%] px-3">Peso</div>
-          <div class="flex-none w-[10%] px-3">Calificación</div>
-          <div class="flex-none w-[10%] px-3">Acumulado</div>
-          <div class="flex-none w-[20%] px-3">Observaciones</div>
+          <div class="flex-none w-[20%] px-3">{{ t('crear_rubrica.tema') }}</div>
+          <div class="flex-none w-[30%] px-3">{{ t('crear_rubrica.criterio') }}</div>
+          <div class="flex-none w-[10%] px-3">{{ t('crear_rubrica.peso') }}</div>
+          <div class="flex-none w-[10%] px-3">{{ t('crear_rubrica.calificacion') }}</div>
+          <div class="flex-none w-[10%] px-3">{{ t('crear_rubrica.acumulado') }}</div>
+          <div class="flex-none w-[20%] px-3">{{ t('crear_rubrica.observaciones') }}</div>
         </div>
 
         <div v-if="temas.length === 0" class="text-center p-4 text-Light-Gray dark:text-MLight-White/50">
-          No hay temas.
+          {{ t('crear_rubrica.no_temas') }}
         </div>
 
         <RubricaTema
@@ -464,7 +465,7 @@
 
         <!-- Add totals row -->
         <div v-if="temas.length > 0" class="flex bg-MLight-White dark:bg-Warm-Dark font-bold dark:text-White-w p-3 text-xs lg:text-sm xl:text-base rounded-lg mt-2 transition-all duration-150">
-          <div class="flex-none w-[20%] px-3">Total</div>
+          <div class="flex-none w-[20%] px-3">{{ t('crear_rubrica.total') }}</div>
           <div class="flex-none w-[30%] px-3"></div>
           <div class="flex-none w-[10%] px-3 text-center">{{ totalPeso }}</div>
           <div class="flex-none w-[10%] px-3 text-center">{{ totalCalificacion }}</div>
@@ -481,7 +482,7 @@
         class="rounded-xl shadow-lg bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-200"
         @click="addTema"
       >
-        Agregar Tema
+        {{ t('crear_rubrica.add_tema') }}
       </UButton>
     </div>
 
@@ -493,7 +494,7 @@
         @click="isSaveModalOpen = true"
       >
         <UIcon name="fluent:save-16-filled" class="text-xl dark:text-White-w"/>
-        <span class="text-white">Guardar</span>
+        <span class="text-white">{{ t('crear_rubrica.save') }}</span>
       </UButton>
       <UButton
         size="xl"
@@ -501,7 +502,7 @@
         class="shadow-lg rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray transition-colors duration-200"
       >
         <UIcon name="fluent:checkmark-24-filled" class="mr-2 text-xl dark:text-White-w"/>
-        <span class="text-white">Asignar Rúbrica</span>
+        <span class="text-white">{{ t('crear_rubrica.assign_rubric') }}</span>
       </UButton>
     </div>
   </div>
@@ -530,7 +531,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Finalizar Rúbrica
+              {{ t('crear_rubrica.finish_rubric') }}
             </h3>
             <UButton
               color="gray"
@@ -547,14 +548,14 @@
           <div class="flex flex-col gap-6">
             <!-- Rubric Name Input -->
             <div class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-4 shadow-md mx-0 sm:mx-36">
-              <UFormGroup label="Nombre de la Rúbrica" required :error="!!rubricNameError" :hint="rubricNameError"
+              <UFormGroup :label="t('crear_rubrica.rubric_name_label')" required :error="!!rubricNameError" :hint="rubricNameError"
                 :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
                   v-model="rubricName"
                   size="sm"
-                  placeholder="Ingrese el nombre de la rúbrica"
+                  :placeholder="t('crear_rubrica.rubric_name_placeholder')"
                   class="w-full"
                   :ui="{
                     icon: { trailing: { pointer: '' } },
@@ -573,7 +574,7 @@
 
             <!-- Course Selection View -->
             <div v-if="!showGroups" class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-6 shadow-md">
-              <h4 class="text-lg font-medium mb-4 dark:text-white">Seleccionar Curso</h4>
+              <h4 class="text-lg font-medium mb-4 dark:text-white">{{ t('crear_rubrica.select_course') }}</h4>
 
               <!-- Course Grid -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -643,14 +644,14 @@
                     />
                   </div>
                   <div v-if="groups.length === 0" class="text-center text-Light-Gray dark:text-MLight-White/50">
-                    No hay grupos disponibles para este curso.
+                    {{ t('crear_rubrica.no_groups') }}
                   </div>
                 </div>
 
                 <!-- Only show divider and guide rubric checkbox if user is moderator -->
                 <template v-if="isModerator && !isLoadingGroups">
                   <UDivider
-                    label="O"
+                    :label="t('crear_rubrica.or')"
                     :orientation="isMobile ? 'horizontal' : 'vertical'"
                     size="md"
                     :ui="{
@@ -664,7 +665,7 @@
                   <div class="flex flex-col justify-start">
                     <UCheckbox
                       v-model="isGuideRubric"
-                      label="Hacer rúbrica guía del curso"
+                      :label="t('crear_rubrica.make_guide_rubric')"
                       :ui="{
                         container: 'flex items-center gap-2',
                         base: 'w-5 h-5 checked:bg-Medium-Blue focus:checked:bg-Medium-Blue hover:checked:bg-Medium-Blue/60 dark:checked:bg-Muted-Brown hover:dark:checked:bg-Muted-Brown/60 transition-colors duration-200',
@@ -688,13 +689,13 @@
               color="black"
               @click="isOpen = false"
             >
-              Cancelar
+              {{ t('crear_rubrica.cancel') }}
             </UButton>
             <UButton
               class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
               @click="CreateRubric"
             >
-              Finalizar
+              {{ t('crear_rubrica.finish') }}
             </UButton>
           </div>
         </div>
@@ -724,7 +725,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Guardar Borrador
+              {{ t('crear_rubrica.save_draft') }}
             </h3>
             <UButton
               color="gray"
@@ -741,14 +742,14 @@
           <div class="flex flex-col gap-6">
             <!-- Rubric Name Input -->
             <div class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-4 shadow-md mx-0 sm:mx-36">
-              <UFormGroup label="Nombre de la Rúbrica" required :error="!!rubricNameError" :hint="rubricNameError"
+              <UFormGroup :label="t('crear_rubrica.rubric_name_label')" required :error="!!rubricNameError" :hint="rubricNameError"
                 :ui="{
                   hint: 'text-red-500 dark:text-red-500 text-sm mt-1'
                 }">
                 <UInput
                   v-model="rubricName"
                   size="sm"
-                  placeholder="Ingrese el nombre de la rúbrica"
+                  :placeholder="t('crear_rubrica.rubric_name_placeholder')"
                   class="w-full"
                   :ui="{
                     icon: { trailing: { pointer: '' } },
@@ -773,13 +774,13 @@
               color="black"
               @click="isSaveModalOpen = false"
             >
-              Cancelar
+              {{ t('crear_rubrica.cancel') }}
             </UButton>
             <UButton
               class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
               @click="saveRubric"
             >
-              Guardar
+              {{ t('crear_rubrica.save') }}
             </UButton>
           </div>
         </div>

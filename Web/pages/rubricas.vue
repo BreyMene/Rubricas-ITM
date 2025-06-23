@@ -1,5 +1,8 @@
 <script setup lang="ts">
   import { useDocenteStore } from "~/utils/store";
+  import { useI18n } from 'vue-i18n';
+
+  const { t } = useI18n();
   const config = useRuntimeConfig();
   const toast = useToast();
 
@@ -23,11 +26,11 @@
   const rubricButtons = computed(() => [
   [
       {
-        label: "Crear Rubrica",
+        label: t('pages.rubricas.create_rubric'),
         to: '/crearRubrica',
       },
       {
-        label: "Clonar Rubrica",
+        label: t('pages.rubricas.clone_rubric'),
         click: () => cloneRubric()
       }
   ],
@@ -37,11 +40,11 @@
   const getStateDisplay = (state: string) => {
     switch (state) {
       case 'borrador':
-        return 'Borrador';
+        return t('pages.rubricas.state_draft');
       case 'activo':
-        return 'Activa';
+        return t('pages.rubricas.state_active');
       case 'inactivo':
-        return 'Desactivada';
+        return t('pages.rubricas.state_inactive');
       default:
         return state;
     }
@@ -56,8 +59,8 @@
       const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId));
       const group = courses.value.flatMap(c => c.grupos || []).find(g => g.rubricas?.some(r => r._id === rubricaId));
       
-      selectedRubricaCourse.value = course?.nombre || 'No asignado a ningún curso';
-      selectedRubricaGroup.value = group?.nombre || 'No asignado a ningún grupo';
+      selectedRubricaCourse.value = course?.nombre || t('pages.rubricas.not_assigned_course');
+      selectedRubricaGroup.value = group?.nombre || t('pages.rubricas.not_assigned_group');
       
       isOpen.value = true;
   };
@@ -67,32 +70,32 @@
   const selectedState = ref('all');
 
   // State filter options with better styling
-  const stateOptions = [
+  const stateOptions = computed(() => [
     { 
-      label: 'Todos los estados', 
+      label: t('pages.rubricas.filter_all_states'), 
       value: 'all',
       icon: 'fluent:filter-24-regular'
     },
     { 
-      label: 'Activas', 
+      label: t('pages.rubricas.filter_active'), 
       value: 'activo',
       icon: 'fluent:checkmark-circle-24-filled'
     },
     { 
-      label: 'Borradores', 
+      label: t('pages.rubricas.filter_drafts'), 
       value: 'borrador',
       icon: 'fluent:drafts-16-filled'
     },
     { 
-      label: 'Inactivas', 
+      label: t('pages.rubricas.filter_inactive'), 
       value: 'inactivo',
       icon: 'fluent:dismiss-circle-24-filled'
     }
-  ];
+  ]);
 
   // Get current filter option
   const currentStateOption = computed(() => 
-    stateOptions.find(option => option.value === selectedState.value) || stateOptions[0]
+    stateOptions.value.find(option => option.value === selectedState.value) || stateOptions.value[0]
   );
 
   // Filtered rubricas based on search and state
@@ -199,7 +202,7 @@
       
       // Add success toast
       toast.add({
-        title: 'Rúbrica eliminada exitosamente',
+        title: t('pages.rubricas.toast_delete_success'),
         icon: "fluent:checkmark-circle-16-filled",
         timeout: 3000,
         ui: {
@@ -228,7 +231,7 @@
       console.error("Error deleting rubric:", error);
       // Add error toast
       toast.add({
-        title: 'Error al eliminar la rúbrica',
+        title: t('pages.rubricas.toast_delete_error'),
         icon: "fluent:alert-urgent-16-filled",
         timeout: 3000,
         ui: {
@@ -280,10 +283,10 @@
       <!-- Main Content Area -->
       <div class="flex-1">
         <div class="mb-6 transition-colors duration-150">
-            <h2 class="text-2xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">Mis Rubricas</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-Pure-Black dark:text-White-w transition-colors duration-150">{{ t('pages.rubricas.my_rubrics_title') }}</h2>
             <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between sm:items-center relative">
                 <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                    <UtilitiesSearchBar placeholderText="Buscar Rubrica..." @search="handleSearch"/>
+                    <UtilitiesSearchBar :placeholderText="t('pages.rubricas.search_placeholder')" @search="handleSearch"/>
                     
                     <!-- Enhanced State Filter -->
                     <UDropdown 
@@ -343,8 +346,8 @@
 
                 <!-- Desktop buttons - visible on SM and above -->
                 <div class="hidden sm:flex gap-3">
-                  <UButton label="Clonar Rubrica" @click="openCourses = true" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
-                  <UButton to="/crearRubrica" label="Crear Rubrica" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
+                  <UButton :label="t('pages.rubricas.clone_rubric')" @click="openCourses = true" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
+                  <UButton :to="'/crearRubrica'" :label="t('pages.rubricas.create_rubric')" size="xl" class="shadow-lg dark:text-White-w rounded-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"/>
                 </div>
 
                 <!-- Mobile dropdown menu - visible on XS only -->
@@ -392,7 +395,7 @@
                         <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg transition-colors duration-150"></div>
 
                         <UIcon name="fluent:filter-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4 transition-colors duration-[0.1s]" />
-                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2 transition-colors duration-150">NO SE ENCONTRARON<br>RUBRICAS</p>
+                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w mb-2 transition-colors duration-150">{{ t('pages.rubricas.no_results_found_line1') }}<br>{{ t('pages.rubricas.no_results_found_line2') }}</p>
                       </div>
                     </div>
 
@@ -406,7 +409,7 @@
                         <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-Purple-P dark:border-Muted-Brown rounded-br-lg"></div>
 
                         <UIcon name="fluent:warning-24-regular" class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4" />
-                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">NO HAY<br>NINGUNA RUBRICA</p>
+                        <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w">{{ t('pages.rubricas.empty_state_line1') }}<br>{{ t('pages.rubricas.empty_state_line2') }}</p>
                       </div>
                     </div>
                     
@@ -484,7 +487,7 @@
             <template #header>
               <div class="flex items-center justify-between">
                   <h3 class="flex gap-1 text-base font-medium leading-6 dark:text-White-w">
-                      Detalles Rúbrica: <p class="font-bold text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaName }}</p>
+                      {{ t('pages.rubricas.details_modal_title') }} <p class="font-bold text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaName }}</p>
                   </h3>
               </div>
             </template>
@@ -493,7 +496,7 @@
               <!-- Rúbrica details -->
               <div class="space-y-4">
                   <div class="flex items-center gap-2">
-                    <p class="dark:text-White-w">Estado:</p>
+                    <p class="dark:text-White-w">{{ t('pages.rubricas.details_modal_state') }}</p>
                     <span class="px-3 py-1 text-white rounded-full text-sm font-medium"
                       :class="{
                         'bg-green-500': selectedRubricaState === 'activo',
@@ -505,11 +508,11 @@
                     </span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <p class="dark:text-White-w">Curso al que pertenece:</p>
+                    <p class="dark:text-White-w">{{ t('pages.rubricas.details_modal_course') }}</p>
                     <span class="text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaCourse }}</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <p class="dark:text-White-w">Grupo al que pertenece:</p>
+                    <p class="dark:text-White-w">{{ t('pages.rubricas.details_modal_group') }}</p>
                     <span class="text-Medium-Blue dark:text-Muted-Brown">{{ selectedRubricaGroup }}</span>
                   </div>
               </div>
@@ -526,10 +529,10 @@
                     <UButton
                         variant="link" color="black"
                         @click="isOpen = false">
-                        Cerrar
+                        {{ t('pages.rubricas.button_close') }}
                     </UButton>
                     <UButton class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray" @click="openRubric">
-                        Ver Rubrica
+                        {{ t('pages.rubricas.button_view_rubric') }}
                     </UButton>
                 </div>
             </div>
@@ -557,11 +560,11 @@
             <div class="p-4">
                 <div class="flex items-center mb-4">
                     <UIcon name="fluent:warning-24-filled" class="text-red-500 text-2xl mr-2" />
-                    <h3 class="text-lg font-semibold dark:text-white">Confirmar Eliminación</h3>
+                    <h3 class="text-lg font-semibold dark:text-white">{{ t('pages.rubricas.delete_modal_title') }}</h3>
                 </div>
                 
                 <p class="mb-6 text-gray-700 dark:text-gray-300">
-                    ¿Estás seguro que deseas eliminar la rúbrica "{{ selectedRubricaName }}"? Esta acción es irreversible.
+                    {{ t('pages.rubricas.delete_modal_desc', { name: selectedRubricaName }) }}
                 </p>
                 
                 <div class="flex justify-end gap-3">
@@ -570,13 +573,13 @@
                         color="gray"
                         @click="isDeleteModalOpen = false"
                     >
-                        Cancelar
+                        {{ t('pages.rubricas.button_cancel') }}
                     </UButton>
                     <UButton 
                         color="red" 
                         @click="deleteRubric"
                     >
-                        Eliminar
+                        {{ t('pages.rubricas.button_delete') }}
                     </UButton>
                 </div>
             </div>
@@ -607,7 +610,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 dark:text-white">
-              Finalizar Rúbrica
+              {{ t('pages.rubricas.finish_rubric_modal_title') }}
             </h3>
             <UButton
               color="gray"
@@ -624,8 +627,8 @@
           <div class="flex flex-col gap-6">
             <!-- Course Selection View -->
             <div class="bg-MLight-White dark:bg-Dark-Grey/50 rounded-xl p-6 shadow-md">
-              <h4 class="text-lg font-medium mb-1 dark:text-white">Seleccionar Curso</h4>
-              <h1 class="mb-4 dark:text-white/60">Clonara la ultima rubrica guia</h1>
+              <h4 class="text-lg font-medium mb-1 dark:text-white">{{ t('pages.rubricas.select_course_title') }}</h4>
+              <h1 class="mb-4 dark:text-white/60">{{ t('pages.rubricas.clone_last_guide_rubric') }}</h1>
 
               <!-- Course Grid -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -659,13 +662,13 @@
               color="black"
               @click="openCourses = false"
             >
-              Cancelar
+              {{ t('pages.rubricas.button_cancel') }}
             </UButton>
             <UButton
               class="dark:text-White-w bg-Dark-Blue dark:bg-Dark-Grey hover:bg-Medium-Blue hover:dark:bg-Medium-Gray"
               @click="cloneRubric"
             >
-              Clonar
+              {{ t('pages.rubricas.button_clone') }}
             </UButton>
           </div>
         </div>

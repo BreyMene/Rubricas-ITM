@@ -1,7 +1,9 @@
 <script setup lang="ts">
     import { useCursoStore } from '~/utils/store'
     import { useCoursePermissions } from '~/composables/useCoursePermissions'
+    import { useI18n } from 'vue-i18n';
 
+    const { t } = useI18n();
     // Get the route object
     const route = useRoute();
     const config = useRuntimeConfig();
@@ -19,17 +21,17 @@
     
     const items = computed(() => [
         {
-            label: 'Inicio',
+            label: t('pages.grupo.breadcrumbs_home'),
             icon: 'fluent:home-12-filled',
             to: '/'
         },
         {
-            label: `Curso ${curso.value?.nombre}` || 'Curso',
+            label: curso.value?.nombre ? `${t('pages.grupo.breadcrumbs_course_default')} ${curso.value.nombre}` : t('pages.grupo.breadcrumbs_course_default'),
             icon: curso.value?.icono || 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}`
         },
         {
-            label: `Grupo ${grupo.value?.nombre}`,
+            label: grupo.value?.nombre ? `${t('pages.grupo.breadcrumbs_group_default')} ${grupo.value.nombre}` : t('pages.grupo.breadcrumbs_group_default'),
             icon: 'fluent:book-32-filled',
             to: `/Curso/${courseId.value}/Grupo/${groupId.value}`
         }
@@ -48,7 +50,7 @@
                 showError({
                     statusCode: error.statusCode || 500,
                     statusMessage: error.statusMessage || 'Error',
-                    message: error.message || 'Ha ocurrido un error al cargar el curso.'
+                    message: error.message || t('pages.grupo.error_loading_course')
                 });
             }
         } else {
@@ -60,7 +62,7 @@
                 showError({
                     statusCode: error.statusCode || 500,
                     statusMessage: error.statusMessage || 'Error',
-                    message: error.message || 'Ha ocurrido un error al validar el acceso al grupo.'
+                    message: error.message || t('pages.grupo.error_validating_access')
                 });
             }
         }
@@ -76,7 +78,7 @@
                 showError({
                     statusCode: error.statusCode || 500,
                     statusMessage: error.statusMessage || 'Error',
-                    message: error.message || 'Ha ocurrido un error al cargar el grupo.'
+                    message: error.message || t('pages.grupo.error_loading_group')
                 });
             }
         }
@@ -249,7 +251,7 @@
                 <!-- Searchbar and Buttons -->
                 <div class="mb-6">
                     <div class="mb-6 flex sm:flex-row gap-4 justify-between sm:items-center relative">
-                        <UtilitiesSearchBar placeholderText="Buscar Estudiante..." @search="handleSearch"/>
+                        <UtilitiesSearchBar :placeholderText="t('pages.grupo.search_placeholder_student')" @search="handleSearch"/>
                         <div class="flex items-center gap-2">
                             <SettingsGroupSettings v-if="isModerator" @load-screen="loadScreen"/>
                             <UButton
@@ -259,7 +261,7 @@
                                 class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                                 @click="navigateTo(`/Curso/${courseId}/Grupo/${groupId}/Calificaciones`)"
                             >
-                                Calificaciones
+                                {{ t('pages.grupo.grades_button') }}
                             </UButton>
                             <CreateStudent v-if="isModerator" class="sm:relative fixed bottom-6 right-6 z-10 sm:z-auto sm:bottom-0 sm:right-0"/>
                         </div>
@@ -303,7 +305,7 @@
                                     class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                                     @click="$router.push(`/Rubrica/${displayRubric?._id}`)"
                                 >
-                                    Modificar
+                                    {{ t('pages.grupo.rubric_preview_modify') }}
                                 </UButton>
                                 <UButton
                                     v-if="rubrics.length > 1"
@@ -311,7 +313,7 @@
                                     class="rounded-lg shadow-xl bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w transition-colors duration-150"
                                     @click="showRubricModal = true"
                                 >
-                                    Ver más
+                                    {{ t('pages.grupo.rubric_preview_see_more') }}
                                 </UButton>
                             </div>
                         </div>
@@ -330,7 +332,7 @@
                             class="text-6xl text-Purple-P dark:text-Muted-Brown mb-4"
                         />
                         <p class="text-xl font-medium text-center text-Pure-Black dark:text-White-w transition-colors duration-150">
-                            NO HAY<br />NINGUNA RÚBRICA
+                            {{ t('pages.grupo.no_rubrics_warning_line1') }}<br />{{ t('pages.grupo.no_rubrics_warning_line2') }}
                         </p>
                     </div>
                 </div>
@@ -338,7 +340,7 @@
                 <!-- Add loading screen -->
                 <UtilitiesLoadingScreen
                     :isLoading="loadingRubrics"
-                    message="Cargando rúbricas..."
+                    :message="t('pages.grupo.loading_rubrics')"
                     :noBackground="true"
                     :noSpinnerBackground="true"
                     spinnerSize="sm"
@@ -376,7 +378,7 @@
                 <template #header>
                     <div class="flex items-center justify-between">
                         <h3 class="text-base font-semibold leading-6 dark:text-white">
-                            Todas las Rúbricas
+                            {{ t('pages.grupo.all_rubrics_modal_title') }}
                         </h3>
                         <UButton
                             color="gray"
@@ -413,7 +415,7 @@
                                 class="mt-2 w-full bg-Dark-Blue dark:bg-Muted-Brown hover:bg-Medium-Blue hover:dark:bg-Medium-Gray dark:text-White-w"
                                 @click="$router.push(`/Rubrica/${rubric._id}`)"
                             >
-                                Ver detalles
+                                {{ t('pages.grupo.view_details') }}
                             </UButton>
                         </div>
                     </div>
