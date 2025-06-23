@@ -593,6 +593,8 @@
       "changes_saved_successfully": "Changes saved successfully",
       "error_saving_changes": "Error saving changes",
       "must_select_at_least_one_group_or_mark_as_guide_rubric": "You must select at least one group or mark as guide rubric",
-      "error_assigning_rubric": "Error assigning rubric"
+      "error_assigning_rubric": "Error assigning rubric",
+      "error": "Error",
+      "error_loading_rubric": "An error occurred while loading the rubric."
     }
 }

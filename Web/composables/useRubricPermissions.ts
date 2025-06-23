@@ -14,10 +14,10 @@ export const useRubricPermissions = () => {
     try {
       for (const course of courses) {
         if (course.grupos && course.grupos.length > 0) {
-          const grupoApi = await $fetch<Grupo>(
-            `${config.public.apiUrl}/groups/${course.grupos[0]}`
+          const gruposApi = await $fetch<Grupo[]>(
+            `${config.public.apiUrl}/courses/groups/${course._id}`
           );
-          course.grupos = [grupoApi];
+          course.grupos = gruposApi;
         }
       }
     } catch (error) {
@@ -71,8 +71,11 @@ export const useRubricPermissions = () => {
         c.rubricasGuia?.some(r => r._id === rubricaId)
       )
       
-      const groupWithRubric = courses.flatMap(c => c.grupos || [])
-        .find(g => g.rubricas?.some(r => r._id === rubricaId))
+      const groupWithRubric = courses
+        .flatMap(c => c.grupos || [])
+        .find(g => g.rubricas?.some((r: any) =>
+          typeof r === 'string' ? r === rubricaId : r._id === rubricaId
+      ));
 
       if (!courseWithRubric && !groupWithRubric && !isCreator) {
         throw {

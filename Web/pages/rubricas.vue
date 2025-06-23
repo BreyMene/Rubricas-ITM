@@ -56,9 +56,11 @@
       selectedRubricaName.value = rubricaNomb;
       selectedRubricaState.value = estado;
       
-      const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId));
-      const group = courses.value.flatMap(c => c.grupos || []).find(g => g.rubricas?.some(r => r._id === rubricaId));
-      
+      const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId || r === rubricaId));
+      const group = courses.value
+      .flatMap(c => c.grupos || [])
+      .find(g => g.rubricas?.includes(rubricaId));
+
       selectedRubricaCourse.value = course?.nombre || t('pages.rubricas.not_assigned_course');
       selectedRubricaGroup.value = group?.nombre || t('pages.rubricas.not_assigned_group');
       
@@ -156,12 +158,10 @@
   const fetchGroups = async () => {
     try {
       for (const course of courses.value) {
-        if (course.grupos && course.grupos.length > 0) {
-          const grupoApi = await $fetch<Grupo>(
-            `${config.public.apiUrl}/groups/${course.grupos[0]}`
-          );
-          course.grupos = [grupoApi];
-        }
+        const gruposApi = await $fetch<Grupo[]>(
+          `${config.public.apiUrl}/courses/groups/${course._id}`
+        );
+        course.grupos = gruposApi;
       }
     } catch (error) {
       console.error("Error fetching groups:", error);

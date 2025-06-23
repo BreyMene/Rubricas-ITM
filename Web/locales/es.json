@@ -593,6 +593,8 @@
       "changes_saved_successfully": "Cambios guardados exitosamente",
       "error_saving_changes": "Error al guardar los cambios",
       "must_select_at_least_one_group_or_mark_as_guide_rubric": "Debe seleccionar al menos un grupo o marcar como rúbrica guía",
-      "error_assigning_rubric": "Error al asignar la rúbrica"
+      "error_assigning_rubric": "Error al asignar la rúbrica",
+      "error": "Error",
+      "error_loading_rubric": "Ha ocurrido un error al cargar la rúbrica."
     }
 }
