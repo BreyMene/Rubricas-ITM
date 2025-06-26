@@ -56,10 +56,16 @@
       selectedRubricaName.value = rubricaNomb;
       selectedRubricaState.value = estado;
       
-      const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId || r === rubricaId));
+      const course = courses.value.find(c => c.rubricasGuia?.some(r => r._id === rubricaId));
       const group = courses.value
       .flatMap(c => c.grupos || [])
-      .find(g => g.rubricas?.includes(rubricaId));
+      .find(g => g.rubricas?.some(r => {
+        if (typeof r === 'string') {
+          return r === rubricaId;
+        } else {
+          return r._id === rubricaId;
+        }
+      }));
 
       selectedRubricaCourse.value = course?.nombre || t('pages.rubricas.not_assigned_course');
       selectedRubricaGroup.value = group?.nombre || t('pages.rubricas.not_assigned_group');
